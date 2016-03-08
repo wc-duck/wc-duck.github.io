@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/pygments.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/font-awesome.min.css">
+  <link href="http://kihlander.net/static/custom.css" rel="stylesheet">
+  <link href="http://kihlander.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="The blog of Fredrik Kihlander Atom">
+  <link rel="shortcut icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+<meta name="author" content="Fredrik Kihlander" />
+<meta name="description" content="I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the "resource"-domain to verbose or --memory-enable-stacktrace=render to enable save ..." />
+<meta name="keywords" content="code, c++">
+<meta property="og:site_name" content="The blog of Fredrik Kihlander"/>
+<meta property="og:title" content="Registering command line arguments"/>
+<meta property="og:description" content="I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the "resource"-domain to verbose or --memory-enable-stacktrace=render to enable save ..."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="http://kihlander.net/registering-command-line-arguments.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2016-02-27 00:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="http://kihlander.net/author/fredrik-kihlander.html">
+<meta property="article:section" content="code"/>
+<meta property="article:tag" content="code"/>
+<meta property="article:tag" content="c++"/>
+<meta property="og:image" content="http://kihlander.net/theme/img/profile.png">  <title>The blog of Fredrik Kihlander &ndash; Registering command line arguments</title>
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="http://kihlander.net">
+        <img src="http://kihlander.net/theme/img/profile.png" alt="What could possibly go wrong?" title="What could possibly go wrong?">
+      </a>
+      <h1><a href="http://kihlander.net">What could possibly go wrong?</a></h1>
+      <p>The blog of Fredrik Kihlander</p>
+      <nav>
+        <ul class="list">
+          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
+        </ul>
+      </nav>
+      <ul class="social">
+        <li><a class="sc-github" href="https://github.com/wc-duck" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-twitter" href="https://twitter.com/wc_duck" target="_blank"><i class="fa fa-twitter"></i></a></li>
+        <li><a class="sc-rss" href="/feeds/all.atom.xml" target="_blank"><i class="fa fa-rss"></i></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <nav>
+      <a href="http://kihlander.net">Home</a>
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+      <a href="http://kihlander.net/feeds/all.atom.xml">Atom</a>
+    </nav>
+
+<article>
+  <header>
+    <h1 id="registering-command-line-arguments">Registering command line arguments</h1>
+    <p>Posted on lör 27 februari 2016 in <a href="http://kihlander.net/category/code.html">code</a></p>
+  </header>
+  <div>
+    <p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+It is for example easier to just add a <code>--log-verbose=resource</code> to set all logging in the "resource"-domain to verbose or
+<code>--memory-enable-stacktrace=render</code> to enable save of stacktraces for all allocations done in the "render"-allocator than to
+edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p>
+<blockquote>
+<p>Note: It's also a simple replacement for config-files, but that is something for a later blog-post ;)</p>
+</blockquote>
+<p>However it seems like there's always one problem, how to register supported command-line arguments to show --help and 
+check that arguments are correctly specified?
+In this blog-post I'll outline a solution that I have found works really well for me. It has its drawbacks but that is usually
+the case with any solution to any problem ;)</p>
+<h2>What do I want to achieve?</h2>
+<p>Let's make a quick list over what I want from my system.</p>
+<ul>
+<li>Different systems to be able to register their supported command line arguments in a simple fashion.</li>
+<li>Automatic --help generation ( I always forget what flags are there etc, --help to the rescue )</li>
+<li>Systems that register args should be able to assume that all flags are valid when they get the args.</li>
+</ul>
+<h2>How I do it</h2>
+<p>First of all I let all systems parse their own argc/argv, in other words I just pass each system a reference to argc/argv.
+This is done in different ways, but usually something like this:</p>
+<div class="highlight"><pre><span></span>    <span class="n">log_ctx_t</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">log_ctx_create</span><span class="p">(</span> <span class="cm">/*... some param ... */</span><span class="p">,</span> <span class="n">argc</span><span class="p">,</span> <span class="n">argv</span> <span class="p">);</span>
+</pre></div>
+
+
+<p>or this:</p>
+<div class="highlight"><pre><span></span>    <span class="n">renderer_create_info</span> <span class="n">create_info</span><span class="p">;</span>
+    <span class="c1">// ... other params ...</span>
+    <span class="n">create_info</span><span class="p">.</span><span class="n">argc</span> <span class="o">=</span> <span class="n">argc</span><span class="p">;</span>
+    <span class="n">create_info</span><span class="p">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">argv</span><span class="p">;</span>
+
+    <span class="n">renderer_t</span> <span class="n">r</span> <span class="o">=</span> <span class="n">renderer_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">create_info</span><span class="p">);</span>
+</pre></div>
+
+
+<p>The systems get access to a const argc/argv and its their job to parse them by them self. For this I use ( shameless self-promotion comming up ) 
+this getopt-parser https://github.com/wc-duck/getopt. But how does that tie in with our earlier demands on the "system".
+Well, lets use some thing that some one consider the c++-equivalent of swearing in church, global constructors! Lets introduce
+a simple helper-class and macro <code>GETOPT_ARGS_REGISTER()</code>.</p>
+<div class="highlight"><pre><span></span>    <span class="k">struct</span> <span class="n">__getopt_args_register</span>
+    <span class="p">{</span>
+        <span class="n">__getopt_args_register</span><span class="p">(</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="k">const</span> <span class="n">getopt_option_t</span><span class="o">*</span> <span class="n">opt</span> <span class="p">)</span>
+            <span class="o">:</span> <span class="n">next</span><span class="p">(</span> <span class="n">first</span> <span class="p">)</span>
+            <span class="p">,</span> <span class="n">options_title</span><span class="p">(</span> <span class="n">t</span> <span class="p">)</span>
+            <span class="p">,</span> <span class="n">opts</span><span class="p">(</span> <span class="n">opt</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">static</span> <span class="n">__getopt_args_register</span><span class="o">*</span> <span class="n">first</span><span class="p">;</span>
+
+        <span class="n">__getopt_args_register</span><span class="o">*</span> <span class="n">next</span><span class="p">;</span>
+        <span class="k">const</span> <span class="kt">char</span><span class="o">*</span>             <span class="n">options_title</span><span class="p">;</span>
+        <span class="k">const</span> <span class="n">getopt_option_t</span><span class="o">*</span>  <span class="n">opts</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="cp">#define GETOPT_ARGS_REGISTER( options_title, options ) \</span>
+<span class="cp">    static __getopt_args_register JOIN_MACRO_TOKENS( __getopt_reg, __LINE__ )( options_title, options )</span>
+</pre></div>
+
+
+<p>And we use this as follows</p>
+<div class="highlight"><pre><span></span>    <span class="k">static</span> <span class="n">getopt_option_t</span> <span class="n">options_list</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">{</span> <span class="s">&quot;log-info&quot;</span><span class="p">,</span>      <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;i&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level info, globally if no domain is specified.&quot;</span><span class="p">,</span>   <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s">&quot;log-error&quot;</span><span class="p">,</span>     <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;e&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level error, globally if no domain is specified.&quot;</span><span class="p">,</span>  <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s">&quot;log-warning&quot;</span><span class="p">,</span>   <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;w&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level warning, globally if no domain is specified&quot;</span><span class="p">,</span> <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s">&quot;log-verbose&quot;</span><span class="p">,</span>   <span class="sc">&#39;v&#39;</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;v&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level verbose, globally if no domain is specified&quot;</span><span class="p">,</span> <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s">&quot;log-callstack&quot;</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;c&#39;</span><span class="p">,</span> <span class="s">&quot;log callstacks together with messages, globally if no domain is specified&quot;</span><span class="p">,</span> <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s">&quot;log-domains&quot;</span><span class="p">,</span>   <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_NO_ARG</span><span class="p">,</span>   <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;d&#39;</span><span class="p">,</span> <span class="s">&quot;log all available domains as they are discovered.&quot;</span> <span class="p">},</span>
+        <span class="n">GETOPT_OPTIONS_END</span>
+    <span class="p">};</span>
+
+    <span class="n">GETOPT_ARGS_REGISTER</span><span class="p">(</span> <span class="s">&quot;log&quot;</span><span class="p">,</span> <span class="n">options_list</span> <span class="p">);</span>
+</pre></div>
+
+
+<p>What the above macro basically does is on old trick, building an global linked list of __getopt_args_register when running global constructors that 
+can be accessed via <code>__getopt_args_register::first</code>.</p>
+<p>When we have this info it is an easy thing to just loop over all registered args and do the error checking and --help generation etc without the systems
+having to know about it. I usually do this as a really early part of <code>int main( int argc, const char** argv )</code>.
+Also notice that the registered options is the same type that is used by the getopt-library so that the same setup can be used during arg-parse. Keeping the
+registered args defined in one place and one place only.</p>
+<p>One of the things I like most with this is that the registering is done link-time, so linking to a static library, in my case render, debug or vfs ( to 
+mention a few ) auto-registers its options. So if a lib is not used/linked, no options is registered.</p>
+<h2>Drawbacks</h2>
+<p>Well there are some of course. This will not work well together will DLL:s since the main .exe and the .dll:s will get their own instance of 
+<code>__getopt_args_register::first</code> and the ones in the dll will not be accessible from the exe. It could  be solved by "pulling out" <code>__getopt_args_register::first</code> 
+from each DLL and manually "link" them together but that is not something I have done or have had any need for.</p>
+<p>Also there is the problem of colliding flag-names and that is best solved by just not sharing flag-names, I prefix my flags by system. In some cases you might even
+want colliding flag-names where you have flags that should be used by multiple systems. Not sure if it is a good idea, but it is definitely something that can be
+done.</p>
+<h2>Conclusion</h2>
+<p>This is a technique that has served me well for this purpose and the "global linked list created with global constructors" could be a useful tool in your toolbox 
+when writing c++. It need to be used restrictively, but at least for this purpose it has not been any problems for me.</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="http://kihlander.net/tag/code.html">code</a>
+      <a href="http://kihlander.net/tag/c.html">c++</a>
+    </p>
+  </div>
+</article>
+
+    <footer>
+<p>
+  &copy; Fredrik Kihlander 2015 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>Built using <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a></p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+         src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BlogPosting",
+  "name": "Registering command line arguments",
+  "headline": "Registering command line arguments",
+  "datePublished": "2016-02-27 00:00:00+01:00",
+  "dateModified": "",
+  "author": {
+    "@type": "Person",
+    "name": "Fredrik Kihlander",
+    "url": "http://kihlander.net/author/fredrik-kihlander.html"
+  },
+  "image": "http://kihlander.net/theme/img/profile.png",
+  "url": "http://kihlander.net/registering-command-line-arguments.html",
+  "description": "I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the "resource"-domain to verbose or --memory-enable-stacktrace=render to enable save ..."
+}
+</script></body>
+</html>

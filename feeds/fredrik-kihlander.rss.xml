@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The blog of Fredrik Kihlander</title><link>http://kihlander.net/</link><description>The blog of Fredrik Kihlander</description><atom:link href="http://kihlander.net/feeds/fredrik-kihlander.rss.xml" rel="self"></atom:link><lastBuildDate>Tue, 01 Mar 2016 00:00:00 +0100</lastBuildDate><item><title>The command-line as a poor mans config files</title><link>http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html</link><description>&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
+post I'll discuss a method to use them as simple config-files.&lt;/p&gt;
+&lt;p&gt;Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
+and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
+loading ( particles have a material to be rendered with etc ), i.e. resources from "some game" need to be found by the particle-viewer.
+Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make
+sure that "some game":s resources is mounted in the particle-viewer!&lt;/p&gt;
+&lt;p&gt;Luckily for me this can be done via, you guessed it, the command line!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    ./meshviewer --vfs-mount-uri&lt;span class="o"&gt;=&lt;/span&gt;file:///path/to/assets --vfs-mount-point&lt;span class="o"&gt;=&lt;/span&gt;/assets/ /assets/mesh/mesh_in_game_to_view.mesh
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Nice! But writing out this when you want to just test a resource from one project might be hard to remember and a bit of a hassle =/
+So lets add one more command-line switch, &lt;code&gt;--cmd-file=&amp;lt;path_to_file&amp;gt;&lt;/code&gt;!
+What this simply does is read the pointed to file, split it at white-space, add it to argc/argv. TADA! simple config-files done + all
+that can be configurate via files can also be configurated via the command-line.&lt;/p&gt;
+&lt;p&gt;If we let &lt;code&gt;--cmd-file=&amp;lt;path_to_file&amp;gt;&lt;/code&gt; be recursive, we can do sub-files as well.&lt;/p&gt;
+&lt;p&gt;The above then becomes:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    ./meshviewer --cmd-file&lt;span class="o"&gt;=&lt;/span&gt;setup_some_game.cmd /assets/mesh/mesh_in_game_to_view.mesh
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In this specific case it might not save you that much, but consider you having multiple games, multiple configs etc.&lt;/p&gt;
+&lt;p&gt;Do I think this would replace all configuration ever? Absolutely not, but it works great for small things as above. I would absolutely not
+do this for settings that should be used in a shipped game, only for debug-settings and other settings used during development.&lt;/p&gt;
+&lt;p&gt;Short post, but hopefully someone like this and steal it :)&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Fredrik Kihlander</dc:creator><pubDate>Tue, 01 Mar 2016 00:00:00 +0100</pubDate><guid>tag:kihlander.net,2016-03-01:the-command-line-as-a-poor-mans-config-files.html</guid><category>code</category><category>c++</category></item><item><title>Registering command line arguments</title><link>http://kihlander.net/registering-command-line-arguments.html</link><description>&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+It is for example easier to just add a &lt;code&gt;--log-verbose=resource&lt;/code&gt; to set all logging in the "resource"-domain to verbose or
+&lt;code&gt;--memory-enable-stacktrace=render&lt;/code&gt; to enable save of stacktraces for all allocations done in the "render"-allocator than to
+edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: It's also a simple replacement for config-files, but that is something for a later blog-post ;)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;However it seems like there's always one problem, how to register supported command-line arguments to show --help and 
+check that arguments are correctly specified?
+In this blog-post I'll outline a solution that I have found works really well for me. It has its drawbacks but that is usually
+the case with any solution to any problem ;)&lt;/p&gt;
+&lt;h2&gt;What do I want to achieve?&lt;/h2&gt;
+&lt;p&gt;Let's make a quick list over what I want from my system.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Different systems to be able to register their supported command line arguments in a simple fashion.&lt;/li&gt;
+&lt;li&gt;Automatic --help generation ( I always forget what flags are there etc, --help to the rescue )&lt;/li&gt;
+&lt;li&gt;Systems that register args should be able to assume that all flags are valid when they get the args.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;How I do it&lt;/h2&gt;
+&lt;p&gt;First of all I let all systems parse their own argc/argv, in other words I just pass each system a reference to argc/argv.
+This is done in different ways, but usually something like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="n"&gt;log_ctx_t&lt;/span&gt; &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;log_ctx_create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="cm"&gt;/*... some param ... */&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;or this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="n"&gt;renderer_create_info&lt;/span&gt; &lt;span class="n"&gt;create_info&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;// ... other params ...&lt;/span&gt;
+    &lt;span class="n"&gt;create_info&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;create_info&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;renderer_t&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;renderer_create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;create_info&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The systems get access to a const argc/argv and its their job to parse them by them self. For this I use ( shameless self-promotion comming up ) 
+this getopt-parser https://github.com/wc-duck/getopt. But how does that tie in with our earlier demands on the "system".
+Well, lets use some thing that some one consider the c++-equivalent of swearing in church, global constructors! Lets introduce
+a simple helper-class and macro &lt;code&gt;GETOPT_ARGS_REGISTER()&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;__getopt_args_register&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;__getopt_args_register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;getopt_option_t&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;opt&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;first&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;options_title&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;opt&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;first&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+        &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="n"&gt;__getopt_args_register&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;first&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="n"&gt;__getopt_args_register&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;next&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;             &lt;span class="n"&gt;options_title&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;getopt_option_t&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;  &lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="cp"&gt;#define GETOPT_ARGS_REGISTER( options_title, options ) \&lt;/span&gt;
+&lt;span class="cp"&gt;    static __getopt_args_register JOIN_MACRO_TOKENS( __getopt_reg, __LINE__ )( options_title, options )&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And we use this as follows&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="n"&gt;getopt_option_t&lt;/span&gt; &lt;span class="n"&gt;options_list&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log-info&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;      &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GETOPT_OPTION_TYPE_OPTIONAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;i&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;set log-level info, globally if no domain is specified.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="s"&gt;&amp;quot;DOMAIN&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log-error&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;     &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GETOPT_OPTION_TYPE_OPTIONAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;e&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;set log-level error, globally if no domain is specified.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="s"&gt;&amp;quot;DOMAIN&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log-warning&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GETOPT_OPTION_TYPE_OPTIONAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;w&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;set log-level warning, globally if no domain is specified&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;DOMAIN&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log-verbose&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="sc"&gt;&amp;#39;v&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GETOPT_OPTION_TYPE_OPTIONAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;v&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;set log-level verbose, globally if no domain is specified&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;DOMAIN&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log-callstack&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GETOPT_OPTION_TYPE_OPTIONAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;c&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log callstacks together with messages, globally if no domain is specified&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;DOMAIN&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log-domains&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GETOPT_OPTION_TYPE_NO_ARG&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;d&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log all available domains as they are discovered.&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="n"&gt;GETOPT_OPTIONS_END&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+
+    &lt;span class="n"&gt;GETOPT_ARGS_REGISTER&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;log&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;options_list&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;What the above macro basically does is on old trick, building an global linked list of __getopt_args_register when running global constructors that 
+can be accessed via &lt;code&gt;__getopt_args_register::first&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;When we have this info it is an easy thing to just loop over all registered args and do the error checking and --help generation etc without the systems
+having to know about it. I usually do this as a really early part of &lt;code&gt;int main( int argc, const char** argv )&lt;/code&gt;.
+Also notice that the registered options is the same type that is used by the getopt-library so that the same setup can be used during arg-parse. Keeping the
+registered args defined in one place and one place only.&lt;/p&gt;
+&lt;p&gt;One of the things I like most with this is that the registering is done link-time, so linking to a static library, in my case render, debug or vfs ( to 
+mention a few ) auto-registers its options. So if a lib is not used/linked, no options is registered.&lt;/p&gt;
+&lt;h2&gt;Drawbacks&lt;/h2&gt;
+&lt;p&gt;Well there are some of course. This will not work well together will DLL:s since the main .exe and the .dll:s will get their own instance of 
+&lt;code&gt;__getopt_args_register::first&lt;/code&gt; and the ones in the dll will not be accessible from the exe. It could  be solved by "pulling out" &lt;code&gt;__getopt_args_register::first&lt;/code&gt; 
+from each DLL and manually "link" them together but that is not something I have done or have had any need for.&lt;/p&gt;
+&lt;p&gt;Also there is the problem of colliding flag-names and that is best solved by just not sharing flag-names, I prefix my flags by system. In some cases you might even
+want colliding flag-names where you have flags that should be used by multiple systems. Not sure if it is a good idea, but it is definitely something that can be
+done.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;This is a technique that has served me well for this purpose and the "global linked list created with global constructors" could be a useful tool in your toolbox 
+when writing c++. It need to be used restrictively, but at least for this purpose it has not been any problems for me.&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Fredrik Kihlander</dc:creator><pubDate>Sat, 27 Feb 2016 00:00:00 +0100</pubDate><guid>tag:kihlander.net,2016-02-27:registering-command-line-arguments.html</guid><category>code</category><category>c++</category></item></channel></rss>
