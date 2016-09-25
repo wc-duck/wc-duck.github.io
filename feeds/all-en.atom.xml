@@ -1,5 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/all-en.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2016-03-01T00:00:00+01:00</updated><entry><title>The command-line as a poor mans config files</title><link href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html" rel="alternate"></link><updated>2016-03-01T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-03-01:the-command-line-as-a-poor-mans-config-files.html</id><summary type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/all-en.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2016-09-24T00:00:00+02:00</updated><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
+see no real reason to leave my old and true friend the script :)&lt;/p&gt;
+&lt;p&gt;So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;uint32_t&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;HashOfString&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;some_string&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;do_some_stuff&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;HashOfString&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;some_other_string&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;do_some_other_stuff&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Simple enough. What seems to come up over and over again is ways of doing this with the compiler compile-time and now recently just marking &lt;code&gt;HashOfString&lt;/code&gt; as &lt;code&gt;constexpr&lt;/code&gt; and "trust the compiler".
+The solution I usually fall back to is to just have a text-file where each line is hashed with a custom script and written to a .h file with values such as:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;my_hashes.hash&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;some string
+some other string
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;my_hashes.hash.h&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;#pragma once&lt;/span&gt;
+
+&lt;span class="cp"&gt;#define HASH_some_string       0xABCD0123 &lt;/span&gt;&lt;span class="c1"&gt;// hash of &amp;quot;some_string&amp;quot;&lt;/span&gt;
+&lt;span class="cp"&gt;#define HASH_some_other_string 0x0123ABCD &lt;/span&gt;&lt;span class="c1"&gt;// hash of &amp;quot;some_other_string&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;usage in code&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;quot;my_hashes.hash.h&amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;uint32_t&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;HASH_some_string&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;do_some_stuff&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;HASH_some_other_string&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;do_some_other_stuff&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;With a resonable buildsystem in place this can be automated and never be in your way. I have it setup to collect all &lt;code&gt;&amp;lt;filename&amp;gt;.hash&lt;/code&gt;-files and output &lt;code&gt;&amp;lt;filename&amp;gt;.hash.h&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;So lets compare the different solutions and see why I prefer the one I do by just listing my perceived pros/cons.&lt;/p&gt;
+&lt;p&gt;The biggest pro for using the c++-compiler itself for this is to not need a custom buildstep for the hashes and that is a really fair point. No need to setup a buildsystem or manually generate 
+the headers can really be an important point in some cases, especially when distributing code to others. Also having the hashed string where it is used is by some considered a pro, for me it is
+a + but a small one.
+But that is about where the pros stop i.m.h.o.&lt;/p&gt;
+&lt;p&gt;On the cons list I think the biggest 2 are that I have to trust the compiler to do the right thing and paying the cost for generating this each time I compile my code.&lt;/p&gt;
+&lt;p&gt;Let's start of with the first one, trusting the compiler. Sure, compilers are smart etc but are we sure that the compiler will optimize a &lt;code&gt;HashOfString("some_string)&lt;/code&gt; to a constant? If it does
+with your current compiler, will it with another compiler? What happens when a new version of your compiler is released?
+With the simple "generate a .h"-file I am quite sure that it will evaluate to a constant and I will not have to think about it.&lt;/p&gt;
+&lt;p&gt;The other issue with compile-time hashes in pure c++ is why pay for something all the time when you can pay for it once? I.e. if I put code in a .cpp to generate a hash by the compiler it will
+cost time each time I compile that file. When generating a header I pay for it once, when I change the text-file with the strings to hash.&lt;/p&gt;
+&lt;p&gt;We also have some other pros that are not as big, but I might just as well list them here for completeness:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;easier to find the actual value of the hash. When generating a header you just look in the header, when doing it with the compiler... it gets harder!&lt;/li&gt;
+&lt;li&gt;you have control over how the header is generated, you want to add registering of hash-value -&amp;gt; string? just add it!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So what do you think, what pros have I missed on hashing with the c++-compiler? Why am I wrong? &lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>The command-line as a poor mans config files</title><link href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html" rel="alternate"></link><updated>2016-03-01T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-03-01:the-command-line-as-a-poor-mans-config-files.html</id><summary type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
 post I'll discuss a method to use them as simple config-files.&lt;/p&gt;
 &lt;p&gt;Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
 and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
