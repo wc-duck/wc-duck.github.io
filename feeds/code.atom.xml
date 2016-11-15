@@ -1,5 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/code.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2016-09-24T00:00:00+02:00</updated><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/code.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2016-11-14T00:00:00+01:00</updated><entry><title>Why I prefer inline forward-declares in C++</title><link href="http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html" rel="alternate"></link><updated>2016-11-14T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-11-14:why-i-prefer-inline-forward-declares-in-c.html</id><summary type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
+others code so it feels worth sharing.&lt;/p&gt;
+&lt;p&gt;So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name
+to the compiler and not having to provide the entire class/struct declaration. Mostly used as a compile-time optimization or to handle circular deps etc.&lt;/p&gt;
+&lt;p&gt;A simple example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;// forward declare this struct.&lt;/span&gt;
+&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;my_struct&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_pointer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;another_pointer&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We're all used to see this kind of code, nothing new under the sun. I however like to write it like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;my_struct&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_pointer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;another_pointer&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I don't know if inline-forward-declare is the correct term, but we'll use that until I'm told otherwise ;)&lt;/p&gt;
+&lt;p&gt;So what is better with this more verbose variant? Well, I have 2 reasons:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It do not "leak" definitions into the global namespace.&lt;/li&gt;
+&lt;li&gt;When usage is removed, so is the forward declare.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Lets go through them one-by-one.&lt;/p&gt;
+&lt;h2&gt;It do not "leak" definitions into the global namespace.&lt;/h2&gt;
+&lt;p&gt;The big thing here is that we can't break other code by removing our forward declares. Say that you have this code:&lt;/p&gt;
+&lt;p&gt;&amp;lt;&lt;em&gt;header1.h&lt;/em&gt;&amp;gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;another_pointer&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&amp;lt;&lt;em&gt;header2.h&lt;/em&gt;&amp;gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;another_pointer&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="c1"&gt;// OH NOES, we forgot our forward declare!&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;em&gt;file.cpp&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;quot;header1.h&amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;quot;header2.h&amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
+
+&lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;quot;a_forward_declared_struct.h&amp;quot; // defining the actual struct.&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;a_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;a_forward_declared_struct&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;ptr&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;my_func2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;ptr&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we work with our code and refactor my_func1() to no longer take a pointer to a &lt;code&gt;a_forward_declared_struct&lt;/code&gt; and removing the forward declare.
+By doing this we break file.cpp since "header2.h" is now "incomplete". This might not be a big issue in a smaller code-base but in a bigger one
+(especially one using unity-builds, batch-builds or whatever you want to call them ) this can pop up on another colleagues machine after you have
+submitted your code.&lt;/p&gt;
+&lt;p&gt;If instead you would have used inline forward-declares header2.h would never have compiled to begin with so the initial implementer would not have
+missed the needed declarations.&lt;/p&gt;
+&lt;h2&gt;When usage is removed, so is the forward declare.&lt;/h2&gt;
+&lt;p&gt;The second improvement over the "ordinary" declarations is the fact that they are automatically removed when they are no longer needed since they
+are part of the actual code.&lt;/p&gt;
+&lt;p&gt;How many times haven't we all found forward declares that no one uses ( and no one want to remove due to point 1 ;) ).&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Some thing like:&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;vec3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;i_have_no_vec3&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;apa&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;kossa&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// I had a vec3 here a few years ago!&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Final words&lt;/h2&gt;
+&lt;p&gt;Are there any drawbacks? Well, except for being slightly more verbose the only one I can think of is that it do not work together with namespaces.
+For me that is no real problem since I really do not like namespaces to begin with ( topic for another rant/blog-post? ) but if you do this tip
+is not as useful. If you mix and match I would still recommend using inline forward-declares where possible and fallback to namespace:d declares
+when you have to.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;namespace&lt;/span&gt; &lt;span class="n"&gt;foo&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;bar&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Do you agree, am I totally wrong? Feel free to tell me on twitter!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
 see no real reason to leave my old and true friend the script :)&lt;/p&gt;
 &lt;p&gt;So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;uint32_t&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
