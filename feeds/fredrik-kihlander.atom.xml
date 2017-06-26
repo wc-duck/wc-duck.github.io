@@ -84,7 +84,7 @@ are part of the actual code.&lt;/p&gt;
 
 
 &lt;h2&gt;Final words&lt;/h2&gt;
-&lt;p&gt;Are there any drawbacks? Well, except for being slightly more verbose the only one I can think of is that it do not work together with namespaces.
+&lt;p&gt;Are there any drawbacks? Well, except for being slightly more verbose, the only one I can think of is that it do not work together with namespaces.
 For me that is no real problem since I really do not like namespaces to begin with ( topic for another rant/blog-post? ) but if you do this tip
 is not as useful. If you mix and match I would still recommend using inline forward-declares where possible and fallback to namespace:d declares
 when you have to.&lt;/p&gt;
