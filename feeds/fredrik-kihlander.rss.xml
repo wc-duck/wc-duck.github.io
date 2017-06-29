@@ -1,5 +1,336 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The blog of Fredrik Kihlander</title><link>http://kihlander.net/</link><description>The blog of Fredrik Kihlander</description><atom:link href="http://kihlander.net/feeds/fredrik-kihlander.rss.xml" rel="self"></atom:link><lastBuildDate>Mon, 14 Nov 2016 00:00:00 +0100</lastBuildDate><item><title>Why I prefer inline forward-declares in C++</title><link>http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html</link><description>&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The blog of Fredrik Kihlander</title><link>http://kihlander.net/</link><description>The blog of Fredrik Kihlander</description><atom:link href="http://kihlander.net/feeds/fredrik-kihlander.rss.xml" rel="self"></atom:link><lastBuildDate>Mon, 26 Jun 2017 00:00:00 +0200</lastBuildDate><item><title>utf8_lookup, a write up.</title><link>http://kihlander.net/utf8_lookup-a-write-up.html</link><description>&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
+read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)&lt;/p&gt;
+&lt;p&gt;Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about &lt;a href="http://github.com/wc-duck/utf8_lookup/"&gt;utf8_lookup&lt;/a&gt;,
+a small lib to translate utf8 chars into offsets into a table.&lt;/p&gt;
+&lt;p&gt;It sprung out of the need to convert utf8-strings into bitmap-font glyhps for rendering. I.e. build some kind of data-structure out of a list of supplied codepoints and
+then use that to translate strings into a lists of indices of valid glyphs or 0 if the glyph wasn't present in the original codepoint-list, i.e. rendering a bitmap font!
+That is what I have been using it for but I guess there might be other uses for a sparse lookup structure like this as well.&lt;/p&gt;
+&lt;p&gt;In short, this is what I have used it for (simplified):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;render_text&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;uint8_t&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;utf8_lookup_result&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;256&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="kt"&gt;size_t&lt;/span&gt; &lt;span class="n"&gt;res_size&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ARRAY_LENGTH&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;uint8_t&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;str_iter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;str_iter&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;str_iter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;utf8_lookup_perform_scalar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;table&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;str_iter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;res_size&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;size_t&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;res_size&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;render_glyph&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;some_glyph_data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="n"&gt;offset&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="c1"&gt;// some_glyph_data might contain things such as uv:s etc.&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The properties of the lib are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;low memory usage&lt;/li&gt;
+&lt;li&gt;one memory chunk for the lookup structure with all (one) allocations done by the user.&lt;/li&gt;
+&lt;li&gt;fairly quick ( we will get in to this later under "performance" )&lt;/li&gt;
+&lt;li&gt;all non-found codepoints should map to offset 0 so that one can place a default-glyph there.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;However I hadn't done any major profiling of the lib and I hadn't compared it to some other approaches to doing the same thing. Time to change that!&lt;/p&gt;
+&lt;h2&gt;How does it work?&lt;/h2&gt;
+&lt;p&gt;So now lets get to the meat of the post, how does it work?&lt;/p&gt;
+&lt;p&gt;The lib basically builds compact search tree based on the ideas of a &lt;a href="https://en.wikipedia.org/wiki/Hash_array_mapped_trie"&gt;Hash Array Mapped Trie&lt;/a&gt;, HAMT for short, where each level of the
+tree is based on each byte of an utf8-char.&lt;/p&gt;
+&lt;p&gt;As stated earlier the entire lookup structure is stored as one buffer, a buffer with the following layout.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;item_cnt[uint64_t], availability-bits[uint64_t[item_cnt]], offsets[uint16_t[item_cnt]]&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;item_cnt&lt;/td&gt;
+&lt;td&gt;the amount of items in the following lists, kept as uint64_t for alignment reasons.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;availability-bits&lt;/td&gt;
+&lt;td&gt;collection of bit-fields of what codepoints that are available in the lookup per "octet-byte".&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;offsets&lt;/td&gt;
+&lt;td&gt;depending on the octet of the current char to translate and step in the translation-process the next offset in availability-bits or start of result-offset.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;By octet I refer to how many bytes the current utf8-char is consisting of.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The first section of our availability-bits is the "root" of our lookup-table where a small table is used to find where to start the lookup.
+As octet one ( i.e. ASCII ) can have 128 possible values in utf8 ( first bit is 0 ) we need two slots in the availability bits where all other octets first byte fit in one 64-bit slots.&lt;/p&gt;
+&lt;p&gt;So what is stored is something like this:
+[ octet1 lower start ] [ octet1 higher start ] [ octet2 start ] [ octet3 start ] [ octet4 start ] ... [ octet2 bit1 ] [ octet2 bit2 ] ... [ octet3 bit1 ] ... [ octet3 bit1 bit2 ]&lt;/p&gt;
+&lt;p&gt;What we are actually storing is info about groups of codepoints in subsequent bytes. I.e. we split the range of codepoints in chunks of 64 and if any char in that group is available in the
+table that bit is set. This is true except in the "leaf" where it represent if the actual codepoint exists.
+In short we have built a tree-structure with all levels having between 0 and 64 branches.&lt;/p&gt;
+&lt;p&gt;Also, if an entire 64-bits chunk is 0, we do not store it at all so there will be no 64-bit chunk that is 0, if there is I have a bug :)&lt;/p&gt;
+&lt;p&gt;Now to find the actual offset that are to be our result, we store offsets to where the next 64-bit chunk for the next byte in our codepoint is stored. By then storing all subservient levels
+in the tree after each other as such:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;i will do this for 8 bits just to fit on the page :)&lt;/p&gt;
+&lt;p&gt;avail_bits[some_index] = [00010110]
+offset[some_index] = 16&lt;/p&gt;
+&lt;p&gt;avail_bits[16-18] = is the next level in the tree
+offsets[16-18] = offsets to the next level in the tree or final result-offsets.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;As we only store one offset per level we need a way to find what item we need, but we do not want empty elements for the 0-bit. What we can do then is use base_offset + bits_set_before_checked_bit(),
+an operation that can be performed really fast by modern hardware via the popcnt-instruction and fairly quick with some smart code if popcnt is not available.&lt;/p&gt;
+&lt;p&gt;So the inner loop of the algorithm will look as follows.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="c1"&gt;// table telling where to start a lookup-traversal depending on how many bytes the current utf8-char is.&lt;/span&gt;
+    &lt;span class="c1"&gt;// first item in the avail_bits is always 0, this is used as &amp;quot;not found&amp;quot;. If sometime in the lookup-loop&lt;/span&gt;
+    &lt;span class="c1"&gt;// a char is determined that it do not exist, i.e. a bit in the avail_bits-array is not set, the current&lt;/span&gt;
+    &lt;span class="c1"&gt;// lookup index will be set to 0 and reference this empty bitset for the rest of the lookup.&lt;/span&gt;
+    &lt;span class="c1"&gt;//&lt;/span&gt;
+    &lt;span class="c1"&gt;// This was done under the assumption that you mostly do lookups that &amp;quot;hit&amp;quot; the table, i.e. you will need&lt;/span&gt;
+    &lt;span class="c1"&gt;// to do all loop-iterations so instead of branching, just make the code always loop all iterations.&lt;/span&gt;
+    &lt;span class="c1"&gt;//&lt;/span&gt;
+    &lt;span class="c1"&gt;// if this is a gain is something to actually be tested.&lt;/span&gt;
+    &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;START_OFFSET&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// pos is the current position in the utf8-string to perform a lookup for.&lt;/span&gt;
+    &lt;span class="kt"&gt;uint8_t&lt;/span&gt; &lt;span class="n"&gt;first_byte&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;octet&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;UTF8_TRAILING_BYTES_TABLE&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="n"&gt;first_byte&lt;/span&gt; &lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;GROUP_MASK&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="mi"&gt;127&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;63&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;63&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;63&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+    &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;GID_MASK&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;  &lt;span class="mi"&gt;63&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;31&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="mi"&gt;7&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+
+    &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;curr_offset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;START_OFFSET&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;octet&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;group_mask&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;GROUP_MASK&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;octet&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;gid_mask&lt;/span&gt;    &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;GID_MASK&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;octet&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;octet&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="c1"&gt;// make sure that we get a value between 0-63 to decide what bit the current byte.&lt;/span&gt;
+        &lt;span class="c1"&gt;// it is only octet 1 that will have more than 6 significant bits.&lt;/span&gt;
+        &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uint64_t&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;group_mask&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uint64_t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="c1"&gt;// mask of the bits that is valid in this mask, only the first byte will have a&lt;/span&gt;
+        &lt;span class="c1"&gt;// different amount of set bits. Thereof the table above.&lt;/span&gt;
+        &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;gid&lt;/span&gt;       &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uint64_t&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;gid_mask&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;check_bit&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uint64_t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;gid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="c1"&gt;// gid mask will always be 0b111111 i.e. the lowest 6 bit set on all loops except&lt;/span&gt;
+        &lt;span class="c1"&gt;// the first one. This is due to how utf8 is structured, see table at the top of&lt;/span&gt;
+        &lt;span class="c1"&gt;// the file.&lt;/span&gt;
+        &lt;span class="n"&gt;gid_mask&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;63&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="c1"&gt;// index in avail_bits and corresponding offsets that we are currently working in.&lt;/span&gt;
+        &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;curr_offset&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="c1"&gt;// how many bits are set &amp;quot;before&amp;quot; the current element in this group? this is used&lt;/span&gt;
+        &lt;span class="c1"&gt;// to calculate the next item in the lookup.&lt;/span&gt;
+        &lt;span class="kt"&gt;uint64_t&lt;/span&gt; &lt;span class="n"&gt;items_before&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;utf8_popcnt_impl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;avail_bits&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;check_bit&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uint64_t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;has_popcnt&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="c1"&gt;// select the next offset in the avail_bits-array to check or if this is the last iteration this&lt;/span&gt;
+        &lt;span class="c1"&gt;// will be the actual result.&lt;/span&gt;
+        &lt;span class="c1"&gt;// note: if the lookup is a miss, i.e. bit is not set, point curr_offset to 0 that is a bitfield&lt;/span&gt;
+        &lt;span class="c1"&gt;//       that is always 0 and offsets[0] == 0 to just keep on &amp;quot;missing&amp;quot;&lt;/span&gt;
+        &lt;span class="n"&gt;curr_offset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;avail_bits&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;check_bit&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uint64_t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;?&lt;/span&gt; &lt;span class="n"&gt;offsets&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nl"&gt;items_before&lt;/span&gt; &lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// curr_offset is now either 0 for not found or offset in glyphs-table&lt;/span&gt;
+
+    &lt;span class="n"&gt;res_out&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;offset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;curr_offset&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Performance&lt;/h2&gt;
+&lt;p&gt;To test out the performance of the solution I have written a small benchmark app that is testing 4 different approaches to doing this and measuring some different stats&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;memory usage&lt;ul&gt;
+&lt;li&gt;total&lt;/li&gt;
+&lt;li&gt;amount of allocations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;speed&lt;ul&gt;
+&lt;li&gt;GB/sec&lt;/li&gt;
+&lt;li&gt;ms/10000 codepoints&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;These benchmarks runs over quite a few texts in various languages. Downloaded from &lt;a href="www.gutenberg.org"&gt;The Project Gutenberg&lt;/a&gt;. I have tried to get a good spread over
+different kind of texts using different combinations of code-pages etc.&lt;/p&gt;
+&lt;p&gt;The benchmarks will perform a complete "translation" of each text 100 times in a row.&lt;/p&gt;
+&lt;p&gt;The tested approaches for doing this are as follows&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;use utf8_lookup with a native popcnt instruction&lt;/li&gt;
+&lt;li&gt;use utf8_lookup without a native popcnt instruction&lt;/li&gt;
+&lt;li&gt;stuff all codepoint/offset pairs into an std::map&lt;/li&gt;
+&lt;li&gt;stuff all codepoint/offset pairs into an std::unordered_map&lt;/li&gt;
+&lt;li&gt;bitarray with native popcnt&lt;/li&gt;
+&lt;li&gt;bitarray without native popcnt&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The bitarray-approach is just having a big array of uint64_t, set the bit if the codepoint exists, store an offset per uint64_t, and get the result-offset as:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;res = offsets[codepoint / 64] + bits_set_before(lookup[codepoint / 64])&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;basically utf8_lookup without compression.&lt;/p&gt;
+&lt;p&gt;Finally its time for some numbers and charts!&lt;/p&gt;
+&lt;p&gt;Texts used and results:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;file&lt;/th&gt;
+&lt;th&gt;codepoint count&lt;/th&gt;
+&lt;th&gt;bpcp utf8_lookup&lt;/th&gt;
+&lt;th&gt;bpcp bitarray&lt;/th&gt;
+&lt;th&gt;bpcp std::map&lt;/th&gt;
+&lt;th&gt;bpcp std::unordered_map&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ancient_greek.txt&lt;/td&gt;
+&lt;td&gt;222&lt;/td&gt;
+&lt;td&gt;0.891892&lt;/td&gt;
+&lt;td&gt;5.810811&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;30.342342&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;stb_image.h&lt;/td&gt;
+&lt;td&gt;95&lt;/td&gt;
+&lt;td&gt;0.505263&lt;/td&gt;
+&lt;td&gt;0.019531&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;23.242105&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;chinese1.txt&lt;/td&gt;
+&lt;td&gt;3529&lt;/td&gt;
+&lt;td&gt;0.971380&lt;/td&gt;
+&lt;td&gt;2.893171&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;24.451118&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;chinese2.txt&lt;/td&gt;
+&lt;td&gt;3540&lt;/td&gt;
+&lt;td&gt;0.959887&lt;/td&gt;
+&lt;td&gt;2.884181&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;24.424858&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;chinese3.txt&lt;/td&gt;
+&lt;td&gt;4226&lt;/td&gt;
+&lt;td&gt;0.818268&lt;/td&gt;
+&lt;td&gt;2.415996&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;30.209181&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;danish.txt&lt;/td&gt;
+&lt;td&gt;111&lt;/td&gt;
+&lt;td&gt;1.333333&lt;/td&gt;
+&lt;td&gt;11.351352&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;29.549549&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;germain.txt&lt;/td&gt;
+&lt;td&gt;133&lt;/td&gt;
+&lt;td&gt;1.413534&lt;/td&gt;
+&lt;td&gt;10.526316&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;27.308271&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;esperanto.txt&lt;/td&gt;
+&lt;td&gt;96&lt;/td&gt;
+&lt;td&gt;1.229167&lt;/td&gt;
+&lt;td&gt;13.437500&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;23.166666&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;japanese.txt&lt;/td&gt;
+&lt;td&gt;2176&lt;/td&gt;
+&lt;td&gt;1.506434&lt;/td&gt;
+&lt;td&gt;4.191961&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;28.232977&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;japanese2.txt&lt;/td&gt;
+&lt;td&gt;2438&lt;/td&gt;
+&lt;td&gt;1.506434&lt;/td&gt;
+&lt;td&gt;4.696691&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;29.705883&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;russian.txt&lt;/td&gt;
+&lt;td&gt;145&lt;/td&gt;
+&lt;td&gt;0.882759&lt;/td&gt;
+&lt;td&gt;8.896552&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;26.372414&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;big.txt&lt;/td&gt;
+&lt;td&gt;6069&lt;/td&gt;
+&lt;td&gt;0.607678&lt;/td&gt;
+&lt;td&gt;1.683968&lt;/td&gt;
+&lt;td&gt;40.0&lt;/td&gt;
+&lt;td&gt;25.894217&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;bpcp = bytes per codepoint&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;All tests has been run on my private machine, an Intel(R) Core(TM) i7-4770K CPU @ 3.50GHz with 16GB DDR3 RAM running Ubuntu 14.04.5 LTS.&lt;/p&gt;
+&lt;p&gt;All builds has been done with g++ (Ubuntu 4.8.4-2ubuntu1~14.04.3) 4.8.4.&lt;/p&gt;
+&lt;p&gt;Optimized builds has been compiled with&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;g++ -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -O2 -std=gnu++0x -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -O2&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;And debug builds with&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;g++ -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -std=gnu++0x -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;First lets get this out of the room, the std::map/unordered_map versions are really bad compared to the others in all measurements. That was expected but I added them to
+the tests as it is something that is the "first thing that comes to mind" and something I wouldn't be surprised to see in a codebase.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Memory use" src="http://kihlander.net/images/memuse_all.png" title="Memory use" /&gt;
+&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec.png" title="GB/sec" /&gt;&lt;/p&gt;
+&lt;p&gt;As we can see the memory used and performance ( in GB text translated per second ) by the std::-implementations are just huge compared to the other to solutions, so lets 
+remove them to get some more interesting charts :)&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Bytes per codepoint" src="http://kihlander.net/images/bytes_per_cp_no_std.png" title="Bytes per codepoint" /&gt;
+&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_no_std.png" title="GB/sec" /&gt;&lt;/p&gt;
+&lt;p&gt;The charts clearly show that utf8_lookup outperforms the bitarray in all cases except pure ASCII ( stb_image.h ) when it comes to memory-usage and loses when it comes to
+raw lookup performance in all tests.
+We can also mention that the "tighter" the codepoints to lookup are, the more comparable the both techniques are. We could also plot bytes-per-codepoint vs lookup perf.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Perf vs bits-per-codepoint" src="http://kihlander.net/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint" /&gt;&lt;/p&gt;
+&lt;p&gt;In this chart we can clearly see each approach "banding" on bytes-per-codepoint and lookup-perf.&lt;/p&gt;
+&lt;p&gt;We'll end with mentioning performance in an non-optimized build as well, something that I find usually is lacking. OK performance in a debug-build is really something that
+will make your life easier and something I find to be a well worthy goal to strive for.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_debug.png" title="GB/sec" /&gt;&lt;/p&gt;
+&lt;p&gt;It's the same pattern here, the std::-based solutions are just getting crushed and the simple array is by far the fastest but IMHO utf8_lookup holds its ground pretty well.
+A colleague of mine also pointed out that this is with gcc:s implementation of the STL, if this would have been run with some other STL implementations ( among others the one
+used in msvc ) the debug-results would have been even worse.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;It has been quite interesting to test and benchmark this solution. I guess the findings can be summarized as follows, if you want pure performance nothing beats a simple array
+( nothing new under the sun here! ), however utf8_lookup performs really well when it comes to memory-usage.&lt;/p&gt;
+&lt;p&gt;I also think that there might be other approaches worth testing and adding benchmarks for here and maybe some more investigations into what governs performance. My guess is cache, i.e.
+depending on how the indexed codepoints are distributed it could give better or worse cache-utilization.&lt;/p&gt;
+&lt;p&gt;There might also be gains to be had in the actual utf8_lookup implementation, for example one might change the order of how the internal items are stored to better group used
+memory chunks depending on access-patters. It might be interesting to generate some "heatmaps" of used codepoints for the different texts and see if a patter emerges.&lt;/p&gt;
+&lt;p&gt;However as I am, depending on when your read this, the father of 2 this is all that I have the time and energy for now and it is good enough for the small things I use it for.&lt;/p&gt;
+&lt;p&gt;I hope that this might be useful for someone, maybe it can be used for something other than what I have used it for? And if there is something to really take away from this is that
+base_offset + (popcnt(bits_before)) is a really sweet technique that can be used for many things :)&lt;/p&gt;
+&lt;p&gt;Have I missed any benchmark approach? Any improvements that I could do? Anything else? Feel free to contact me on twitter!&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Fredrik Kihlander</dc:creator><pubDate>Mon, 26 Jun 2017 00:00:00 +0200</pubDate><guid>tag:kihlander.net,2017-06-26:utf8_lookup-a-write-up.html</guid><category>code</category><category>c++</category><category>utf8</category></item><item><title>Why I prefer inline forward-declares in C++</title><link>http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html</link><description>&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
 others code so it feels worth sharing.&lt;/p&gt;
 &lt;p&gt;So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name
 to the compiler and not having to provide the entire class/struct declaration. Mostly used as a compile-time optimization or to handle circular deps etc.&lt;/p&gt;

@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/style.min.css">
-  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/pygments.min.css">
-  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/css/font-awesome.min.css">
-  <link href="http://localhost:8000/static/custom.css" rel="stylesheet">
-  <link href="http://localhost:8000/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="The blog of Fredrik Kihlander Atom">
-  <link rel="shortcut icon" href="http://localhost:8000/images/favicon.ico" type="image/x-icon">
-  <link rel="icon" href="http://localhost:8000/images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/pygments.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/font-awesome.min.css">
+  <link href="http://kihlander.net/static/custom.css" rel="stylesheet">
+  <link href="http://kihlander.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="The blog of Fredrik Kihlander Atom">
+  <link rel="shortcut icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,28 +20,28 @@
 <meta property="og:title" content="utf8_lookup, a write up."/>
 <meta property="og:description" content="I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am ..."/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="http://localhost:8000/utf8_lookup-a-write-up.html"/>
+<meta property="og:url" content="http://kihlander.net/utf8_lookup-a-write-up.html"/>
 <meta property="og:type" content="article"/>
-<meta property="article:published_time" content="2017-06-09 00:00:00+02:00"/>
+<meta property="article:published_time" content="2017-06-26 00:00:00+02:00"/>
 <meta property="article:modified_time" content=""/>
-<meta property="article:author" content="http://localhost:8000/author/fredrik-kihlander.html">
+<meta property="article:author" content="http://kihlander.net/author/fredrik-kihlander.html">
 <meta property="article:section" content="code"/>
 <meta property="article:tag" content="code"/>
 <meta property="article:tag" content="c++"/>
 <meta property="article:tag" content="utf8"/>
-<meta property="og:image" content="http://localhost:8000/theme/img/profile.png">  <title>The blog of Fredrik Kihlander &ndash; utf8_lookup, a write up.</title>
+<meta property="og:image" content="http://kihlander.net/theme/img/profile.png">  <title>The blog of Fredrik Kihlander &ndash; utf8_lookup, a write up.</title>
 </head>
 <body>
   <aside>
     <div>
-      <a href="http://localhost:8000">
-        <img src="http://localhost:8000/theme/img/profile.png" alt="What could possibly go wrong?" title="What could possibly go wrong?">
+      <a href="http://kihlander.net">
+        <img src="http://kihlander.net/theme/img/profile.png" alt="What could possibly go wrong?" title="What could possibly go wrong?">
       </a>
-      <h1><a href="http://localhost:8000">What could possibly go wrong?</a></h1>
+      <h1><a href="http://kihlander.net">What could possibly go wrong?</a></h1>
       <p>The blog of Fredrik Kihlander</p>
       <nav>
         <ul class="list">
-          <li><a href="http://localhost:8000/pages/about.html#about">About</a></li>
+          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
         </ul>
       </nav>
       <ul class="social">
@@ -53,24 +53,24 @@
   </aside>
   <main>
     <nav>
-      <a href="http://localhost:8000">Home</a>
+      <a href="http://kihlander.net">Home</a>
       <a href="/archives.html">Archives</a>
       <a href="/categories.html">Categories</a>
       <a href="/tags.html">Tags</a>
-      <a href="http://localhost:8000/feeds/all.atom.xml">Atom</a>
+      <a href="http://kihlander.net/feeds/all.atom.xml">Atom</a>
     </nav>
 
 <article>
   <header>
     <h1 id="utf8_lookup-a-write-up">utf8_lookup, a write up.</h1>
-    <p>Posted on fre 09 juni 2017 in <a href="http://localhost:8000/category/code.html">code</a></p>
+    <p>Posted on mån 26 juni 2017 in <a href="http://kihlander.net/category/code.html">code</a></p>
   </header>
   <div>
     <p>I saw this blog post a while ago <a href="http://reedbeta.com/blog/programmers-intro-to-unicode/">A Programmer’s Introduction to Unicode</a>, a really great write up that is a worth a
-read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am to write here :)</p>
+read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)</p>
 <p>Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about <a href="http://github.com/wc-duck/utf8_lookup/">utf8_lookup</a>,
 a small lib to translate utf8 chars into offsets into a table.</p>
-<p>It sprung out of the need to convert utf8-strings into bitmap-font glyhps for rendering. I.e. build some kind of data-structure out of a list of supported codepoints and
+<p>It sprung out of the need to convert utf8-strings into bitmap-font glyhps for rendering. I.e. build some kind of data-structure out of a list of supplied codepoints and
 then use that to translate strings into a lists of indices of valid glyphs or 0 if the glyph wasn't present in the original codepoint-list, i.e. rendering a bitmap font!
 That is what I have been using it for but I guess there might be other uses for a sparse lookup structure like this as well.</p>
 <p>In short, this is what I have used it for (simplified):</p>
@@ -89,14 +89,14 @@ That is what I have been using it for but I guess there might be other uses for 
 </pre></div>
 
 
-<p>The properties of the lib is:</p>
+<p>The properties of the lib are:</p>
 <ul>
 <li>low memory usage</li>
 <li>one memory chunk for the lookup structure with all (one) allocations done by the user.</li>
 <li>fairly quick ( we will get in to this later under "performance" )</li>
 <li>all non-found codepoints should map to offset 0 so that one can place a default-glyph there.</li>
 </ul>
-<p>However I hadn't done any major profiling of the lib and I hadn't compared it to some other approches to doing the same thing. Time to change that!</p>
+<p>However I hadn't done any major profiling of the lib and I hadn't compared it to some other approaches to doing the same thing. Time to change that!</p>
 <h2>How does it work?</h2>
 <p>So now lets get to the meat of the post, how does it work?</p>
 <p>The lib basically builds compact search tree based on the ideas of a <a href="https://en.wikipedia.org/wiki/Hash_array_mapped_trie">Hash Array Mapped Trie</a>, HAMT for short, where each level of the
@@ -138,7 +138,7 @@ As octet one ( i.e. ASCII ) can have 128 possible values in utf8 ( first bit is 
 table that bit is set. This is true except in the "leaf" where it represent if the actual codepoint exists.
 In short we have built a tree-structure with all levels having between 0 and 64 branches.</p>
 <p>Also, if an entire 64-bits chunk is 0, we do not store it at all so there will be no 64-bit chunk that is 0, if there is I have a bug :)</p>
-<p>Now to find the actual offset that are to be our result, we store offsets to where the next 64-bit chunk for the next byte in our codepoint is store. By then storing all subservient levels
+<p>Now to find the actual offset that are to be our result, we store offsets to where the next 64-bit chunk for the next byte in our codepoint is stored. By then storing all subservient levels
 in the tree after each other as such:</p>
 <blockquote>
 <p>i will do this for 8 bits just to fit on the page :)</p>
@@ -222,7 +222,7 @@ an operation that can be performed really fast by modern hardware via the popcnt
 </li>
 <li>speed<ul>
 <li>GB/sec</li>
-<li>us/10000 codepoints</li>
+<li>ms/10000 codepoints</li>
 </ul>
 </li>
 </ul>
@@ -370,21 +370,23 @@ different kind of texts using different combinations of code-pages etc.</p>
 </blockquote>
 <p>First lets get this out of the room, the std::map/unordered_map versions are really bad compared to the others in all measurements. That was expected but I added them to
 the tests as it is something that is the "first thing that comes to mind" and something I wouldn't be surprised to see in a codebase.</p>
-<p><img alt="Memory use" src="http://localhost:8000/images/memuse_all.png" title="Memory use" />
-<img alt="GB/sec" src="http://localhost:8000/images/gb_per_sec.png" title="GB/sec" /></p>
+<p><img alt="Memory use" src="http://kihlander.net/images/memuse_all.png" title="Memory use" />
+<img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec.png" title="GB/sec" /></p>
 <p>As we can see the memory used and performance ( in GB text translated per second ) by the std::-implementations are just huge compared to the other to solutions, so lets 
 remove them to get some more interesting charts :)</p>
-<p><img alt="Bytes per codepoint" src="http://localhost:8000/images/bytes_per_cp_no_std.png" title="Bytes per codepoint" />
-<img alt="GB/sec" src="http://localhost:8000/images/gb_per_sec_no_std.png" title="GB/sec" /></p>
-<p>The charts clearly show that utf8_lookup outperforms the bitarray in all cases except pure ascii ( stb_image.h ) when it comes to memory-usage and loses when it comes to
+<p><img alt="Bytes per codepoint" src="http://kihlander.net/images/bytes_per_cp_no_std.png" title="Bytes per codepoint" />
+<img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_no_std.png" title="GB/sec" /></p>
+<p>The charts clearly show that utf8_lookup outperforms the bitarray in all cases except pure ASCII ( stb_image.h ) when it comes to memory-usage and loses when it comes to
 raw lookup performance in all tests.
 We can also mention that the "tighter" the codepoints to lookup are, the more comparable the both techniques are. We could also plot bytes-per-codepoint vs lookup perf.</p>
-<p><img alt="Perf vs bits-per-codepoint" src="http://localhost:8000/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint" /></p>
+<p><img alt="Perf vs bits-per-codepoint" src="http://kihlander.net/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint" /></p>
 <p>In this chart we can clearly see each approach "banding" on bytes-per-codepoint and lookup-perf.</p>
 <p>We'll end with mentioning performance in an non-optimized build as well, something that I find usually is lacking. OK performance in a debug-build is really something that
 will make your life easier and something I find to be a well worthy goal to strive for.</p>
-<p><img alt="GB/sec" src="http://localhost:8000/images/gb_per_sec_debug.png" title="GB/sec" /></p>
-<p>It's the same pattern here, the std::-based solutions are just getting crushed and the simple array is by far the fastest but IMHO utf8_lookup holds its ground pretty well.</p>
+<p><img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_debug.png" title="GB/sec" /></p>
+<p>It's the same pattern here, the std::-based solutions are just getting crushed and the simple array is by far the fastest but IMHO utf8_lookup holds its ground pretty well.
+A colleague of mine also pointed out that this is with gcc:s implementation of the STL, if this would have been run with some other STL implementations ( among others the one
+used in msvc ) the debug-results would have been even worse.</p>
 <h2>Conclusion</h2>
 <p>It has been quite interesting to test and benchmark this solution. I guess the findings can be summarized as follows, if you want pure performance nothing beats a simple array
 ( nothing new under the sun here! ), however utf8_lookup performs really well when it comes to memory-usage.</p>
@@ -393,14 +395,15 @@ depending on how the indexed codepoints are distributed it could give better or 
 <p>There might also be gains to be had in the actual utf8_lookup implementation, for example one might change the order of how the internal items are stored to better group used
 memory chunks depending on access-patters. It might be interesting to generate some "heatmaps" of used codepoints for the different texts and see if a patter emerges.</p>
 <p>However as I am, depending on when your read this, the father of 2 this is all that I have the time and energy for now and it is good enough for the small things I use it for.</p>
-<p>I hope that this might be useful for someone, maybe it can be used for something other than what I have used it for?</p>
+<p>I hope that this might be useful for someone, maybe it can be used for something other than what I have used it for? And if there is something to really take away from this is that
+base_offset + (popcnt(bits_before)) is a really sweet technique that can be used for many things :)</p>
 <p>Have I missed any benchmark approach? Any improvements that I could do? Anything else? Feel free to contact me on twitter!</p>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="http://localhost:8000/tag/code.html">code</a>
-      <a href="http://localhost:8000/tag/c.html">c++</a>
-      <a href="http://localhost:8000/tag/utf8.html">utf8</a>
+      <a href="http://kihlander.net/tag/code.html">code</a>
+      <a href="http://kihlander.net/tag/c.html">c++</a>
+      <a href="http://kihlander.net/tag/utf8.html">utf8</a>
     </p>
   </div>
 </article>
@@ -428,15 +431,15 @@ memory chunks depending on access-patters. It might be interesting to generate s
   "@type": "BlogPosting",
   "name": "utf8_lookup, a write up.",
   "headline": "utf8_lookup, a write up.",
-  "datePublished": "2017-06-09 00:00:00+02:00",
+  "datePublished": "2017-06-26 00:00:00+02:00",
   "dateModified": "",
   "author": {
     "@type": "Person",
     "name": "Fredrik Kihlander",
-    "url": "http://localhost:8000/author/fredrik-kihlander.html"
+    "url": "http://kihlander.net/author/fredrik-kihlander.html"
   },
-  "image": "http://localhost:8000/theme/img/profile.png",
-  "url": "http://localhost:8000/utf8_lookup-a-write-up.html",
+  "image": "http://kihlander.net/theme/img/profile.png",
+  "url": "http://kihlander.net/utf8_lookup-a-write-up.html",
   "description": "I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am ..."
 }
 </script></body>
