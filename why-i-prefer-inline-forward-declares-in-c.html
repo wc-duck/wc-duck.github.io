@@ -70,7 +70,7 @@ others code so it feels worth sharing.</p>
 <p>So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name
 to the compiler and not having to provide the entire class/struct declaration. Mostly used as a compile-time optimization or to handle circular deps etc.</p>
 <p>A simple example:</p>
-<div class="highlight"><pre><span></span><span class="c1">// forward declare this struct.</span>
+<div class="highlight"><pre><span class="c1">// forward declare this struct.</span>
 <span class="k">struct</span> <span class="n">a_forward_declared_struct</span><span class="p">;</span>
 
 <span class="k">struct</span> <span class="n">my_struct</span>
@@ -83,7 +83,7 @@ to the compiler and not having to provide the entire class/struct declaration. M
 
 
 <p>We're all used to see this kind of code, nothing new under the sun. I however like to write it like this:</p>
-<div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">my_struct</span>
+<div class="highlight"><pre><span class="k">struct</span> <span class="n">my_struct</span>
 <span class="p">{</span>
     <span class="k">struct</span> <span class="n">a_forward_declared_struct</span><span class="o">*</span> <span class="n">a_forward_declared_pointer</span><span class="p">;</span>
 <span class="p">};</span>
@@ -102,19 +102,19 @@ to the compiler and not having to provide the entire class/struct declaration. M
 <h2>It do not "leak" definitions into the global namespace.</h2>
 <p>The big thing here is that we can't break other code by removing our forward declares. Say that you have this code:</p>
 <p>&lt;<em>header1.h</em>&gt;</p>
-<div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">a_forward_declared_struct</span><span class="p">;</span>
+<div class="highlight"><pre><span class="k">struct</span> <span class="n">a_forward_declared_struct</span><span class="p">;</span>
 
 <span class="kt">void</span> <span class="nf">my_func1</span><span class="p">(</span> <span class="n">a_forward_declared_struct</span><span class="o">*</span> <span class="n">another_pointer</span> <span class="p">);</span>
 </pre></div>
 
 
 <p>&lt;<em>header2.h</em>&gt;</p>
-<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">my_func2</span><span class="p">(</span> <span class="n">a_forward_declared_struct</span><span class="o">*</span> <span class="n">another_pointer</span> <span class="p">);</span> <span class="c1">// OH NOES, we forgot our forward declare!</span>
+<div class="highlight"><pre><span class="kt">void</span> <span class="nf">my_func2</span><span class="p">(</span> <span class="n">a_forward_declared_struct</span><span class="o">*</span> <span class="n">another_pointer</span> <span class="p">);</span> <span class="c1">// OH NOES, we forgot our forward declare!</span>
 </pre></div>
 
 
 <p><em>file.cpp</em></p>
-<div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;header1.h&quot;</span><span class="cp"></span>
+<div class="highlight"><pre><span class="cp">#include</span> <span class="cpf">&quot;header1.h&quot;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&quot;header2.h&quot;</span><span class="cp"></span>
 
 <span class="cp">#include</span> <span class="cpf">&quot;a_forward_declared_struct.h&quot; // defining the actual struct.</span><span class="cp"></span>
@@ -137,7 +137,7 @@ missed the needed declarations.</p>
 are part of the actual code.</p>
 <p>How many times haven't we all found forward declares that no one uses ( and no one want to remove due to point 1 ;) ).</p>
 <p><em>Some thing like:</em></p>
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">vec3</span><span class="p">;</span>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">vec3</span><span class="p">;</span>
 
 <span class="k">struct</span> <span class="n">i_have_no_vec3</span>
 <span class="p">{</span>
@@ -154,7 +154,7 @@ are part of the actual code.</p>
 For me that is no real problem since I really do not like namespaces to begin with ( topic for another rant/blog-post? ) but if you do this tip
 is not as useful. If you mix and match I would still recommend using inline forward-declares where possible and fallback to namespace:d declares
 when you have to.</p>
-<div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">foo</span>
+<div class="highlight"><pre><span class="k">namespace</span> <span class="n">foo</span>
 <span class="p">{</span>
     <span class="k">class</span> <span class="nc">bar</span><span class="p">;</span>
 <span class="p">};</span>

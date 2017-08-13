@@ -73,7 +73,7 @@ loading ( particles have a material to be rendered with etc ), i.e. resources fr
 Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make
 sure that "some game":s resources is mounted in the particle-viewer!</p>
 <p>Luckily for me this can be done via, you guessed it, the command line!</p>
-<div class="highlight"><pre><span></span>    ./meshviewer --vfs-mount-uri<span class="o">=</span>file:///path/to/assets --vfs-mount-point<span class="o">=</span>/assets/ /assets/mesh/mesh_in_game_to_view.mesh
+<div class="highlight"><pre>    ./meshviewer --vfs-mount-uri<span class="o">=</span>file:///path/to/assets --vfs-mount-point<span class="o">=</span>/assets/ /assets/mesh/mesh_in_game_to_view.mesh
 </pre></div>
 
 
@@ -83,7 +83,7 @@ What this simply does is read the pointed to file, split it at white-space, add 
 that can be configurate via files can also be configurated via the command-line.</p>
 <p>If we let <code>--cmd-file=&lt;path_to_file&gt;</code> be recursive, we can do sub-files as well.</p>
 <p>The above then becomes:</p>
-<div class="highlight"><pre><span></span>    ./meshviewer --cmd-file<span class="o">=</span>setup_some_game.cmd /assets/mesh/mesh_in_game_to_view.mesh
+<div class="highlight"><pre>    ./meshviewer --cmd-file<span class="o">=</span>setup_some_game.cmd /assets/mesh/mesh_in_game_to_view.mesh
 </pre></div>
 
 
