@@ -68,7 +68,7 @@
     <p>I recently read a blogpost about <a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/">compile-time string-hashes and constexpr</a> and I'm still not convinced and 
 see no real reason to leave my old and true friend the script :)</p>
 <p>So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).</p>
-<div class="highlight"><pre><span class="kt">void</span> <span class="nf">my_func</span><span class="p">(</span> <span class="kt">uint32_t</span> <span class="n">val</span> <span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">my_func</span><span class="p">(</span> <span class="kt">uint32_t</span> <span class="n">val</span> <span class="p">)</span>
 <span class="p">{</span>
     <span class="k">switch</span><span class="p">(</span> <span class="n">val</span> <span class="p">)</span>
     <span class="p">{</span>
@@ -86,13 +86,13 @@ see no real reason to leave my old and true friend the script :)</p>
 <p>Simple enough. What seems to come up over and over again is ways of doing this with the compiler compile-time and now recently just marking <code>HashOfString</code> as <code>constexpr</code> and "trust the compiler".
 The solution I usually fall back to is to just have a text-file where each line is hashed with a custom script and written to a .h file with values such as:</p>
 <p><strong><em>my_hashes.hash</em></strong></p>
-<div class="highlight"><pre>some string
+<div class="highlight"><pre><span></span>some string
 some other string
 </pre></div>
 
 
 <p><strong><em>my_hashes.hash.h</em></strong></p>
-<div class="highlight"><pre><span class="cp">#pragma once</span>
+<div class="highlight"><pre><span></span><span class="cp">#pragma once</span>
 
 <span class="cp">#define HASH_some_string       0xABCD0123 </span><span class="c1">// hash of &quot;some_string&quot;</span>
 <span class="cp">#define HASH_some_other_string 0x0123ABCD </span><span class="c1">// hash of &quot;some_other_string&quot;</span>
@@ -100,7 +100,7 @@ some other string
 
 
 <p><strong><em>usage in code</em></strong></p>
-<div class="highlight"><pre><span class="cp">#include</span> <span class="cpf">&quot;my_hashes.hash.h&quot;</span><span class="cp"></span>
+<div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;my_hashes.hash.h&quot;</span><span class="cp"></span>
 
 <span class="kt">void</span> <span class="nf">my_func</span><span class="p">(</span> <span class="kt">uint32_t</span> <span class="n">val</span> <span class="p">)</span>
 <span class="p">{</span>

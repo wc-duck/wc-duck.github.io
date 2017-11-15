@@ -86,12 +86,12 @@ the case with any solution to any problem ;)</p>
 <h2>How I do it</h2>
 <p>First of all I let all systems parse their own argc/argv, in other words I just pass each system a reference to argc/argv.
 This is done in different ways, but usually something like this:</p>
-<div class="highlight"><pre>    <span class="n">log_ctx_t</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">log_ctx_create</span><span class="p">(</span> <span class="cm">/*... some param ... */</span><span class="p">,</span> <span class="n">argc</span><span class="p">,</span> <span class="n">argv</span> <span class="p">);</span>
+<div class="highlight"><pre><span></span>    <span class="n">log_ctx_t</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">log_ctx_create</span><span class="p">(</span> <span class="cm">/*... some param ... */</span><span class="p">,</span> <span class="n">argc</span><span class="p">,</span> <span class="n">argv</span> <span class="p">);</span>
 </pre></div>
 
 
 <p>or this:</p>
-<div class="highlight"><pre>    <span class="n">renderer_create_info</span> <span class="n">create_info</span><span class="p">;</span>
+<div class="highlight"><pre><span></span>    <span class="n">renderer_create_info</span> <span class="n">create_info</span><span class="p">;</span>
     <span class="c1">// ... other params ...</span>
     <span class="n">create_info</span><span class="p">.</span><span class="n">argc</span> <span class="o">=</span> <span class="n">argc</span><span class="p">;</span>
     <span class="n">create_info</span><span class="p">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">argv</span><span class="p">;</span>
@@ -104,7 +104,7 @@ This is done in different ways, but usually something like this:</p>
 this getopt-parser https://github.com/wc-duck/getopt. But how does that tie in with our earlier demands on the "system".
 Well, lets use some thing that some one consider the c++-equivalent of swearing in church, global constructors! Lets introduce
 a simple helper-class and macro <code>GETOPT_ARGS_REGISTER()</code>.</p>
-<div class="highlight"><pre>    <span class="k">struct</span> <span class="n">__getopt_args_register</span>
+<div class="highlight"><pre><span></span>    <span class="k">struct</span> <span class="n">__getopt_args_register</span>
     <span class="p">{</span>
         <span class="n">__getopt_args_register</span><span class="p">(</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="k">const</span> <span class="n">getopt_option_t</span><span class="o">*</span> <span class="n">opt</span> <span class="p">)</span>
             <span class="o">:</span> <span class="n">next</span><span class="p">(</span> <span class="n">first</span> <span class="p">)</span>
@@ -127,7 +127,7 @@ a simple helper-class and macro <code>GETOPT_ARGS_REGISTER()</code>.</p>
 
 
 <p>And we use this as follows</p>
-<div class="highlight"><pre>    <span class="k">static</span> <span class="n">getopt_option_t</span> <span class="n">options_list</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span>    <span class="k">static</span> <span class="n">getopt_option_t</span> <span class="n">options_list</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="p">{</span> <span class="s">&quot;log-info&quot;</span><span class="p">,</span>      <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;i&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level info, globally if no domain is specified.&quot;</span><span class="p">,</span>   <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
         <span class="p">{</span> <span class="s">&quot;log-error&quot;</span><span class="p">,</span>     <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;e&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level error, globally if no domain is specified.&quot;</span><span class="p">,</span>  <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>
         <span class="p">{</span> <span class="s">&quot;log-warning&quot;</span><span class="p">,</span>   <span class="mh">0x0</span><span class="p">,</span> <span class="n">GETOPT_OPTION_TYPE_OPTIONAL</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="sc">&#39;w&#39;</span><span class="p">,</span> <span class="s">&quot;set log-level warning, globally if no domain is specified&quot;</span><span class="p">,</span> <span class="s">&quot;DOMAIN&quot;</span> <span class="p">},</span>

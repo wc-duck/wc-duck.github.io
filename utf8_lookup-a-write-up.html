@@ -74,7 +74,7 @@ a small lib to translate utf8 chars into offsets into a table.</p>
 then use that to translate strings into a lists of indices of valid glyphs or 0 if the glyph wasn't present in the original codepoint-list, i.e. rendering a bitmap font!
 That is what I have been using it for but I guess there might be other uses for a sparse lookup structure like this as well.</p>
 <p>In short, this is what I have used it for (simplified):</p>
-<div class="highlight"><pre><span class="kt">void</span> <span class="nf">render_text</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">text</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">render_text</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">text</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="n">utf8_lookup_result</span> <span class="n">res</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
     <span class="kt">size_t</span> <span class="n">res_size</span> <span class="o">=</span> <span class="n">ARRAY_LENGTH</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
@@ -150,7 +150,7 @@ offsets[16-18] = offsets to the next level in the tree or final result-offsets.<
 <p>As we only store one offset per level we need a way to find what item we need, but we do not want empty elements for the 0-bit. What we can do then is use base_offset + bits_set_before_checked_bit(),
 an operation that can be performed really fast by modern hardware via the popcnt-instruction and fairly quick with some smart code if popcnt is not available.</p>
 <p>So the inner loop of the algorithm will look as follows.</p>
-<div class="highlight"><pre>    <span class="c1">// table telling where to start a lookup-traversal depending on how many bytes the current utf8-char is.</span>
+<div class="highlight"><pre><span></span>    <span class="c1">// table telling where to start a lookup-traversal depending on how many bytes the current utf8-char is.</span>
     <span class="c1">// first item in the avail_bits is always 0, this is used as &quot;not found&quot;. If sometime in the lookup-loop</span>
     <span class="c1">// a char is determined that it do not exist, i.e. a bit in the avail_bits-array is not set, the current</span>
     <span class="c1">// lookup index will be set to 0 and reference this empty bitset for the rest of the lookup.</span>

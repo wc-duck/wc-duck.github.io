@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/pygments.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/font-awesome.min.css">
+  <link href="http://kihlander.net/static/custom.css" rel="stylesheet">
+  <link href="http://kihlander.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="The blog of Fredrik Kihlander Atom">
+  <link rel="shortcut icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+<meta name="author" content="Fredrik Kihlander" />
+<meta name="description" content="This is the story of an unexpected ABI break that I thought would be worth documenting. At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except ..." />
+<meta name="keywords" content="code, c++, war-stories">
+<meta property="og:site_name" content="The blog of Fredrik Kihlander"/>
+<meta property="og:title" content="A story about an unexpected ABI break"/>
+<meta property="og:description" content="This is the story of an unexpected ABI break that I thought would be worth documenting. At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except ..."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="http://kihlander.net/a-story-about-an-unexpected-abi-break.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2017-11-15 00:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="http://kihlander.net/author/fredrik-kihlander.html">
+<meta property="article:section" content="code"/>
+<meta property="article:tag" content="code"/>
+<meta property="article:tag" content="c++"/>
+<meta property="article:tag" content="war-stories"/>
+<meta property="og:image" content="http://kihlander.net/theme/img/profile.png">  <title>The blog of Fredrik Kihlander &ndash; A story about an unexpected ABI break</title>
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="http://kihlander.net">
+        <img src="http://kihlander.net/theme/img/profile.png" alt="What could possibly go wrong?" title="What could possibly go wrong?">
+      </a>
+      <h1><a href="http://kihlander.net">What could possibly go wrong?</a></h1>
+      <p>The blog of Fredrik Kihlander</p>
+      <nav>
+        <ul class="list">
+          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
+        </ul>
+      </nav>
+      <ul class="social">
+        <li><a class="sc-github" href="https://github.com/wc-duck" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-twitter" href="https://twitter.com/wc_duck" target="_blank"><i class="fa fa-twitter"></i></a></li>
+        <li><a class="sc-rss" href="/feeds/all.atom.xml" target="_blank"><i class="fa fa-rss"></i></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <nav>
+      <a href="http://kihlander.net">Home</a>
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+      <a href="http://kihlander.net/feeds/all.atom.xml">Atom</a>
+    </nav>
+
+<article>
+  <header>
+    <h1 id="a-story-about-an-unexpected-abi-break">A story about an unexpected ABI break</h1>
+    <p>Posted on ons 15 november 2017 in <a href="http://kihlander.net/category/code.html">code</a></p>
+  </header>
+  <div>
+    <p>This is the story of an unexpected ABI break that I thought would be worth documenting.</p>
+<p>At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
+uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.</p>
+<p>Why would you want a class like this you might ask, well we use it for adding a <code>const char* c_str()</code>-function that can be
+used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString
+and have a lookup of the hash-value performed.</p>
+<p>However this is not about how we use it, but how things can break in unexpected ways.</p>
+<p>As a bit more background it should be mentioned that a big part of Avalanches internal libraries are distributed pre-compiled
+to our game-projects with all the positives and negatives that brings with it. For example when deploying a middle-version fix
+we "promise" to our projects that we do not break the ABI of the library, i.e. you should  be able to link with any 5.x.x if you
+only depend on 5.x.x.</p>
+<p>Our CHashString was basically defined something like this</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CHashString</span>
+<span class="p">{</span>
+    <span class="kt">uint32_t</span> <span class="n">m_Hash</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+
+    <span class="k">explicit</span> <span class="n">CHashString</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">hash</span><span class="p">)</span>
+        <span class="o">:</span> <span class="n">m_Hash</span><span class="p">(</span><span class="n">hash</span><span class="p">)</span>
+    <span class="p">{}</span>
+
+    <span class="n">CHashString</span><span class="o">&amp;</span> <span class="n">CHashString</span><span class="p">(</span><span class="n">CHashString</span><span class="o">&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="p">{</span> <span class="n">m_Hash</span> <span class="o">=</span> <span class="n">other</span><span class="p">.</span><span class="n">m_Hash</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="p">...</span> <span class="n">more</span> <span class="n">constructors</span> <span class="p">...</span>
+
+    <span class="p">...</span> <span class="n">more</span> <span class="n">functions</span> <span class="p">...</span>
+
+    <span class="kt">bool</span> <span class="k">operator</span> <span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">CHashString</span> <span class="n">other</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">m_Hash</span> <span class="o">==</span> <span class="n">other</span><span class="p">.</span><span class="n">m_Hash</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>As an earlier brain-fart/didn't-think-about-that someone added the copy-constructor, something that made this class non-trivially-copyable,
+i.e. <a href="http://en.cppreference.com/w/cpp/types/is_trivially_copyable">std::is_trivially_copyable</a> would fail.
+This would lead to putting it in some containers would not make it as performant as it should have been ( and it couldn't even live in some containers ).</p>
+<p>As the fixy kind of guy one am I said to my self "I can fix this, how hard can it be?". We decided that we should just remove that un-needed
+copy-constructor since a default copy-constructor would do the same thing. Said and done, be gone with you!</p>
+<p>check-in!</p>
+<p>deploy!</p>
+<p>go for coffee!</p>
+<p>...</p>
+<p>...</p>
+<p>...</p>
+<p>Come back to crashing projects!</p>
+<p>Sad panda!</p>
+<p>Luckily for me it is easy to lock down versions of distributed libs so we could quickly fix the issues on the projects by locking down to the 
+previous version.</p>
+<p>At this time we are scratching our heads quite a bit, our thinking being that even if one part of the code calls the old way of copy-constructing
+an object the end result should be the same in memory... And to make things worse, most things seem to work.</p>
+<p>Time to bring out the debugger!</p>
+<p>I build a debug-build of one of our projects and after some time, thanks to some log-messages, I find a spot that behaves REALLY fishy!</p>
+<div class="highlight"><pre><span></span><span class="n">CHashString</span> <span class="nf">one_hash</span><span class="p">(</span><span class="mh">0x12345678</span><span class="p">);</span>
+<span class="n">CHashString</span> <span class="nf">another_hash</span><span class="p">(</span><span class="mh">0x12345678</span><span class="p">);</span>
+
+<span class="c1">// ... later in the code ...</span>
+
+<span class="k">if</span><span class="p">(</span> <span class="n">one_hash</span> <span class="o">==</span> <span class="n">another_hash</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">do_stuff</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>do_stuff() is NEVER called!?! I.e. stuff is never done, and we all know that our job is mostly about getting stuff done ;) </p>
+<p>The debugger tell me that the 2 values are the same! What is going on here?
+After checking the assembly and stepping the code quite a few times we can determine that when we removed the copy-constructor MSVC decided
+that it should pass CHashString in register instead of by pointer to stack. So what our <code>operator==</code> that take CHashString by-value ends up doing is 
+comparing one of the hashes to half the stack-address of the other variable :)</p>
+<p>This since this code is defined in one of our pre-compiled libraries and the implementation of <code>operator==</code> ends up in our main executable that
+is built from latest the lib and the exe disagrees on how to pass values to the function!</p>
+<p>As expected this works in a release build where the code is inlined, but in that case we had other functions where how CHashString was passed was an issue.</p>
+<p>What can we learn from this? ABI-issues can show its ugly face when you least expect it and compilers do the darnedest things!</p>
+<p>Well, that was part of my day, how was yours? Feel free to hit me up on twitter or something if you want to give me a comment about this!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="http://kihlander.net/tag/code.html">code</a>
+      <a href="http://kihlander.net/tag/c.html">c++</a>
+      <a href="http://kihlander.net/tag/war-stories.html">war-stories</a>
+    </p>
+  </div>
+</article>
+
+    <footer>
+<p>
+  &copy; Fredrik Kihlander 2015 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>Built using <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a></p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+         src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BlogPosting",
+  "name": "A story about an unexpected ABI break",
+  "headline": "A story about an unexpected ABI break",
+  "datePublished": "2017-11-15 00:00:00+01:00",
+  "dateModified": "",
+  "author": {
+    "@type": "Person",
+    "name": "Fredrik Kihlander",
+    "url": "http://kihlander.net/author/fredrik-kihlander.html"
+  },
+  "image": "http://kihlander.net/theme/img/profile.png",
+  "url": "http://kihlander.net/a-story-about-an-unexpected-abi-break.html",
+  "description": "This is the story of an unexpected ABI break that I thought would be worth documenting. At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except ..."
+}
+</script></body>
+</html>
