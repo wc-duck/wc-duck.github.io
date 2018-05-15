@@ -1,5 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/all-en.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2017-11-15T00:00:00+01:00</updated><entry><title>A story about an unexpected ABI break</title><link href="http://kihlander.net/a-story-about-an-unexpected-abi-break.html" rel="alternate"></link><updated>2017-11-15T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-11-15:a-story-about-an-unexpected-abi-break.html</id><summary type="html">&lt;p&gt;This is the story of an unexpected ABI break that I thought would be worth documenting.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/all-en.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2018-05-15T00:00:00+02:00</updated><entry><title>printf-based TOSTR on the stack</title><link href="http://kihlander.net/printf-based-tostr-on-the-stack.html" rel="alternate"></link><published>2018-05-15T00:00:00+02:00</published><updated>2018-05-15T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2018-05-15:/printf-based-tostr-on-the-stack.html</id><summary type="html">&lt;p&gt;As I might have written before I like printf-style string-formating. It's imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing "composite" values such as a vec3 or quaternion as there will be …&lt;/p&gt;</summary><content type="html">&lt;p&gt;As I might have written before I like printf-style string-formating. It's imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing "composite" values such as a vec3 or quaternion as there will be quite a bunch of repetition.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{ %.2f, %.2f, %.2f }&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above! ).&lt;/p&gt;
+&lt;p&gt;I have read/looked at a whole bunch of string-formating libs and "tostr()" implementations, usually in c++, returning an &lt;code&gt;std::string&lt;/code&gt; and/or overloading &lt;code&gt;operator&amp;lt;&amp;lt;&lt;/code&gt; for writing to &lt;code&gt;std::ostream&lt;/code&gt; etc and not really liking any of them ( forcing dynamic allocation for known sized outputs for example, &lt;em&gt;yuck!&lt;/em&gt; ). &lt;/p&gt;
+&lt;p&gt;But complaining is easy, time to be constructive and get to some suggestions on how this can be done instead.&lt;/p&gt;
+&lt;h1&gt;BYTES2STR()&lt;/h1&gt;
+&lt;p&gt;I have found that most of these problems can be solved with a small trick, introducing a struct with the storage for the string. I will start introducing this with a simple macro to turn a &lt;code&gt;size_t&lt;/code&gt; to a string in the format &lt;code&gt;"234 bytes"&lt;/code&gt;, &lt;code&gt;"2.9 kB"&lt;/code&gt; or &lt;code&gt;"234 GB"&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;enum&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;BYTES_PER_KB&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;BYTES_PER_MB&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;BYTES_PER_KB&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;BYTES_PER_GB&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;BYTES_PER_MB&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_bytes_to_human&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;64&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="n"&gt;_bytes_to_human&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;size_t&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt;     &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;BYTES_PER_GB&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;snprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;%.02f GB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mf"&gt;1.0f&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;BYTES_PER_GB&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="nf"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;BYTES_PER_MB&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;snprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;%.02f MB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mf"&gt;1.0f&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;BYTES_PER_MB&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="nf"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;BYTES_PER_KB&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;snprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;%.02f kB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mf"&gt;1.0f&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;double&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;BYTES_PER_KB&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;                            &lt;span class="nf"&gt;snprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;%zu bytes&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="cp"&gt;#define BYTES2STR( bytes ) _bytes_to_human( bytes ).str&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This can now be used simply as follows&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;you have allocated %s&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;BYTES2STR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;allocated_bytes&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;What we did here is to introduce a helper-struct containing the storage for the generated string and a macro to hide a bit of ugliness. Simple and easy to read and work with and I feel fairly confident when I say that the compiler will handle this will, NICE :)&lt;/p&gt;
+&lt;h1&gt;Extending to a more general TOSTR()&lt;/h1&gt;
+&lt;p&gt;But can this be extended to be a general and extensible solution? Would I write this article if I didn't believe that it was? Of course it is and with a really small amount of code as well :)&lt;/p&gt;
+&lt;p&gt;Our goal here is to be able to have one macro, &lt;code&gt;TOSTR(obj)&lt;/code&gt;, that take an object that has an implementation defined with &lt;code&gt;TOSTR_DEFINE_TYPE_FUNCTION&lt;/code&gt; that defines how to convert the type to string and reserve space for that string on the stack.&lt;/p&gt;
+&lt;p&gt;If you just want the code or think it is easier to read the code directly here is a link to a github repo.&lt;/p&gt;
+&lt;p&gt;https://github.com/wc-duck/tostring.&lt;/p&gt;
+&lt;p&gt;Onto the code/implementation then!&lt;/p&gt;
+&lt;p&gt;So lets say that we have a vec3-struct that we want to add TOSTR() support to. That is as simple as using the macro &lt;code&gt;TOSTR_DEFINE_TYPE_FUNCTION&lt;/code&gt; as follows.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;vec3&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="c1"&gt;// declare with type to implement for and the amount of bytes that &lt;/span&gt;
+&lt;span class="c1"&gt;// is needed in the output-string.&lt;/span&gt;
+&lt;span class="n"&gt;TOSTR_DEFINE_TYPE_FUNCTION&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;64&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// the end of the macro-expansion expects you to declare how&lt;/span&gt;
+    &lt;span class="c1"&gt;// to write the output value.&lt;/span&gt;
+    &lt;span class="c1"&gt;//&lt;/span&gt;
+    &lt;span class="c1"&gt;// you will get passed an output-buffer as &amp;#39;out&amp;#39; ( with space&lt;/span&gt;
+    &lt;span class="c1"&gt;// for the requested 64-chars ) and a reference to the value &lt;/span&gt;
+    &lt;span class="c1"&gt;// to print as &amp;#39;value&amp;#39;.&lt;/span&gt;
+    &lt;span class="c1"&gt;//&lt;/span&gt;
+    &lt;span class="c1"&gt;// &amp;#39;out&amp;#39; has one member-function called &amp;#39;put&amp;#39; that has a &lt;/span&gt;
+    &lt;span class="c1"&gt;// printf-like format. ( yes, that makes it out.put :) )&lt;/span&gt;
+
+    &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;put&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{ %.2f, %.2f, %.2f }&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The macro will declare a static constant for the declared type with the size like this, but for a few different cases ( &lt;code&gt;vec3&lt;/code&gt;, &lt;code&gt;const vec3&lt;/code&gt;, &lt;code&gt;vec3&amp;amp;&lt;/code&gt; and &lt;code&gt;const vec3&amp;amp;&lt;/code&gt; )&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;template&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_TOSTR_type_size&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;vec3&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;STRING_SIZE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;64&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And it also declare a function with this signature ( using the code in {} after the macro as its body )&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;_TOSTR_type_impl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;_TOSTR_builder&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="n"&gt;vec3&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Finally we have the &lt;code&gt;TOSTR(obj)&lt;/code&gt;-macro that will create a temporary buffer on the stack, fetching its size from &lt;code&gt;_TOSTR_type_size&amp;lt;decltype(obj)&amp;gt;::STRING_SIZE&lt;/code&gt; and pass that to the &lt;code&gt;_TOSTR_type_impl&lt;/code&gt; that will use overloading to select the correct implementation.&lt;/p&gt;
+&lt;p&gt;What we can simply do now is just use TOSTR() as expected with vec3.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;player: pos = %s, velocity = %s&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;player_pos&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;player_vel&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+
+&lt;span class="c1"&gt;// ... or ...&lt;/span&gt;
+
+&lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;player: pos = %s, velocity = %s&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;player&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;()),&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;player&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vel&lt;/span&gt;&lt;span class="p"&gt;()));&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;that would output something like: &lt;code&gt;"player: pos = { 11.0, 12.99, 13.37 }, velocity = { 0.14, 2.35, 3.71 }"&lt;/code&gt; ( depending on the actual position and velocity of the player hopefully ;) )&lt;/p&gt;
+&lt;p&gt;btw, they also "stack" quite well such as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;aabb&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;vec3&lt;/span&gt; &lt;span class="n"&gt;min&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;vec3&lt;/span&gt; &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="n"&gt;TOSTR_DEFINE_TYPE_FUNCTION&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;aabb&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;put&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{ %s, %s }&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;min&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Any negatives?&lt;/h1&gt;
+&lt;p&gt;The biggest draw-back in my opinion is the fact that the lifetime of the generated string is only during the current expression, i.e. you can't "save" your string to use later. I.e. this is valid code but undefined behavior.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vec_str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;TOSTR&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;my_vec&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;%s&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec_str&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This since the macro defines a temporary variable to hold the value.&lt;/p&gt;
+&lt;p&gt;Also the fact that overflow might happen and you will get truncated output. I think this is a smaller problem as in many cases ( as the ones above and many more ) you actually know in advance the string-length that you will be generating.&lt;/p&gt;
+&lt;p&gt;If you find the overflow issue as a big issues it would be quite easy to add an "dynamic-alloc on overflow" to the system.&lt;/p&gt;
+&lt;p&gt;I also know that some has problems with printf and friends all together as it is not "typesafe" etc. Imho that is mostly a solved problem by modern compilers that do type-checks in compile-time for you on these. But that is my opinion :)&lt;/p&gt;
+&lt;p&gt;Finally there might be some objections to the template-usage in the implementation but I think it is at a reasonable level, but I guess that it can be solved in other ways if you think this is a problem.&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;This might not be anything new but it is a small trick that I haven't seen that much in the wild and that has made my own code "better" imho. It might not be to everybodys taste but hopefully someone has got a new tool to their toolbox!&lt;/p&gt;
+&lt;p&gt;As usual, don't be afraid to reach out to me at twitter, github any other channel that you might know of!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>A story about an unexpected ABI break</title><link href="http://kihlander.net/a-story-about-an-unexpected-abi-break.html" rel="alternate"></link><published>2017-11-15T00:00:00+01:00</published><updated>2017-11-15T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-11-15:/a-story-about-an-unexpected-abi-break.html</id><summary type="html">&lt;p&gt;This is the story of an unexpected ABI break that I thought would be worth documenting.&lt;/p&gt;
+&lt;p&gt;At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
+uint32_t and one should be able to treat it as a uint32_t in code except …&lt;/p&gt;</summary><content type="html">&lt;p&gt;This is the story of an unexpected ABI break that I thought would be worth documenting.&lt;/p&gt;
 &lt;p&gt;At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
 uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.&lt;/p&gt;
 &lt;p&gt;Why would you want a class like this you might ask, well we use it for adding a &lt;code&gt;const char* c_str()&lt;/code&gt;-function that can be
@@ -71,7 +197,8 @@ comparing one of the hashes to half the stack-address of the other variable :)&l
 is built from latest the lib and the exe disagrees on how to pass values to the function!&lt;/p&gt;
 &lt;p&gt;As expected this works in a release build where the code is inlined, but in that case we had other functions where how CHashString was passed was an issue.&lt;/p&gt;
 &lt;p&gt;What can we learn from this? ABI-issues can show its ugly face when you least expect it and compilers do the darnedest things!&lt;/p&gt;
-&lt;p&gt;Well, that was part of my day, how was yours? Feel free to hit me up on twitter or something if you want to give me a comment about this!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="war-stories"></category></entry><entry><title>Builtin resources and the resource-system</title><link href="http://kihlander.net/builtin-resources-and-the-resource-system.html" rel="alternate"></link><updated>2017-08-07T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-08-07:builtin-resources-and-the-resource-system.html</id><summary type="html">&lt;p&gt;I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
+&lt;p&gt;Well, that was part of my day, how was yours? Feel free to hit me up on twitter or something if you want to give me a comment about this!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category><category term="war-stories"></category></entry><entry><title>Builtin resources and the resource-system</title><link href="http://kihlander.net/builtin-resources-and-the-resource-system.html" rel="alternate"></link><published>2017-08-07T00:00:00+02:00</published><updated>2017-08-07T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-08-07:/builtin-resources-and-the-resource-system.html</id><summary type="html">&lt;p&gt;I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
+but will dig down a bit deeper into one "feature" in it that I find kind of neat. I'm sure it has …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
 but will dig down a bit deeper into one "feature" in it that I find kind of neat. I'm sure it has been done before but I have not seen it myself somewhere else.
 I'll be writing about how I handle builtin resources in the engine.&lt;/p&gt;
 &lt;p&gt;When talking about a "builtin resource" I refer to resources generated by code and not read from files on disk such as a &lt;code&gt;red.png&lt;/code&gt; or a &lt;code&gt;cube.mesh&lt;/code&gt;. Resources read
@@ -134,7 +261,8 @@ malicious person if you are concerned by that. In that case you might want to ju
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 &lt;p&gt;I'll just conclude by saying that this is a system/feature that has worked out really well for me on my own stuff and has proven itself to be really useful. As
 mentioned above it is really helpful to be able to reference "a red texture" or "a cube" directly via assets.&lt;/p&gt;
-&lt;p&gt;What do you think? Has this been done before? Any other thoughts? Hit me up on twitter and tell me ( if you do it in a civil way of course! ;) )&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="assets"></category></entry><entry><title>utf8_lookup, a write up.</title><link href="http://kihlander.net/utf8_lookup-a-write-up.html" rel="alternate"></link><updated>2017-06-26T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-06-26:utf8_lookup-a-write-up.html</id><summary type="html">&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
+&lt;p&gt;What do you think? Has this been done before? Any other thoughts? Hit me up on twitter and tell me ( if you do it in a civil way of course! ;) )&lt;/p&gt;</content><category term="code"></category><category term="c++"></category><category term="assets"></category></entry><entry><title>utf8_lookup, a write up.</title><link href="http://kihlander.net/utf8_lookup-a-write-up.html" rel="alternate"></link><published>2017-06-26T00:00:00+02:00</published><updated>2017-06-26T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-06-26:/utf8_lookup-a-write-up.html</id><summary type="html">&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
+read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
 read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)&lt;/p&gt;
 &lt;p&gt;Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about &lt;a href="http://github.com/wc-duck/utf8_lookup/"&gt;utf8_lookup&lt;/a&gt;,
 a small lib to translate utf8 chars into offsets into a table.&lt;/p&gt;
@@ -438,20 +566,20 @@ different kind of texts using different combinations of code-pages etc.&lt;/p&gt
 &lt;/blockquote&gt;
 &lt;p&gt;First lets get this out of the room, the std::map/unordered_map versions are really bad compared to the others in all measurements. That was expected but I added them to
 the tests as it is something that is the "first thing that comes to mind" and something I wouldn't be surprised to see in a codebase.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Memory use" src="http://kihlander.net/images/memuse_all.png" title="Memory use" /&gt;
-&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec.png" title="GB/sec" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Memory use" src="{filename}/images/memuse_all.png" title="Memory use"&gt;
+&lt;img alt="GB/sec" src="{filename}/images/gb_per_sec.png" title="GB/sec"&gt;&lt;/p&gt;
 &lt;p&gt;As we can see the memory used and performance ( in GB text translated per second ) by the std::-implementations are just huge compared to the other to solutions, so lets 
 remove them to get some more interesting charts :)&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Bytes per codepoint" src="http://kihlander.net/images/bytes_per_cp_no_std.png" title="Bytes per codepoint" /&gt;
-&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_no_std.png" title="GB/sec" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Bytes per codepoint" src="{filename}/images/bytes_per_cp_no_std.png" title="Bytes per codepoint"&gt;
+&lt;img alt="GB/sec" src="{filename}/images/gb_per_sec_no_std.png" title="GB/sec"&gt;&lt;/p&gt;
 &lt;p&gt;The charts clearly show that utf8_lookup outperforms the bitarray in all cases except pure ASCII ( stb_image.h ) when it comes to memory-usage and loses when it comes to
 raw lookup performance in all tests.
 We can also mention that the "tighter" the codepoints to lookup are, the more comparable the both techniques are. We could also plot bytes-per-codepoint vs lookup perf.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Perf vs bits-per-codepoint" src="http://kihlander.net/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Perf vs bits-per-codepoint" src="{filename}/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint"&gt;&lt;/p&gt;
 &lt;p&gt;In this chart we can clearly see each approach "banding" on bytes-per-codepoint and lookup-perf.&lt;/p&gt;
 &lt;p&gt;We'll end with mentioning performance in an non-optimized build as well, something that I find usually is lacking. OK performance in a debug-build is really something that
 will make your life easier and something I find to be a well worthy goal to strive for.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_debug.png" title="GB/sec" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="GB/sec" src="{filename}/images/gb_per_sec_debug.png" title="GB/sec"&gt;&lt;/p&gt;
 &lt;p&gt;It's the same pattern here, the std::-based solutions are just getting crushed and the simple array is by far the fastest but IMHO utf8_lookup holds its ground pretty well.
 A colleague of mine also pointed out that this is with gcc:s implementation of the STL, if this would have been run with some other STL implementations ( among others the one
 used in msvc ) the debug-results would have been even worse.&lt;/p&gt;
@@ -465,7 +593,9 @@ memory chunks depending on access-patters. It might be interesting to generate s
 &lt;p&gt;However as I am, depending on when your read this, the father of 2 this is all that I have the time and energy for now and it is good enough for the small things I use it for.&lt;/p&gt;
 &lt;p&gt;I hope that this might be useful for someone, maybe it can be used for something other than what I have used it for? And if there is something to really take away from this is that
 base_offset + (popcnt(bits_before)) is a really sweet technique that can be used for many things :)&lt;/p&gt;
-&lt;p&gt;Have I missed any benchmark approach? Any improvements that I could do? Anything else? Feel free to contact me on twitter!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="utf8"></category></entry><entry><title>Why I prefer inline forward-declares in C++</title><link href="http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html" rel="alternate"></link><updated>2016-11-14T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-11-14:why-i-prefer-inline-forward-declares-in-c.html</id><summary type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
+&lt;p&gt;Have I missed any benchmark approach? Any improvements that I could do? Anything else? Feel free to contact me on twitter!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category><category term="utf8"></category></entry><entry><title>Why I prefer inline forward-declares in C++</title><link href="http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html" rel="alternate"></link><published>2016-11-14T00:00:00+01:00</published><updated>2016-11-14T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-11-14:/why-i-prefer-inline-forward-declares-in-c.html</id><summary type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
+others code so it feels worth sharing.&lt;/p&gt;
+&lt;p&gt;So lets start of with just defining what we are …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
 others code so it feels worth sharing.&lt;/p&gt;
 &lt;p&gt;So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name
 to the compiler and not having to provide the entire class/struct declaration. Mostly used as a compile-time optimization or to handle circular deps etc.&lt;/p&gt;
@@ -561,7 +691,9 @@ when you have to.&lt;/p&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Do you agree, am I totally wrong? Feel free to tell me on twitter!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
+&lt;p&gt;Do you agree, am I totally wrong? Feel free to tell me on twitter!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><published>2016-09-24T00:00:00+02:00</published><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:/compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
+see no real reason to leave my old and true friend the script :)&lt;/p&gt;
+&lt;p&gt;So first of lets look at the problem we want to solve. We want a way to do things like this …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
 see no real reason to leave my old and true friend the script :)&lt;/p&gt;
 &lt;p&gt;So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;uint32_t&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
@@ -630,7 +762,9 @@ cost time each time I compile that file. When generating a header I pay for it o
 &lt;li&gt;easier to find the actual value of the hash. When generating a header you just look in the header, when doing it with the compiler... it gets harder!&lt;/li&gt;
 &lt;li&gt;you have control over how the header is generated, you want to add registering of hash-value -&amp;gt; string? just add it!&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;So what do you think, what pros have I missed on hashing with the c++-compiler? Why am I wrong? &lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>The command-line as a poor mans config files</title><link href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html" rel="alternate"></link><updated>2016-03-01T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-03-01:the-command-line-as-a-poor-mans-config-files.html</id><summary type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
+&lt;p&gt;So what do you think, what pros have I missed on hashing with the c++-compiler? Why am I wrong? &lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>The command-line as a poor mans config files</title><link href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html" rel="alternate"></link><published>2016-03-01T00:00:00+01:00</published><updated>2016-03-01T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-03-01:/the-command-line-as-a-poor-mans-config-files.html</id><summary type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
+post I'll discuss a method to use them as simple config-files.&lt;/p&gt;
+&lt;p&gt;Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
 post I'll discuss a method to use them as simple config-files.&lt;/p&gt;
 &lt;p&gt;Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
 and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
@@ -655,7 +789,9 @@ that can be configurate via files can also be configurated via the command-line.
 &lt;p&gt;In this specific case it might not save you that much, but consider you having multiple games, multiple configs etc.&lt;/p&gt;
 &lt;p&gt;Do I think this would replace all configuration ever? Absolutely not, but it works great for small things as above. I would absolutely not
 do this for settings that should be used in a shipped game, only for debug-settings and other settings used during development.&lt;/p&gt;
-&lt;p&gt;Short post, but hopefully someone like this and steal it :)&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>Registering command line arguments</title><link href="http://kihlander.net/registering-command-line-arguments.html" rel="alternate"></link><updated>2016-02-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-02-27:registering-command-line-arguments.html</id><summary type="html">&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+&lt;p&gt;Short post, but hopefully someone like this and steal it :)&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>Registering command line arguments</title><link href="http://kihlander.net/registering-command-line-arguments.html" rel="alternate"></link><published>2016-02-27T00:00:00+01:00</published><updated>2016-02-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-02-27:/registering-command-line-arguments.html</id><summary type="html">&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+It is for example easier to just add a &lt;code&gt;--log-verbose=resource&lt;/code&gt; to set all logging in the "resource"-domain to verbose or
+&lt;code&gt;--memory-enable-stacktrace=render&lt;/code&gt; to enable save …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
 It is for example easier to just add a &lt;code&gt;--log-verbose=resource&lt;/code&gt; to set all logging in the "resource"-domain to verbose or
 &lt;code&gt;--memory-enable-stacktrace=render&lt;/code&gt; to enable save of stacktraces for all allocations done in the "render"-allocator than to
 edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.&lt;/p&gt;
@@ -748,4 +884,11 @@ want colliding flag-names where you have flags that should be used by multiple s
 done.&lt;/p&gt;
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 &lt;p&gt;This is a technique that has served me well for this purpose and the "global linked list created with global constructors" could be a useful tool in your toolbox 
-when writing c++. It need to be used restrictively, but at least for this purpose it has not been any problems for me.&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry></feed>
+when writing c++. It need to be used restrictively, but at least for this purpose it has not been any problems for me.&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>About</title><link href="http://kihlander.net/about.html" rel="alternate"></link><published>2016-01-27T00:00:00+01:00</published><updated>2016-01-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-01-27:/about.html</id><summary type="html">&lt;h3&gt;Who I am&lt;/h3&gt;
+&lt;p&gt;I'm &lt;a href="http://kihlander.net"&gt;Fredrik Kihlander&lt;/a&gt;, engine programmer at &lt;a href="http://avalanchestudios.com"&gt;Avalanche Studios&lt;/a&gt; by day, father and avid amateur cook at night.&lt;/p&gt;
+&lt;p&gt;The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
+emphasis on the …&lt;/p&gt;</summary><content type="html">&lt;h3&gt;Who I am&lt;/h3&gt;
+&lt;p&gt;I'm &lt;a href="http://kihlander.net"&gt;Fredrik Kihlander&lt;/a&gt;, engine programmer at &lt;a href="http://avalanchestudios.com"&gt;Avalanche Studios&lt;/a&gt; by day, father and avid amateur cook at night.&lt;/p&gt;
+&lt;p&gt;The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
+emphasis on the ++:es ), maybe some python and general game-dev stuff.&lt;/p&gt;
+&lt;p&gt;Don't expect regular updates!&lt;/p&gt;</content></entry></feed>

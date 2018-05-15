@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander - pages</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/pages.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2016-01-27T00:00:00+01:00</updated><entry><title>About</title><link href="http://kihlander.net/about.html" rel="alternate"></link><published>2016-01-27T00:00:00+01:00</published><updated>2016-01-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-01-27:/about.html</id><summary type="html">&lt;h3&gt;Who I am&lt;/h3&gt;
+&lt;p&gt;I'm &lt;a href="http://kihlander.net"&gt;Fredrik Kihlander&lt;/a&gt;, engine programmer at &lt;a href="http://avalanchestudios.com"&gt;Avalanche Studios&lt;/a&gt; by day, father and avid amateur cook at night.&lt;/p&gt;
+&lt;p&gt;The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
+emphasis on the …&lt;/p&gt;</summary><content type="html">&lt;h3&gt;Who I am&lt;/h3&gt;
+&lt;p&gt;I'm &lt;a href="http://kihlander.net"&gt;Fredrik Kihlander&lt;/a&gt;, engine programmer at &lt;a href="http://avalanchestudios.com"&gt;Avalanche Studios&lt;/a&gt; by day, father and avid amateur cook at night.&lt;/p&gt;
+&lt;p&gt;The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
+emphasis on the ++:es ), maybe some python and general game-dev stuff.&lt;/p&gt;
+&lt;p&gt;Don't expect regular updates!&lt;/p&gt;</content></entry></feed>

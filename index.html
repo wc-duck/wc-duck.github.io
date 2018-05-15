@@ -34,7 +34,6 @@
       <p>The blog of Fredrik Kihlander</p>
       <nav>
         <ul class="list">
-          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
         </ul>
       </nav>
       <ul class="social">
@@ -55,6 +54,21 @@
 
 <article>
   <header>
+    <h2><a href="http://kihlander.net/printf-based-tostr-on-the-stack.html#printf-based-tostr-on-the-stack">printf-based TOSTR on the stack</a></h2>
+    <p>
+      Posted on tis 15 maj 2018 in <a href="http://kihlander.net/category/code.html">code</a>
+      &#8226; Tagged with
+      <a href="http://kihlander.net/tag/code.html">code</a>,      <a href="http://kihlander.net/tag/c.html">c++</a>    </p>
+  </header>
+  <div>
+      <p>As I might have written before I like printf-style string-formating. It's imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing "composite" values such as a vec3 or quaternion as there will be …</p>
+      <a class="btn" href="http://kihlander.net/printf-based-tostr-on-the-stack.html#printf-based-tostr-on-the-stack">Continue reading</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
     <h2><a href="http://kihlander.net/a-story-about-an-unexpected-abi-break.html#a-story-about-an-unexpected-abi-break">A story about an unexpected ABI break</a></h2>
     <p>
       Posted on ons 15 november 2017 in <a href="http://kihlander.net/category/code.html">code</a>
@@ -64,7 +78,7 @@
   <div>
       <p>This is the story of an unexpected ABI break that I thought would be worth documenting.</p>
 <p>At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
-uint32_t and one should be able to treat it as a uint32_t in code except ...</p>
+uint32_t and one should be able to treat it as a uint32_t in code except …</p>
       <a class="btn" href="http://kihlander.net/a-story-about-an-unexpected-abi-break.html#a-story-about-an-unexpected-abi-break">Continue reading</a>
   </div>
   <hr />
@@ -79,7 +93,7 @@ uint32_t and one should be able to treat it as a uint32_t in code except ...</p>
   </header>
   <div>
       <p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
-but will dig down a bit deeper into one "feature" in it that I find kind of neat. I'm sure it ...</p>
+but will dig down a bit deeper into one "feature" in it that I find kind of neat. I'm sure it has …</p>
       <a class="btn" href="http://kihlander.net/builtin-resources-and-the-resource-system.html#builtin-resources-and-the-resource-system">Continue reading</a>
   </div>
   <hr />
@@ -94,7 +108,7 @@ but will dig down a bit deeper into one "feature" in it that I find kind of neat
   </header>
   <div>
       <p>I saw this blog post a while ago <a href="http://reedbeta.com/blog/programmers-intro-to-unicode/">A Programmer’s Introduction to Unicode</a>, a really great write up that is a worth a
-read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am ...</p>
+read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am …</p>
       <a class="btn" href="http://kihlander.net/utf8_lookup-a-write-up.html#utf8_lookup-a-write-up">Continue reading</a>
   </div>
   <hr />
@@ -110,7 +124,7 @@ read for anyone interested in the subject! So go ahead and read that now even as
   <div>
       <p>Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
 others code so it feels worth sharing.</p>
-<p>So lets start of with just defining what we are ...</p>
+<p>So lets start of with just defining what we are …</p>
       <a class="btn" href="http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html#why-i-prefer-inline-forward-declares-in-c">Continue reading</a>
   </div>
   <hr />
@@ -126,7 +140,7 @@ others code so it feels worth sharing.</p>
   <div>
       <p>I recently read a blogpost about <a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/">compile-time string-hashes and constexpr</a> and I'm still not convinced and 
 see no real reason to leave my old and true friend the script :)</p>
-<p>So first of lets look at the problem we want to solve. We want a way to do things like ...</p>
+<p>So first of lets look at the problem we want to solve. We want a way to do things like this …</p>
       <a class="btn" href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html#compile-time-hashes-in-c-im-not-convinced">Continue reading</a>
   </div>
   <hr />
@@ -142,7 +156,7 @@ see no real reason to leave my old and true friend the script :)</p>
   <div>
       <p>I like command-line arguments as mentioned in an earlier <a href="http://kihlander.net/registering-command-line-arguments.html">post</a> about them. In this 
 post I'll discuss a method to use them as simple config-files.</p>
-<p>Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it ...</p>
+<p>Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes …</p>
       <a class="btn" href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html#the-command-line-as-a-poor-mans-config-files">Continue reading</a>
   </div>
   <hr />
@@ -158,8 +172,24 @@ post I'll discuss a method to use them as simple config-files.</p>
   <div>
       <p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
 It is for example easier to just add a <code>--log-verbose=resource</code> to set all logging in the "resource"-domain to verbose or
-<code>--memory-enable-stacktrace=render</code> to enable save ...</p>
+<code>--memory-enable-stacktrace=render</code> to enable save …</p>
       <a class="btn" href="http://kihlander.net/registering-command-line-arguments.html#registering-command-line-arguments">Continue reading</a>
+  </div>
+  <hr />
+</article>
+<article>
+  <header>
+    <h2><a href="http://kihlander.net/about.html#about">About</a></h2>
+    <p>
+      Posted on ons 27 januari 2016 in <a href="http://kihlander.net/category/pages.html">pages</a>
+    </p>
+  </header>
+  <div>
+      <h3>Who I am</h3>
+<p>I'm <a href="http://kihlander.net">Fredrik Kihlander</a>, engine programmer at <a href="http://avalanchestudios.com">Avalanche Studios</a> by day, father and avid amateur cook at night.</p>
+<p>The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
+emphasis on the …</p>
+      <a class="btn" href="http://kihlander.net/about.html#about">Continue reading</a>
   </div>
 </article>
 

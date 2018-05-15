@@ -14,11 +14,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="index, follow" />
 <meta name="author" content="Fredrik Kihlander" />
-<meta name="description" content="I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am ..." />
+<meta name="description" content="I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am …" />
 <meta name="keywords" content="code, c++, utf8">
 <meta property="og:site_name" content="The blog of Fredrik Kihlander"/>
 <meta property="og:title" content="utf8_lookup, a write up."/>
-<meta property="og:description" content="I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am ..."/>
+<meta property="og:description" content="I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am …"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="http://kihlander.net/utf8_lookup-a-write-up.html"/>
 <meta property="og:type" content="article"/>
@@ -41,7 +41,6 @@
       <p>The blog of Fredrik Kihlander</p>
       <nav>
         <ul class="list">
-          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
         </ul>
       </nav>
       <ul class="social">
@@ -370,20 +369,20 @@ different kind of texts using different combinations of code-pages etc.</p>
 </blockquote>
 <p>First lets get this out of the room, the std::map/unordered_map versions are really bad compared to the others in all measurements. That was expected but I added them to
 the tests as it is something that is the "first thing that comes to mind" and something I wouldn't be surprised to see in a codebase.</p>
-<p><img alt="Memory use" src="http://kihlander.net/images/memuse_all.png" title="Memory use" />
-<img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec.png" title="GB/sec" /></p>
+<p><img alt="Memory use" src="{filename}/images/memuse_all.png" title="Memory use">
+<img alt="GB/sec" src="{filename}/images/gb_per_sec.png" title="GB/sec"></p>
 <p>As we can see the memory used and performance ( in GB text translated per second ) by the std::-implementations are just huge compared to the other to solutions, so lets 
 remove them to get some more interesting charts :)</p>
-<p><img alt="Bytes per codepoint" src="http://kihlander.net/images/bytes_per_cp_no_std.png" title="Bytes per codepoint" />
-<img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_no_std.png" title="GB/sec" /></p>
+<p><img alt="Bytes per codepoint" src="{filename}/images/bytes_per_cp_no_std.png" title="Bytes per codepoint">
+<img alt="GB/sec" src="{filename}/images/gb_per_sec_no_std.png" title="GB/sec"></p>
 <p>The charts clearly show that utf8_lookup outperforms the bitarray in all cases except pure ASCII ( stb_image.h ) when it comes to memory-usage and loses when it comes to
 raw lookup performance in all tests.
 We can also mention that the "tighter" the codepoints to lookup are, the more comparable the both techniques are. We could also plot bytes-per-codepoint vs lookup perf.</p>
-<p><img alt="Perf vs bits-per-codepoint" src="http://kihlander.net/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint" /></p>
+<p><img alt="Perf vs bits-per-codepoint" src="{filename}/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint"></p>
 <p>In this chart we can clearly see each approach "banding" on bytes-per-codepoint and lookup-perf.</p>
 <p>We'll end with mentioning performance in an non-optimized build as well, something that I find usually is lacking. OK performance in a debug-build is really something that
 will make your life easier and something I find to be a well worthy goal to strive for.</p>
-<p><img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_debug.png" title="GB/sec" /></p>
+<p><img alt="GB/sec" src="{filename}/images/gb_per_sec_debug.png" title="GB/sec"></p>
 <p>It's the same pattern here, the std::-based solutions are just getting crushed and the simple array is by far the fastest but IMHO utf8_lookup holds its ground pretty well.
 A colleague of mine also pointed out that this is with gcc:s implementation of the STL, if this would have been run with some other STL implementations ( among others the one
 used in msvc ) the debug-results would have been even worse.</p>
@@ -440,7 +439,7 @@ base_offset + (popcnt(bits_before)) is a really sweet technique that can be used
   },
   "image": "http://kihlander.net/theme/img/profile.png",
   "url": "http://kihlander.net/utf8_lookup-a-write-up.html",
-  "description": "I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am ..."
+  "description": "I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am …"
 }
 </script></body>
 </html>
