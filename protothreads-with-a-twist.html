@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/pygments.min.css">
+  <link rel="stylesheet" type="text/css" href="http://kihlander.net/theme/css/font-awesome.min.css">
+  <link href="http://kihlander.net/static/custom.css" rel="stylesheet">
+  <link href="http://kihlander.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="The blog of Fredrik Kihlander Atom">
+  <link rel="shortcut icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="http://kihlander.net/images/favicon.ico" type="image/x-icon">
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+<meta name="author" content="Fredrik Kihlander" />
+<meta name="description" content="For a long time I'v been interested in running game-specific/entity-specific code in coroutines. Something like the following. void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and ..." />
+<meta name="keywords" content="code, c++, coroutines">
+<meta property="og:site_name" content="The blog of Fredrik Kihlander"/>
+<meta property="og:title" content=""ProtoThreads" with a twist."/>
+<meta property="og:description" content="For a long time I'v been interested in running game-specific/entity-specific code in coroutines. Something like the following. void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and ..."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="http://kihlander.net/protothreads-with-a-twist.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2018-11-20 00:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="http://kihlander.net/author/fredrik-kihlander.html">
+<meta property="article:section" content="code"/>
+<meta property="article:tag" content="code"/>
+<meta property="article:tag" content="c++"/>
+<meta property="article:tag" content="coroutines"/>
+<meta property="og:image" content="http://kihlander.net/theme/img/profile.png">  <title>The blog of Fredrik Kihlander &ndash; "ProtoThreads" with a twist.</title>
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="http://kihlander.net">
+        <img src="http://kihlander.net/theme/img/profile.png" alt="What could possibly go wrong?" title="What could possibly go wrong?">
+      </a>
+      <h1><a href="http://kihlander.net">What could possibly go wrong?</a></h1>
+      <p>The blog of Fredrik Kihlander</p>
+      <nav>
+        <ul class="list">
+          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
+        </ul>
+      </nav>
+      <ul class="social">
+        <li><a class="sc-github" href="https://github.com/wc-duck" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-twitter" href="https://twitter.com/wc_duck" target="_blank"><i class="fa fa-twitter"></i></a></li>
+        <li><a class="sc-rss" href="/feeds/all.atom.xml" target="_blank"><i class="fa fa-rss"></i></a></li>
+      </ul>
+    </div>
+  </aside>
+  <main>
+    <nav>
+      <a href="http://kihlander.net">Home</a>
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+      <a href="http://kihlander.net/feeds/all.atom.xml">Atom</a>
+    </nav>
+
+<article>
+  <header>
+    <h1 id="protothreads-with-a-twist">"ProtoThreads" with a twist.</h1>
+    <p>Posted on tis 20 november 2018 in <a href="http://kihlander.net/category/code.html">code</a></p>
+  </header>
+  <div>
+    <p>For a long time I'v been interested in running game-specific/entity-specific code in coroutines. 
+Something like the following.</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">entity</span> <span class="n">ent</span><span class="p">,</span> <span class="p">...</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">pnt3</span> <span class="n">points</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="kt">int</span> <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">while</span><span class="p">(</span><span class="n">entity_alive</span><span class="p">(</span><span class="n">ent</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="c1">// move the entity to a position and yield coroutine while movement is ongoing.</span>
+        <span class="n">move_to</span><span class="p">(</span><span class="n">ent</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="n">pos</span> <span class="o">%</span> <span class="n">ARRAY_LENGTH</span><span class="p">(</span><span class="n">points</span><span class="p">)]);</span>
+        <span class="n">pos</span><span class="o">++</span><span class="p">;</span>
+
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">shoot_bullet</span><span class="p">(</span><span class="n">ent</span><span class="p">);</span>
+            <span class="n">wait_sec</span><span class="p">(</span><span class="n">ent</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// do nothing for 2 seconds and yield the coroutine for that duration.</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>The above example is slightly simplified but I hope that it get the point across, that I want to be able
+to suspend code-execution at specific points and wait for certain actions to complete. Writing  one-off 
+game-code in this fashion might be a good way to work, especially when adding wait_for_any() and  wait_for_all()
+etc.</p>
+<p>So when I finally decided to take a stab at trying that out I started out by looking at how to implement the
+actual coroutines. There are a couple of libraries out there that I looked at for coroutines in c/c++ such as:</p>
+<ul>
+<li><a href="https://github.com/hnes/libaco">libaco</a></li>
+<li><a href="http://libdill.org/">libdill</a></li>
+<li><a href="http://libmill.org/">libmill</a></li>
+</ul>
+<p>Both libdill and libmill feel too 'opinionated' on how they want you to structure your code ( not that
+weird since the both sets out to re-implement go:s goroutines in c ) and also feels 'heavier' than what I
+need.
+libaco however sparked my interest, it looked quite lean and not too opinionated, i.e. it looks really nice! 
+But there is a big BUT, no windows support yet =/ I do most of my development on Linux but throwing Windows 
+support out of the "window" (<strong>badumtish</strong>) is not something I want to do.
+According to the issue-tracker it is in "the pipe" but it is not supported as of writing this.</p>
+<p>This lead me to fire of a question on twitter about alternatives and where <a href="https://twitter.com/randypgaul">@RandyPGaul</a>
+pointed out something that I had looked at before but totally forgot about, coroutines/protothreads based 
+on "duff's device".</p>
+<p>Since this technique is already well documented on the interwebs I'll just link to the original 
+article here and wait until you have read it ( if you haven't already ).</p>
+<p><a href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html">coroutines in c</a></p>
+<p>Read it yet? Good!</p>
+<p>Here are a few other links to libs that implement these kind of coroutines.</p>
+<ul>
+<li><a href="http://dunkels.com/adam/pt/">protothreads</a></li>
+<li><a href="https://github.com/zserge/pt">zserge/pt</a></li>
+<li><a href="https://github.com/RandyGaul/cute_headers/blob/master/cute_coroutine.h">cute_coroutine</a></li>
+</ul>
+<p>What I like about this solution is that it is "just code" so it should in theory work on any platform without
+platform-specific code. It should also work with emscripten ( that I shall get running any day now!!! ;) ).</p>
+<p>There are however things that I am missing from these otherwise fine libraries.
+A major one is based in how I plan to use them. I plan to have all my "behaviors" run one coroutine and 
+have some kind of simple "scheduler" run them. Something simple as having all "active" coroutines in a list,
+remove them from the list when waiting for something, and update them in a loop. However doing that with the
+above libs would require me keeping track of what functions are associated with each coroutine state.</p>
+<p>Also local variables/state is not handled by the above libs and would need to be handled by passing in some
+kind of state-struct, that would need to be different for each "behavior" and also be tracked by the above
+mentioned system.</p>
+<p>2 of the 3 libs also fails to handle calling another coroutine-function from within a coroutine and by that
+having the sub-call control the state of the top-level coroutine. For example if a sub-call does a yield or
+wait the entire call-hierarchy should do the same (cute_coroutine.h solves this for a fixed depth of sub-calls).</p>
+<p>So what do you do when you have an interesting itch to scratch? You scratch it of course :)</p>
+<h1>Solving the issues!</h1>
+<p>As any decent NIH-addict I decided to try myself and see what I could do and came to the conclusion that all
+the above issues can be solved by adding a small stack to each coroutine, i.e. almost do what the compiler 
+does!</p>
+<p>Introducing my boringly named coroutine lib/header, <a href="https://github.com/wc-duck/coro">coro</a>.</p>
+<p>As mentioned above the only real difference between <code>coro</code> and the above mentioned libs are that each coroutine 
+in coro MAY have a stack associated with it where the system itself can push data and reset when a coroutine completes.  </p>
+<blockquote>
+<p>Warning for you C-all-the-way people, there be some usage of C++ in this piece of code! But I guess it wouldn't
+be that hard to C:ify the lib if there is demand for it!
+</p>
+</blockquote>
+<p>The library does nothing particularly fancy at its core, the simplest coroutine would be implemented and updated 
+like this.</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">my_coro</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// all coroutines need a matching co_begin/co_end-pair</span>
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="c1">// ... do stuff ...</span>
+
+    <span class="c1">// ... yield execution of coroutine, i.e. introduce a yield-point in the</span>
+    <span class="c1">//     function where to continue execution on the next update ...</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">run_it</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// ... create and initialize our coroutine ...</span>
+    <span class="n">coro</span> <span class="n">co</span><span class="p">;</span>
+    <span class="n">co_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">,</span> <span class="k">nullptr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">my_coro</span><span class="p">);</span>
+
+    <span class="c1">// ... resume until completed ...</span>
+    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">co_completed</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">))</span>
+        <span class="n">co_resume</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>But now to the meat of this post, how will adding a stack solve the above mentioned issues?</p>
+<h2>General coroutine update</h2>
+<p>Well, this isn't solved by the stack, this is just solved by introducing a struct for the coroutines and storing a
+function-ptr in it :) Now we have that out of the way, carry on.</p>
+<h2>Local variables</h2>
+<p>Lets get to the stack-part and start with local variables. When we have a memory-area to store data in
+the problem isn't really to store the data, it is how to make it nice to use.</p>
+<p>As all the above mentioned libs, the same goes for coro, you can't just make a local variable and expect it to work</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">my_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;whoo %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">++</span><span class="n">my_counter</span><span class="p">);</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;whoo %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">++</span><span class="n">my_counter</span><span class="p">);</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;whoo %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">++</span><span class="n">my_counter</span><span class="p">);</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>One might expect for this to print:</p>
+<blockquote>
+<p>whoo 1</p>
+<p>whoo 2</p>
+<p>whoo 3</p>
+</blockquote>
+<p>But it will print </p>
+<blockquote>
+<p>whoo 1</p>
+<p>whoo 1</p>
+<p>whoo 1</p>
+</blockquote>
+<p>Why? If you read the article <a href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html">coroutines in c</a> ( you 
+did read it right? ) then you see the problem. The coroutines build on calling the function over and over until it
+exits at the end. On each call it will initialize a local variable to 0, jump to the last position in the 
+function, increment and print.</p>
+<p>Thats not good now, is it? "Didn't you mention solving this with the stack" you might think and that is correct. 
+<code>coro</code> has a pair of functions (actually a macros) called <code>co_locals_begin()</code>/<code>co_locals_end()</code> that is used like this</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">co_locals_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">my_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// could be any amount of variables here!</span>
+    <span class="n">co_locals_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;whoo %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">++</span><span class="n">locals</span><span class="p">.</span><span class="n">my_counter</span><span class="p">);</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;whoo %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">++</span><span class="n">locals</span><span class="p">.</span><span class="n">my_counter</span><span class="p">);</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;whoo %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">++</span><span class="n">locals</span><span class="p">.</span><span class="n">my_counter</span><span class="p">);</span>
+    <span class="n">co_yield</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>These macros will declare a local struct and instantiate a reference to one of these called <code>locals</code>, and guess where
+that reference is pointing, into the stack! This variable will only be allocated from the stack when entering the 
+function for the first time, in the following calls it will just be fetched from the stack.</p>
+<p>What this means is that we will have a struct that will be the same between all calls to our coroutine, that is not 
+exposed to the calling code and take the burden of keeping track of this away from the caller.</p>
+<p>It might be interesting to have a look at how the macro work as well, if we just expand it and look at what is 
+generated.</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">_co_locals</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">my_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">co</span><span class="o">-&gt;</span><span class="n">call_locals</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">co</span><span class="o">-&gt;</span><span class="n">call_locals</span> <span class="o">=</span> <span class="n">_co_stack_alloc</span><span class="p">(</span> <span class="n">co</span><span class="p">,</span>
+                                           <span class="k">sizeof</span><span class="p">(</span><span class="n">_co_locals</span><span class="p">),</span>
+                                           <span class="k">alignof</span><span class="p">(</span><span class="n">_co_locals</span><span class="p">));</span>
+        <span class="k">new</span> <span class="p">(</span><span class="n">co</span><span class="o">-&gt;</span><span class="n">call_locals</span><span class="p">)</span> <span class="n">_co_locals</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">_co_locals</span><span class="o">&amp;</span> <span class="n">CORO_LOCALS_NAME</span> <span class="o">=</span> <span class="o">*</span><span class="p">((</span><span class="n">_co_locals</span><span class="o">*</span><span class="p">)</span><span class="n">co</span><span class="o">-&gt;</span><span class="n">call_locals</span><span class="p">);</span>
+
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="c1">// ... function ...</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>As you can see it just declare a local struct and put everything between <code>co_locals_begin()</code>/<code>co_locals_end()</code> into it. Then, 
+if it is the first call, allocate data from the stack at the correct size/alignment. By placing the values in a struct we 
+can put all of this in one declare call + we get size/alignment of the entire block for free from the compiler.</p>
+<p>Also, since c++ now supports 'inline' initialization ( I guess there is a fancier name for it ) of member-variables we can
+just write out or variables, set initial values and use <code>placement new</code> to initialize the values.</p>
+<blockquote>
+<p>Note to the C++:ers out there, currently no destructor is run on the locals but I guess that could be implemented in co_end()
+if needed.
+</p>
+</blockquote>
+<h2>sub-calls</h2>
+<p>With local variables out of the way, how about calling another coroutine function from the first one? Well, just to state the
+obvious calling an ordinary function is just doing the call if someone was wondering. However say that you want to call a 
+function that can, by itself, yield execution?</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_sub_behaviors1</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// ... do stuff ...</span>
+
+    <span class="n">wait_for_timer</span><span class="p">();</span> <span class="c1">// how this is implemented is up to the user ;)</span>
+
+    <span class="c1">// ... do other stuff ...</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">some_game_object_sub_behaviors2</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// ... do other cool stuff ...</span>
+
+    <span class="n">wait_for_timer</span><span class="p">();</span> <span class="c1">// how this is implemented is up to the user ;)</span>
+
+    <span class="c1">// ... DAMN THIS IS SOME COOL STUFF GOING ON HERE ...</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="c1">// ... function ...</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span> <span class="o">%</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">{</span><span class="c1">// some_game_object_sub_behaviors1()?}</span>
+    <span class="k">else</span>
+        <span class="p">{</span><span class="c1">// some_game_object_sub_behaviors2()?}</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Lucky for us we have the stack and <code>co_call()</code>! co_call() will allocate a <code>coro</code>-struct on the coroutine-stack and execute 
+that just as any other coroutine. However it has some differences from co_init()+co_resume(). First of all, if it returns 
+on the first call the caller will not yield, it will just continue. If it do yield it will be resumed by co_begin() of the
+caller until it completes and then the caller will continue at the yield-point introduced by co_call().
+The resume of the sub-call could also have been done in the top-level co_resume() call but I decided to do it from the
+caller just to preserve the callstack for debugging.
+When the sub-call completes the stack will be reset to the point where <code>co_call()</code> allocated its <code>coro</code>-struct.</p>
+<p>The above code will then be</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="c1">// ... function ...</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span> <span class="o">%</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">co_call</span><span class="p">(</span><span class="n">co</span><span class="p">,</span> <span class="n">some_game_object_sub_behaviors1</span><span class="p">);</span>
+    <span class="k">else</span>
+        <span class="n">co_call</span><span class="p">(</span><span class="n">co</span><span class="p">,</span> <span class="n">some_game_object_sub_behaviors2</span><span class="p">);</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h2>call-arguments</h2>
+<p>So how about argument to coroutines? You guessed it, lets just pass them on the stack! Both <code>co_init()</code> and <code>co_call()</code> has
+versions that accepts a pointer to an argument + size/alignment. Example</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_move_on_path</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">path_index</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">move_me_on_path</span><span class="p">(</span><span class="o">*</span><span class="n">path_index</span><span class="p">);</span> <span class="c1">// maybe this will yield until movement is complete!</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">path_to_take</span><span class="p">;</span> <span class="c1">// need to be declared before co_begin(), see below =/</span>
+
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="c1">// ... function ...</span>
+    <span class="n">path_to_take</span> <span class="o">=</span> <span class="n">rand</span><span class="p">()</span> <span class="o">%</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">co_call</span><span class="p">((</span><span class="n">co_func</span><span class="p">)</span><span class="n">some_game_object_move_on_path</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">path_to_take</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">),</span> <span class="k">alignof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>The above will allocate space for the int and copy it onto the stack, and run <code>some_game_object_move_on_path</code>. The last argument
+to a <code>co_func</code> will be its arguments, or <code>nullptr</code> if not used.
+An alert reader might have noticed that the argument is copied onto the stack and that is true... and its copied by <code>memcpy</code> so 
+keep the arguments simple. I guess you could add lots of c++ magic to move types and <em>yada yada</em> but I haven't needed that. IHMO
+keeping types <code>memcpy</code>-able usually keeps code simpler and easier to work with!</p>
+<blockquote>
+<p>Note: there is also a version of co_call() and co_init() that deduce sizeof() and alignof() from arg.
+</p>
+</blockquote>
+<p>Again, no destructor will be run for the argument!
+Lastly note the cast to (co_func)! I guess that this is not everyones cup of tea but personally I'd rather take the cast there 
+than in the function itself but I guess that is a matter of taste.</p>
+<h2>Running out of stack!</h2>
+<p>So what happens when/if we run out of stack, for example allocating locals, args or doing a <code>co_call()</code>? coro will handle that
+gracefully and yield the coroutine at a point before the point of allocation.
+When this happen <code>co_resume()</code> will return as usual and the state can be checked by <code>co_stack_overflowed()</code> and that can then be
+handled by the user.
+The simplest might just be to ASSERT() but there is also <code>co_stack_replace()</code> if you feel fancy and want to grow the stack.</p>
+<p>An example of how this might work</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">run_me</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">original_stack</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+    <span class="n">coro</span> <span class="n">co</span><span class="p">;</span>
+    <span class="n">co_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">,</span> <span class="n">original_stack</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">original_stack</span><span class="p">),</span> <span class="n">some_func</span><span class="p">);</span>
+
+    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">co_completed</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">co_resume</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">co_stack_overflowed</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="kt">void</span><span class="o">*</span> <span class="n">old</span> <span class="o">=</span> <span class="n">co_stack_replace</span><span class="p">(</span><span class="o">&amp;</span><span class="n">co</span><span class="p">,</span> <span class="n">malloc</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">stack_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">co</span><span class="p">.</span><span class="n">stack_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">old</span> <span class="o">!=</span> <span class="n">original_stack</span><span class="p">)</span>
+                <span class="n">free</span><span class="p">(</span><span class="n">old</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">stack</span> <span class="o">!=</span> <span class="n">original_stack</span><span class="p">)</span>
+        <span class="n">free</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">stack</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h2>a note on 'waiting'</h2>
+<p>I mentioned above that I would like to be able to do things such as <code>wait_for( timeout, move_to )</code>. That is however something
+that I have mostly left out of <code>coro</code>. Why you ask? Well, I can't really know how the user structures their code, how do they
+want to update the coroutines etc.
+If I would have supported something like that the lib would have become bigger and more 'opinionated', maybe it would have
+needed an update and a manager of some kind etc. That would have brought the lib from being a simple building-block to something
+more "framework:y" and that is not my intent. Maybe someday I'll do something like that but then it will be built upon <code>coro</code> not
+built into it.
+There is however one small helper for building this kind of code, and that is <code>co_wait()</code>. co_wait() is basically a <code>co_yield()</code> 
+that also sets a flag on the coroutine. This flag is also propagated through the currently running coroutine-callstack so that the
+user can do <code>co_waiting(&amp;co)</code> at the top-level and see if it is waiting for something. This flag will be cleared on the next
+call to <code>co_resume()</code>.
+I think this little addition will be enough to build your own system on top of it if needed.</p>
+<h1>Conclusion</h1>
+<p>First of all I need to say that I'm curious to see if it really works when I actually start to use it ;)
+I.e. my next task is to actually use this for something productive ( nope haven't done that yet! ). IMHO it feels promising but
+we'll see.</p>
+<p>Secondly let's take a look at some pros/cons of this approach.</p>
+<h2>Pro: No platform specific code</h2>
+<p>This is IMHO a big win for a smaller team ( in this case me ). No need to support low-level asm-code to switch stacks and save
+registers. No worries about "what happens if we start porting to a new platform, can we do the same thing there?".</p>
+<h2>Pro: Not much code</h2>
+<p>Also it is quite small ( at the time of writing 280 lines of code + 345 lines of comments ) and that is always a good thing
+for maintenance and "ease of use". </p>
+<h2>Con: Easy to mess up locals</h2>
+<p>It is easy to mess up your local variables as it is second nature for every one of us to just declare a variable and expect it
+to keep its value :)
+My guess however is that you learn quickly and hopefully <code>co_locals_begin()/co_locals_end()</code> make it a bit easier.</p>
+<h2>Con: Macro-heavy</h2>
+<p>Personally I'm not that afraid of macros but I know some are. Also in this case they require you to follow quite a few rules and
+if you break them you end up with quite hard to understand errors. Again I think this is something that you learn but the more of you
+on your team the more people that have to learn and the fudge up a few times.</p>
+<p>An macro-related error that can be quite hard to understand if you are new to the code is this</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">coro</span><span class="o">*</span> <span class="n">co</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">co_begin</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="c1">// ... function ...</span>
+    <span class="kt">int</span> <span class="n">path_to_take</span> <span class="o">=</span> <span class="n">rand</span><span class="p">()</span> <span class="o">%</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">path_to_take</span><span class="p">);</span>
+
+    <span class="n">co_yeald</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+
+    <span class="n">co_end</span><span class="p">(</span><span class="n">co</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This code looks perfectly valid but generates this on my currently installed gcc.</p>
+<blockquote>
+<p>test/test_coro.cpp: In function ‘void some_game_object_behavior(coro<em>, void</em>, void*)’:
+test/test_coro.cpp:43:16: error: jump to case label [-fpermissive]
+     co_yield(co);
+                ^
+test/test_coro.cpp:40:9: note:   crosses initialization of ‘int path_to_take’
+     int path_to_take = rand() % 5;</p>
+</blockquote>
+<p>Also stepping through the co_***-macros while debugging is far from pleasant, hopefully that is my problem and not
+my users :)</p>
+<h2>Con: no type-safety for arguments</h2>
+<p>Currently there is no real type-safety between args passed to co_call()/co_init() and the actual function used as a
+coroutine callback. I would like to have that but I'm not really sure that it is doable? Any ideas for solutions
+would be appreciated ( easy on the meta-programming please ) !</p>
+<h1>Final note</h1>
+<p>I think this turned out nicely and hope that its something that might be useful for some of you. On a bigger team
+with more resources, would I use this? Maybe? I think a full-scale stack-register switch might be a better solution
+but that has its own caveats ( TLS-variables for example ).</p>
+<p>Any thoughts or suggestions? I would love to hear about it!
+Please hit me up on twitter or post in the coro issue-tracker! And remember, there will be bugs, there always is!</p>
+<p>Check it out <a href="https://github.com/wc-duck/coro">https://github.com/wc-duck/coro</a>!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="http://kihlander.net/tag/code.html">code</a>
+      <a href="http://kihlander.net/tag/c.html">c++</a>
+      <a href="http://kihlander.net/tag/coroutines.html">coroutines</a>
+    </p>
+  </div>
+</article>
+
+    <footer>
+<p>
+  &copy; Fredrik Kihlander 2015 - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>Built using <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a></p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+         src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BlogPosting",
+  "name": ""ProtoThreads" with a twist.",
+  "headline": ""ProtoThreads" with a twist.",
+  "datePublished": "2018-11-20 00:00:00+01:00",
+  "dateModified": "",
+  "author": {
+    "@type": "Person",
+    "name": "Fredrik Kihlander",
+    "url": "http://kihlander.net/author/fredrik-kihlander.html"
+  },
+  "image": "http://kihlander.net/theme/img/profile.png",
+  "url": "http://kihlander.net/protothreads-with-a-twist.html",
+  "description": "For a long time I'v been interested in running game-specific/entity-specific code in coroutines. Something like the following. void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and ..."
+}
+</script></body>
+</html>

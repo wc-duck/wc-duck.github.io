@@ -22,7 +22,7 @@
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="http://kihlander.net"/>
 <meta property="og:image" content="http://kihlander.net/theme/img/profile.png">
-  <title>The blog of Fredrik Kihlander &ndash; Category: pages</title>
+  <title>The blog of Fredrik Kihlander &ndash; Tag: coroutines</title>
 </head>
 <body>
   <aside>
@@ -34,6 +34,7 @@
       <p>The blog of Fredrik Kihlander</p>
       <nav>
         <ul class="list">
+          <li><a href="http://kihlander.net/pages/about.html#about">About</a></li>
         </ul>
       </nav>
       <ul class="social">
@@ -54,17 +55,30 @@
 
 <article>
   <header>
-    <h2><a href="http://kihlander.net/about.html#about">About</a></h2>
+    <h2><a href="http://kihlander.net/protothreads-with-a-twist.html#protothreads-with-a-twist">"ProtoThreads" with a twist.</a></h2>
     <p>
-      Posted on ons 27 januari 2016 in <a href="http://kihlander.net/category/pages.html">pages</a>
-    </p>
+      Posted on tis 20 november 2018 in <a href="http://kihlander.net/category/code.html">code</a>
+      &#8226; Tagged with
+      <a href="http://kihlander.net/tag/code.html">code</a>,      <a href="http://kihlander.net/tag/c.html">c++</a>,      <a href="http://kihlander.net/tag/coroutines.html">coroutines</a>    </p>
   </header>
   <div>
-      <h3>Who I am</h3>
-<p>I'm <a href="http://kihlander.net">Fredrik Kihlander</a>, engine programmer at <a href="http://avalanchestudios.com">Avalanche Studios</a> by day, father and avid amateur cook at night.</p>
-<p>The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
-emphasis on ...</p>
-      <a class="btn" href="http://kihlander.net/about.html#about">Continue reading</a>
+      <p>For a long time I'v been interested in running game-specific/entity-specific code in coroutines. 
+Something like the following.</p>
+<div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">some_game_object_behavior</span><span class="p">(</span> <span class="n">entity</span> <span class="n">ent</span><span class="p">,</span> <span class="p">...</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">pnt3</span> <span class="n">points</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="kt">int</span> <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">while</span><span class="p">(</span><span class="n">entity_alive</span><span class="p">(</span><span class="n">ent</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="c1">// move the entity to a position and ...</span></pre></div>
+      <a class="btn" href="http://kihlander.net/protothreads-with-a-twist.html#protothreads-with-a-twist">Continue reading</a>
   </div>
 </article>
 

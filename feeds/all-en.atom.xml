@@ -1,6 +1,425 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/all-en.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2018-05-15T00:00:00+02:00</updated><entry><title>printf-based TOSTR on the stack</title><link href="http://kihlander.net/printf-based-tostr-on-the-stack.html" rel="alternate"></link><published>2018-05-15T00:00:00+02:00</published><updated>2018-05-15T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2018-05-15:/printf-based-tostr-on-the-stack.html</id><summary type="html">&lt;p&gt;As I might have written before I like printf-style string-formating. It's imho the most convenient way to format strings and it can be really powerful if needed.
-However something that can be a bit tedious is output:ing "composite" values such as a vec3 or quaternion as there will be …&lt;/p&gt;</summary><content type="html">&lt;p&gt;As I might have written before I like printf-style string-formating. It's imho the most convenient way to format strings and it can be really powerful if needed.
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The blog of Fredrik Kihlander</title><link href="http://kihlander.net/" rel="alternate"></link><link href="http://kihlander.net/feeds/all-en.atom.xml" rel="self"></link><id>http://kihlander.net/</id><updated>2018-11-20T00:00:00+01:00</updated><entry><title>"ProtoThreads" with a twist.</title><link href="http://kihlander.net/protothreads-with-a-twist.html" rel="alternate"></link><updated>2018-11-20T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2018-11-20:protothreads-with-a-twist.html</id><summary type="html">&lt;p&gt;For a long time I'v been interested in running game-specific/entity-specific code in coroutines. 
+Something like the following.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;entity&lt;/span&gt; &lt;span class="n"&gt;ent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;pnt3&lt;/span&gt; &lt;span class="n"&gt;points&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;pos&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;entity_alive&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ent&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="c1"&gt;// move the entity to a position and yield coroutine while movement is ongoing.&lt;/span&gt;
+        &lt;span class="n"&gt;move_to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;points&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;ARRAY_LENGTH&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;points&lt;/span&gt;&lt;span class="p"&gt;)]);&lt;/span&gt;
+        &lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;shoot_bullet&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ent&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;wait_sec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="c1"&gt;// do nothing for 2 seconds and yield the coroutine for that duration.&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The above example is slightly simplified but I hope that it get the point across, that I want to be able
+to suspend code-execution at specific points and wait for certain actions to complete. Writing  one-off 
+game-code in this fashion might be a good way to work, especially when adding wait_for_any() and  wait_for_all()
+etc.&lt;/p&gt;
+&lt;p&gt;So when I finally decided to take a stab at trying that out I started out by looking at how to implement the
+actual coroutines. There are a couple of libraries out there that I looked at for coroutines in c/c++ such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/hnes/libaco"&gt;libaco&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://libdill.org/"&gt;libdill&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://libmill.org/"&gt;libmill&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Both libdill and libmill feel too 'opinionated' on how they want you to structure your code ( not that
+weird since the both sets out to re-implement go:s goroutines in c ) and also feels 'heavier' than what I
+need.
+libaco however sparked my interest, it looked quite lean and not too opinionated, i.e. it looks really nice! 
+But there is a big BUT, no windows support yet =/ I do most of my development on Linux but throwing Windows 
+support out of the "window" (&lt;strong&gt;badumtish&lt;/strong&gt;) is not something I want to do.
+According to the issue-tracker it is in "the pipe" but it is not supported as of writing this.&lt;/p&gt;
+&lt;p&gt;This lead me to fire of a question on twitter about alternatives and where &lt;a href="https://twitter.com/randypgaul"&gt;@RandyPGaul&lt;/a&gt;
+pointed out something that I had looked at before but totally forgot about, coroutines/protothreads based 
+on "duff's device".&lt;/p&gt;
+&lt;p&gt;Since this technique is already well documented on the interwebs I'll just link to the original 
+article here and wait until you have read it ( if you haven't already ).&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html"&gt;coroutines in c&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Read it yet? Good!&lt;/p&gt;
+&lt;p&gt;Here are a few other links to libs that implement these kind of coroutines.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://dunkels.com/adam/pt/"&gt;protothreads&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/zserge/pt"&gt;zserge/pt&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/RandyGaul/cute_headers/blob/master/cute_coroutine.h"&gt;cute_coroutine&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;What I like about this solution is that it is "just code" so it should in theory work on any platform without
+platform-specific code. It should also work with emscripten ( that I shall get running any day now!!! ;) ).&lt;/p&gt;
+&lt;p&gt;There are however things that I am missing from these otherwise fine libraries.
+A major one is based in how I plan to use them. I plan to have all my "behaviors" run one coroutine and 
+have some kind of simple "scheduler" run them. Something simple as having all "active" coroutines in a list,
+remove them from the list when waiting for something, and update them in a loop. However doing that with the
+above libs would require me keeping track of what functions are associated with each coroutine state.&lt;/p&gt;
+&lt;p&gt;Also local variables/state is not handled by the above libs and would need to be handled by passing in some
+kind of state-struct, that would need to be different for each "behavior" and also be tracked by the above
+mentioned system.&lt;/p&gt;
+&lt;p&gt;2 of the 3 libs also fails to handle calling another coroutine-function from within a coroutine and by that
+having the sub-call control the state of the top-level coroutine. For example if a sub-call does a yield or
+wait the entire call-hierarchy should do the same (cute_coroutine.h solves this for a fixed depth of sub-calls).&lt;/p&gt;
+&lt;p&gt;So what do you do when you have an interesting itch to scratch? You scratch it of course :)&lt;/p&gt;
+&lt;h1&gt;Solving the issues!&lt;/h1&gt;
+&lt;p&gt;As any decent NIH-addict I decided to try myself and see what I could do and came to the conclusion that all
+the above issues can be solved by adding a small stack to each coroutine, i.e. almost do what the compiler 
+does!&lt;/p&gt;
+&lt;p&gt;Introducing my boringly named coroutine lib/header, &lt;a href="https://github.com/wc-duck/coro"&gt;coro&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As mentioned above the only real difference between &lt;code&gt;coro&lt;/code&gt; and the above mentioned libs are that each coroutine 
+in coro MAY have a stack associated with it where the system itself can push data and reset when a coroutine completes.  &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Warning for you C-all-the-way people, there be some usage of C++ in this piece of code! But I guess it wouldn't
+be that hard to C:ify the lib if there is demand for it!
+&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The library does nothing particularly fancy at its core, the simplest coroutine would be implemented and updated 
+like this.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_coro&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// all coroutines need a matching co_begin/co_end-pair&lt;/span&gt;
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... do stuff ...&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... yield execution of coroutine, i.e. introduce a yield-point in the&lt;/span&gt;
+    &lt;span class="c1"&gt;//     function where to continue execution on the next update ...&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;run_it&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// ... create and initialize our coroutine ...&lt;/span&gt;
+    &lt;span class="n"&gt;coro&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;co_init&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;nullptr&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;my_coro&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... resume until completed ...&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;co_completed&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="n"&gt;co_resume&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;But now to the meat of this post, how will adding a stack solve the above mentioned issues?&lt;/p&gt;
+&lt;h2&gt;General coroutine update&lt;/h2&gt;
+&lt;p&gt;Well, this isn't solved by the stack, this is just solved by introducing a struct for the coroutines and storing a
+function-ptr in it :) Now we have that out of the way, carry on.&lt;/p&gt;
+&lt;h2&gt;Local variables&lt;/h2&gt;
+&lt;p&gt;Lets get to the stack-part and start with local variables. When we have a memory-area to store data in
+the problem isn't really to store the data, it is how to make it nice to use.&lt;/p&gt;
+&lt;p&gt;As all the above mentioned libs, the same goes for coro, you can't just make a local variable and expect it to work&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;my_counter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;whoo %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;my_counter&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;whoo %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;my_counter&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;whoo %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;my_counter&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;One might expect for this to print:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;whoo 1&lt;/p&gt;
+&lt;p&gt;whoo 2&lt;/p&gt;
+&lt;p&gt;whoo 3&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;But it will print &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;whoo 1&lt;/p&gt;
+&lt;p&gt;whoo 1&lt;/p&gt;
+&lt;p&gt;whoo 1&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Why? If you read the article &lt;a href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html"&gt;coroutines in c&lt;/a&gt; ( you 
+did read it right? ) then you see the problem. The coroutines build on calling the function over and over until it
+exits at the end. On each call it will initialize a local variable to 0, jump to the last position in the 
+function, increment and print.&lt;/p&gt;
+&lt;p&gt;Thats not good now, is it? "Didn't you mention solving this with the stack" you might think and that is correct. 
+&lt;code&gt;coro&lt;/code&gt; has a pair of functions (actually a macros) called &lt;code&gt;co_locals_begin()&lt;/code&gt;/&lt;code&gt;co_locals_end()&lt;/code&gt; that is used like this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;co_locals_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;my_counter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;// could be any amount of variables here!&lt;/span&gt;
+    &lt;span class="n"&gt;co_locals_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;whoo %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;locals&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;my_counter&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;whoo %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;locals&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;my_counter&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;whoo %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;locals&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;my_counter&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;co_yield&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;These macros will declare a local struct and instantiate a reference to one of these called &lt;code&gt;locals&lt;/code&gt;, and guess where
+that reference is pointing, into the stack! This variable will only be allocated from the stack when entering the 
+function for the first time, in the following calls it will just be fetched from the stack.&lt;/p&gt;
+&lt;p&gt;What this means is that we will have a struct that will be the same between all calls to our coroutine, that is not 
+exposed to the calling code and take the burden of keeping track of this away from the caller.&lt;/p&gt;
+&lt;p&gt;It might be interesting to have a look at how the macro work as well, if we just expand it and look at what is 
+generated.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_co_locals&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;my_counter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;call_locals&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="k"&gt;nullptr&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;call_locals&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;_co_stack_alloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                                           &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_co_locals&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+                                           &lt;span class="k"&gt;alignof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_co_locals&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+        &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;call_locals&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;_co_locals&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="n"&gt;_co_locals&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;CORO_LOCALS_NAME&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;_co_locals&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;call_locals&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... function ...&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see it just declare a local struct and put everything between &lt;code&gt;co_locals_begin()&lt;/code&gt;/&lt;code&gt;co_locals_end()&lt;/code&gt; into it. Then, 
+if it is the first call, allocate data from the stack at the correct size/alignment. By placing the values in a struct we 
+can put all of this in one declare call + we get size/alignment of the entire block for free from the compiler.&lt;/p&gt;
+&lt;p&gt;Also, since c++ now supports 'inline' initialization ( I guess there is a fancier name for it ) of member-variables we can
+just write out or variables, set initial values and use &lt;code&gt;placement new&lt;/code&gt; to initialize the values.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note to the C++:ers out there, currently no destructor is run on the locals but I guess that could be implemented in co_end()
+if needed.
+&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;sub-calls&lt;/h2&gt;
+&lt;p&gt;With local variables out of the way, how about calling another coroutine function from the first one? Well, just to state the
+obvious calling an ordinary function is just doing the call if someone was wondering. However say that you want to call a 
+function that can, by itself, yield execution?&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_sub_behaviors1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// ... do stuff ...&lt;/span&gt;
+
+    &lt;span class="n"&gt;wait_for_timer&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt; &lt;span class="c1"&gt;// how this is implemented is up to the user ;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... do other stuff ...&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_sub_behaviors2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// ... do other cool stuff ...&lt;/span&gt;
+
+    &lt;span class="n"&gt;wait_for_timer&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt; &lt;span class="c1"&gt;// how this is implemented is up to the user ;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... DAMN THIS IS SOME COOL STUFF GOING ON HERE ...&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... function ...&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rand&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="c1"&gt;// some_game_object_sub_behaviors1()?}&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="c1"&gt;// some_game_object_sub_behaviors2()?}&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Lucky for us we have the stack and &lt;code&gt;co_call()&lt;/code&gt;! co_call() will allocate a &lt;code&gt;coro&lt;/code&gt;-struct on the coroutine-stack and execute 
+that just as any other coroutine. However it has some differences from co_init()+co_resume(). First of all, if it returns 
+on the first call the caller will not yield, it will just continue. If it do yield it will be resumed by co_begin() of the
+caller until it completes and then the caller will continue at the yield-point introduced by co_call().
+The resume of the sub-call could also have been done in the top-level co_resume() call but I decided to do it from the
+caller just to preserve the callstack for debugging.
+When the sub-call completes the stack will be reset to the point where &lt;code&gt;co_call()&lt;/code&gt; allocated its &lt;code&gt;coro&lt;/code&gt;-struct.&lt;/p&gt;
+&lt;p&gt;The above code will then be&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... function ...&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rand&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;co_call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;some_game_object_sub_behaviors1&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+        &lt;span class="n"&gt;co_call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;some_game_object_sub_behaviors2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;call-arguments&lt;/h2&gt;
+&lt;p&gt;So how about argument to coroutines? You guessed it, lets just pass them on the stack! Both &lt;code&gt;co_init()&lt;/code&gt; and &lt;code&gt;co_call()&lt;/code&gt; has
+versions that accepts a pointer to an argument + size/alignment. Example&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_move_on_path&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;path_index&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;move_me_on_path&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;path_index&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="c1"&gt;// maybe this will yield until movement is complete!&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;path_to_take&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;// need to be declared before co_begin(), see below =/&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... function ...&lt;/span&gt;
+    &lt;span class="n"&gt;path_to_take&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;rand&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;co_call&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;co_func&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;some_game_object_move_on_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;path_to_take&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="k"&gt;alignof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The above will allocate space for the int and copy it onto the stack, and run &lt;code&gt;some_game_object_move_on_path&lt;/code&gt;. The last argument
+to a &lt;code&gt;co_func&lt;/code&gt; will be its arguments, or &lt;code&gt;nullptr&lt;/code&gt; if not used.
+An alert reader might have noticed that the argument is copied onto the stack and that is true... and its copied by &lt;code&gt;memcpy&lt;/code&gt; so 
+keep the arguments simple. I guess you could add lots of c++ magic to move types and &lt;em&gt;yada yada&lt;/em&gt; but I haven't needed that. IHMO
+keeping types &lt;code&gt;memcpy&lt;/code&gt;-able usually keeps code simpler and easier to work with!&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: there is also a version of co_call() and co_init() that deduce sizeof() and alignof() from arg.
+&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Again, no destructor will be run for the argument!
+Lastly note the cast to (co_func)! I guess that this is not everyones cup of tea but personally I'd rather take the cast there 
+than in the function itself but I guess that is a matter of taste.&lt;/p&gt;
+&lt;h2&gt;Running out of stack!&lt;/h2&gt;
+&lt;p&gt;So what happens when/if we run out of stack, for example allocating locals, args or doing a &lt;code&gt;co_call()&lt;/code&gt;? coro will handle that
+gracefully and yield the coroutine at a point before the point of allocation.
+When this happen &lt;code&gt;co_resume()&lt;/code&gt; will return as usual and the state can be checked by &lt;code&gt;co_stack_overflowed()&lt;/code&gt; and that can then be
+handled by the user.
+The simplest might just be to ASSERT() but there is also &lt;code&gt;co_stack_replace()&lt;/code&gt; if you feel fancy and want to grow the stack.&lt;/p&gt;
+&lt;p&gt;An example of how this might work&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;run_me&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;uint8_t&lt;/span&gt; &lt;span class="n"&gt;original_stack&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="n"&gt;coro&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;co_init&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;original_stack&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;original_stack&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;some_func&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;co_completed&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;co_resume&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co_stack_overflowed&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;old&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;co_stack_replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;malloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stack_size&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stack_size&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;old&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;original_stack&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;free&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;old&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stack&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;original_stack&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;free&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stack&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;a note on 'waiting'&lt;/h2&gt;
+&lt;p&gt;I mentioned above that I would like to be able to do things such as &lt;code&gt;wait_for( timeout, move_to )&lt;/code&gt;. That is however something
+that I have mostly left out of &lt;code&gt;coro&lt;/code&gt;. Why you ask? Well, I can't really know how the user structures their code, how do they
+want to update the coroutines etc.
+If I would have supported something like that the lib would have become bigger and more 'opinionated', maybe it would have
+needed an update and a manager of some kind etc. That would have brought the lib from being a simple building-block to something
+more "framework:y" and that is not my intent. Maybe someday I'll do something like that but then it will be built upon &lt;code&gt;coro&lt;/code&gt; not
+built into it.
+There is however one small helper for building this kind of code, and that is &lt;code&gt;co_wait()&lt;/code&gt;. co_wait() is basically a &lt;code&gt;co_yield()&lt;/code&gt; 
+that also sets a flag on the coroutine. This flag is also propagated through the currently running coroutine-callstack so that the
+user can do &lt;code&gt;co_waiting(&amp;amp;co)&lt;/code&gt; at the top-level and see if it is waiting for something. This flag will be cleared on the next
+call to &lt;code&gt;co_resume()&lt;/code&gt;.
+I think this little addition will be enough to build your own system on top of it if needed.&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;First of all I need to say that I'm curious to see if it really works when I actually start to use it ;)
+I.e. my next task is to actually use this for something productive ( nope haven't done that yet! ). IMHO it feels promising but
+we'll see.&lt;/p&gt;
+&lt;p&gt;Secondly let's take a look at some pros/cons of this approach.&lt;/p&gt;
+&lt;h2&gt;Pro: No platform specific code&lt;/h2&gt;
+&lt;p&gt;This is IMHO a big win for a smaller team ( in this case me ). No need to support low-level asm-code to switch stacks and save
+registers. No worries about "what happens if we start porting to a new platform, can we do the same thing there?".&lt;/p&gt;
+&lt;h2&gt;Pro: Not much code&lt;/h2&gt;
+&lt;p&gt;Also it is quite small ( at the time of writing 280 lines of code + 345 lines of comments ) and that is always a good thing
+for maintenance and "ease of use". &lt;/p&gt;
+&lt;h2&gt;Con: Easy to mess up locals&lt;/h2&gt;
+&lt;p&gt;It is easy to mess up your local variables as it is second nature for every one of us to just declare a variable and expect it
+to keep its value :)
+My guess however is that you learn quickly and hopefully &lt;code&gt;co_locals_begin()/co_locals_end()&lt;/code&gt; make it a bit easier.&lt;/p&gt;
+&lt;h2&gt;Con: Macro-heavy&lt;/h2&gt;
+&lt;p&gt;Personally I'm not that afraid of macros but I know some are. Also in this case they require you to follow quite a few rules and
+if you break them you end up with quite hard to understand errors. Again I think this is something that you learn but the more of you
+on your team the more people that have to learn and the fudge up a few times.&lt;/p&gt;
+&lt;p&gt;An macro-related error that can be quite hard to understand if you are new to the code is this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;some_game_object_behavior&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;coro&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;co_begin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// ... function ...&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;path_to_take&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;rand&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;%d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;path_to_take&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_yeald&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;co_end&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;co&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This code looks perfectly valid but generates this on my currently installed gcc.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;test/test_coro.cpp: In function ‘void some_game_object_behavior(coro&lt;em&gt;, void&lt;/em&gt;, void*)’:
+test/test_coro.cpp:43:16: error: jump to case label [-fpermissive]
+     co_yield(co);
+                ^
+test/test_coro.cpp:40:9: note:   crosses initialization of ‘int path_to_take’
+     int path_to_take = rand() % 5;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Also stepping through the co_***-macros while debugging is far from pleasant, hopefully that is my problem and not
+my users :)&lt;/p&gt;
+&lt;h2&gt;Con: no type-safety for arguments&lt;/h2&gt;
+&lt;p&gt;Currently there is no real type-safety between args passed to co_call()/co_init() and the actual function used as a
+coroutine callback. I would like to have that but I'm not really sure that it is doable? Any ideas for solutions
+would be appreciated ( easy on the meta-programming please ) !&lt;/p&gt;
+&lt;h1&gt;Final note&lt;/h1&gt;
+&lt;p&gt;I think this turned out nicely and hope that its something that might be useful for some of you. On a bigger team
+with more resources, would I use this? Maybe? I think a full-scale stack-register switch might be a better solution
+but that has its own caveats ( TLS-variables for example ).&lt;/p&gt;
+&lt;p&gt;Any thoughts or suggestions? I would love to hear about it!
+Please hit me up on twitter or post in the coro issue-tracker! And remember, there will be bugs, there always is!&lt;/p&gt;
+&lt;p&gt;Check it out &lt;a href="https://github.com/wc-duck/coro"&gt;https://github.com/wc-duck/coro&lt;/a&gt;!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="coroutines"></category></entry><entry><title>printf-based TOSTR on the stack</title><link href="http://kihlander.net/printf-based-tostr-on-the-stack.html" rel="alternate"></link><updated>2018-05-15T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2018-05-15:printf-based-tostr-on-the-stack.html</id><summary type="html">&lt;p&gt;As I might have written before I like printf-style string-formating. It's imho the most convenient way to format strings and it can be really powerful if needed.
 However something that can be a bit tedious is output:ing "composite" values such as a vec3 or quaternion as there will be quite a bunch of repetition.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{ %.2f, %.2f, %.2f }&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -123,9 +542,7 @@ However something that can be a bit tedious is output:ing "composite" values suc
 &lt;p&gt;Finally there might be some objections to the template-usage in the implementation but I think it is at a reasonable level, but I guess that it can be solved in other ways if you think this is a problem.&lt;/p&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
 &lt;p&gt;This might not be anything new but it is a small trick that I haven't seen that much in the wild and that has made my own code "better" imho. It might not be to everybodys taste but hopefully someone has got a new tool to their toolbox!&lt;/p&gt;
-&lt;p&gt;As usual, don't be afraid to reach out to me at twitter, github any other channel that you might know of!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>A story about an unexpected ABI break</title><link href="http://kihlander.net/a-story-about-an-unexpected-abi-break.html" rel="alternate"></link><published>2017-11-15T00:00:00+01:00</published><updated>2017-11-15T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-11-15:/a-story-about-an-unexpected-abi-break.html</id><summary type="html">&lt;p&gt;This is the story of an unexpected ABI break that I thought would be worth documenting.&lt;/p&gt;
-&lt;p&gt;At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
-uint32_t and one should be able to treat it as a uint32_t in code except …&lt;/p&gt;</summary><content type="html">&lt;p&gt;This is the story of an unexpected ABI break that I thought would be worth documenting.&lt;/p&gt;
+&lt;p&gt;As usual, don't be afraid to reach out to me at twitter, github any other channel that you might know of!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>A story about an unexpected ABI break</title><link href="http://kihlander.net/a-story-about-an-unexpected-abi-break.html" rel="alternate"></link><updated>2017-11-15T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-11-15:a-story-about-an-unexpected-abi-break.html</id><summary type="html">&lt;p&gt;This is the story of an unexpected ABI break that I thought would be worth documenting.&lt;/p&gt;
 &lt;p&gt;At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
 uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.&lt;/p&gt;
 &lt;p&gt;Why would you want a class like this you might ask, well we use it for adding a &lt;code&gt;const char* c_str()&lt;/code&gt;-function that can be
@@ -197,8 +614,7 @@ comparing one of the hashes to half the stack-address of the other variable :)&l
 is built from latest the lib and the exe disagrees on how to pass values to the function!&lt;/p&gt;
 &lt;p&gt;As expected this works in a release build where the code is inlined, but in that case we had other functions where how CHashString was passed was an issue.&lt;/p&gt;
 &lt;p&gt;What can we learn from this? ABI-issues can show its ugly face when you least expect it and compilers do the darnedest things!&lt;/p&gt;
-&lt;p&gt;Well, that was part of my day, how was yours? Feel free to hit me up on twitter or something if you want to give me a comment about this!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category><category term="war-stories"></category></entry><entry><title>Builtin resources and the resource-system</title><link href="http://kihlander.net/builtin-resources-and-the-resource-system.html" rel="alternate"></link><published>2017-08-07T00:00:00+02:00</published><updated>2017-08-07T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-08-07:/builtin-resources-and-the-resource-system.html</id><summary type="html">&lt;p&gt;I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
-but will dig down a bit deeper into one "feature" in it that I find kind of neat. I'm sure it has …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
+&lt;p&gt;Well, that was part of my day, how was yours? Feel free to hit me up on twitter or something if you want to give me a comment about this!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="war-stories"></category></entry><entry><title>Builtin resources and the resource-system</title><link href="http://kihlander.net/builtin-resources-and-the-resource-system.html" rel="alternate"></link><updated>2017-08-07T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-08-07:builtin-resources-and-the-resource-system.html</id><summary type="html">&lt;p&gt;I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be "in passing"
 but will dig down a bit deeper into one "feature" in it that I find kind of neat. I'm sure it has been done before but I have not seen it myself somewhere else.
 I'll be writing about how I handle builtin resources in the engine.&lt;/p&gt;
 &lt;p&gt;When talking about a "builtin resource" I refer to resources generated by code and not read from files on disk such as a &lt;code&gt;red.png&lt;/code&gt; or a &lt;code&gt;cube.mesh&lt;/code&gt;. Resources read
@@ -261,8 +677,7 @@ malicious person if you are concerned by that. In that case you might want to ju
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 &lt;p&gt;I'll just conclude by saying that this is a system/feature that has worked out really well for me on my own stuff and has proven itself to be really useful. As
 mentioned above it is really helpful to be able to reference "a red texture" or "a cube" directly via assets.&lt;/p&gt;
-&lt;p&gt;What do you think? Has this been done before? Any other thoughts? Hit me up on twitter and tell me ( if you do it in a civil way of course! ;) )&lt;/p&gt;</content><category term="code"></category><category term="c++"></category><category term="assets"></category></entry><entry><title>utf8_lookup, a write up.</title><link href="http://kihlander.net/utf8_lookup-a-write-up.html" rel="alternate"></link><published>2017-06-26T00:00:00+02:00</published><updated>2017-06-26T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-06-26:/utf8_lookup-a-write-up.html</id><summary type="html">&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
-read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
+&lt;p&gt;What do you think? Has this been done before? Any other thoughts? Hit me up on twitter and tell me ( if you do it in a civil way of course! ;) )&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="assets"></category></entry><entry><title>utf8_lookup, a write up.</title><link href="http://kihlander.net/utf8_lookup-a-write-up.html" rel="alternate"></link><updated>2017-06-26T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2017-06-26:utf8_lookup-a-write-up.html</id><summary type="html">&lt;p&gt;I saw this blog post a while ago &lt;a href="http://reedbeta.com/blog/programmers-intro-to-unicode/"&gt;A Programmer’s Introduction to Unicode&lt;/a&gt;, a really great write up that is a worth a
 read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)&lt;/p&gt;
 &lt;p&gt;Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about &lt;a href="http://github.com/wc-duck/utf8_lookup/"&gt;utf8_lookup&lt;/a&gt;,
 a small lib to translate utf8 chars into offsets into a table.&lt;/p&gt;
@@ -566,20 +981,20 @@ different kind of texts using different combinations of code-pages etc.&lt;/p&gt
 &lt;/blockquote&gt;
 &lt;p&gt;First lets get this out of the room, the std::map/unordered_map versions are really bad compared to the others in all measurements. That was expected but I added them to
 the tests as it is something that is the "first thing that comes to mind" and something I wouldn't be surprised to see in a codebase.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Memory use" src="{filename}/images/memuse_all.png" title="Memory use"&gt;
-&lt;img alt="GB/sec" src="{filename}/images/gb_per_sec.png" title="GB/sec"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Memory use" src="http://kihlander.net/images/memuse_all.png" title="Memory use" /&gt;
+&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec.png" title="GB/sec" /&gt;&lt;/p&gt;
 &lt;p&gt;As we can see the memory used and performance ( in GB text translated per second ) by the std::-implementations are just huge compared to the other to solutions, so lets 
 remove them to get some more interesting charts :)&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Bytes per codepoint" src="{filename}/images/bytes_per_cp_no_std.png" title="Bytes per codepoint"&gt;
-&lt;img alt="GB/sec" src="{filename}/images/gb_per_sec_no_std.png" title="GB/sec"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Bytes per codepoint" src="http://kihlander.net/images/bytes_per_cp_no_std.png" title="Bytes per codepoint" /&gt;
+&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_no_std.png" title="GB/sec" /&gt;&lt;/p&gt;
 &lt;p&gt;The charts clearly show that utf8_lookup outperforms the bitarray in all cases except pure ASCII ( stb_image.h ) when it comes to memory-usage and loses when it comes to
 raw lookup performance in all tests.
 We can also mention that the "tighter" the codepoints to lookup are, the more comparable the both techniques are. We could also plot bytes-per-codepoint vs lookup perf.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Perf vs bits-per-codepoint" src="{filename}/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Perf vs bits-per-codepoint" src="http://kihlander.net/images/bpcp_vs_cppus_no_std.png" title="Perf vs bits-per-codepoint" /&gt;&lt;/p&gt;
 &lt;p&gt;In this chart we can clearly see each approach "banding" on bytes-per-codepoint and lookup-perf.&lt;/p&gt;
 &lt;p&gt;We'll end with mentioning performance in an non-optimized build as well, something that I find usually is lacking. OK performance in a debug-build is really something that
 will make your life easier and something I find to be a well worthy goal to strive for.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="GB/sec" src="{filename}/images/gb_per_sec_debug.png" title="GB/sec"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="GB/sec" src="http://kihlander.net/images/gb_per_sec_debug.png" title="GB/sec" /&gt;&lt;/p&gt;
 &lt;p&gt;It's the same pattern here, the std::-based solutions are just getting crushed and the simple array is by far the fastest but IMHO utf8_lookup holds its ground pretty well.
 A colleague of mine also pointed out that this is with gcc:s implementation of the STL, if this would have been run with some other STL implementations ( among others the one
 used in msvc ) the debug-results would have been even worse.&lt;/p&gt;
@@ -593,9 +1008,7 @@ memory chunks depending on access-patters. It might be interesting to generate s
 &lt;p&gt;However as I am, depending on when your read this, the father of 2 this is all that I have the time and energy for now and it is good enough for the small things I use it for.&lt;/p&gt;
 &lt;p&gt;I hope that this might be useful for someone, maybe it can be used for something other than what I have used it for? And if there is something to really take away from this is that
 base_offset + (popcnt(bits_before)) is a really sweet technique that can be used for many things :)&lt;/p&gt;
-&lt;p&gt;Have I missed any benchmark approach? Any improvements that I could do? Anything else? Feel free to contact me on twitter!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category><category term="utf8"></category></entry><entry><title>Why I prefer inline forward-declares in C++</title><link href="http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html" rel="alternate"></link><published>2016-11-14T00:00:00+01:00</published><updated>2016-11-14T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-11-14:/why-i-prefer-inline-forward-declares-in-c.html</id><summary type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
-others code so it feels worth sharing.&lt;/p&gt;
-&lt;p&gt;So lets start of with just defining what we are …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
+&lt;p&gt;Have I missed any benchmark approach? Any improvements that I could do? Anything else? Feel free to contact me on twitter!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category><category term="utf8"></category></entry><entry><title>Why I prefer inline forward-declares in C++</title><link href="http://kihlander.net/why-i-prefer-inline-forward-declares-in-c.html" rel="alternate"></link><updated>2016-11-14T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-11-14:why-i-prefer-inline-forward-declares-in-c.html</id><summary type="html">&lt;p&gt;Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
 others code so it feels worth sharing.&lt;/p&gt;
 &lt;p&gt;So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name
 to the compiler and not having to provide the entire class/struct declaration. Mostly used as a compile-time optimization or to handle circular deps etc.&lt;/p&gt;
@@ -691,9 +1104,7 @@ when you have to.&lt;/p&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Do you agree, am I totally wrong? Feel free to tell me on twitter!&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><published>2016-09-24T00:00:00+02:00</published><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:/compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
-see no real reason to leave my old and true friend the script :)&lt;/p&gt;
-&lt;p&gt;So first of lets look at the problem we want to solve. We want a way to do things like this …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
+&lt;p&gt;Do you agree, am I totally wrong? Feel free to tell me on twitter!&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>Compile-time hashes in c++, im not convinced!</title><link href="http://kihlander.net/compile-time-hashes-in-c-im-not-convinced.html" rel="alternate"></link><updated>2016-09-24T00:00:00+02:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-09-24:compile-time-hashes-in-c-im-not-convinced.html</id><summary type="html">&lt;p&gt;I recently read a blogpost about &lt;a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/"&gt;compile-time string-hashes and constexpr&lt;/a&gt; and I'm still not convinced and 
 see no real reason to leave my old and true friend the script :)&lt;/p&gt;
 &lt;p&gt;So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;uint32_t&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
@@ -762,9 +1173,7 @@ cost time each time I compile that file. When generating a header I pay for it o
 &lt;li&gt;easier to find the actual value of the hash. When generating a header you just look in the header, when doing it with the compiler... it gets harder!&lt;/li&gt;
 &lt;li&gt;you have control over how the header is generated, you want to add registering of hash-value -&amp;gt; string? just add it!&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;So what do you think, what pros have I missed on hashing with the c++-compiler? Why am I wrong? &lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>The command-line as a poor mans config files</title><link href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html" rel="alternate"></link><published>2016-03-01T00:00:00+01:00</published><updated>2016-03-01T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-03-01:/the-command-line-as-a-poor-mans-config-files.html</id><summary type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
-post I'll discuss a method to use them as simple config-files.&lt;/p&gt;
-&lt;p&gt;Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
+&lt;p&gt;So what do you think, what pros have I missed on hashing with the c++-compiler? Why am I wrong? &lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>The command-line as a poor mans config files</title><link href="http://kihlander.net/the-command-line-as-a-poor-mans-config-files.html" rel="alternate"></link><updated>2016-03-01T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-03-01:the-command-line-as-a-poor-mans-config-files.html</id><summary type="html">&lt;p&gt;I like command-line arguments as mentioned in an earlier &lt;a href="http://kihlander.net/registering-command-line-arguments.html"&gt;post&lt;/a&gt; about them. In this 
 post I'll discuss a method to use them as simple config-files.&lt;/p&gt;
 &lt;p&gt;Let's start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
 and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
@@ -789,9 +1198,7 @@ that can be configurate via files can also be configurated via the command-line.
 &lt;p&gt;In this specific case it might not save you that much, but consider you having multiple games, multiple configs etc.&lt;/p&gt;
 &lt;p&gt;Do I think this would replace all configuration ever? Absolutely not, but it works great for small things as above. I would absolutely not
 do this for settings that should be used in a shipped game, only for debug-settings and other settings used during development.&lt;/p&gt;
-&lt;p&gt;Short post, but hopefully someone like this and steal it :)&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>Registering command line arguments</title><link href="http://kihlander.net/registering-command-line-arguments.html" rel="alternate"></link><published>2016-02-27T00:00:00+01:00</published><updated>2016-02-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-02-27:/registering-command-line-arguments.html</id><summary type="html">&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
-It is for example easier to just add a &lt;code&gt;--log-verbose=resource&lt;/code&gt; to set all logging in the "resource"-domain to verbose or
-&lt;code&gt;--memory-enable-stacktrace=render&lt;/code&gt; to enable save …&lt;/p&gt;</summary><content type="html">&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+&lt;p&gt;Short post, but hopefully someone like this and steal it :)&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry><entry><title>Registering command line arguments</title><link href="http://kihlander.net/registering-command-line-arguments.html" rel="alternate"></link><updated>2016-02-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-02-27:registering-command-line-arguments.html</id><summary type="html">&lt;p&gt;I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
 It is for example easier to just add a &lt;code&gt;--log-verbose=resource&lt;/code&gt; to set all logging in the "resource"-domain to verbose or
 &lt;code&gt;--memory-enable-stacktrace=render&lt;/code&gt; to enable save of stacktraces for all allocations done in the "render"-allocator than to
 edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.&lt;/p&gt;
@@ -884,11 +1291,4 @@ want colliding flag-names where you have flags that should be used by multiple s
 done.&lt;/p&gt;
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 &lt;p&gt;This is a technique that has served me well for this purpose and the "global linked list created with global constructors" could be a useful tool in your toolbox 
-when writing c++. It need to be used restrictively, but at least for this purpose it has not been any problems for me.&lt;/p&gt;</content><category term="code"></category><category term="c++"></category></entry><entry><title>About</title><link href="http://kihlander.net/about.html" rel="alternate"></link><published>2016-01-27T00:00:00+01:00</published><updated>2016-01-27T00:00:00+01:00</updated><author><name>Fredrik Kihlander</name></author><id>tag:kihlander.net,2016-01-27:/about.html</id><summary type="html">&lt;h3&gt;Who I am&lt;/h3&gt;
-&lt;p&gt;I'm &lt;a href="http://kihlander.net"&gt;Fredrik Kihlander&lt;/a&gt;, engine programmer at &lt;a href="http://avalanchestudios.com"&gt;Avalanche Studios&lt;/a&gt; by day, father and avid amateur cook at night.&lt;/p&gt;
-&lt;p&gt;The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
-emphasis on the …&lt;/p&gt;</summary><content type="html">&lt;h3&gt;Who I am&lt;/h3&gt;
-&lt;p&gt;I'm &lt;a href="http://kihlander.net"&gt;Fredrik Kihlander&lt;/a&gt;, engine programmer at &lt;a href="http://avalanchestudios.com"&gt;Avalanche Studios&lt;/a&gt; by day, father and avid amateur cook at night.&lt;/p&gt;
-&lt;p&gt;The goal of this blog is to have somewhere to write down code-related things that might be of interest to others. Mainly C++ ( with a really light 
-emphasis on the ++:es ), maybe some python and general game-dev stuff.&lt;/p&gt;
-&lt;p&gt;Don't expect regular updates!&lt;/p&gt;</content></entry></feed>
+when writing c++. It need to be used restrictively, but at least for this purpose it has not been any problems for me.&lt;/p&gt;</summary><category term="code"></category><category term="c++"></category></entry></feed>
