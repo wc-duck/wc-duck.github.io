@@ -154,14 +154,13 @@
 
       
         <article class="post-preview">
-  <a href="http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/">
-    <h2 class="post-title">When selecting a theme is your biggest problem!</h2>
+  <a href="http://kihlander.net/post/registering-command-line-args/">
+    <h2 class="post-title">Registering command line arguments</h2>
   </a>
   <div class="post-entry">
     
-      <p>I have been using pellican to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.
-After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it?</p>
-      <a href="http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/" class="post-read-more"
+      <p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the &ldquo;resource&rdquo;-domain to verbose or --memory-enable-stacktrace=render to enable save of stacktraces for all allocations done in the &ldquo;render&rdquo;-allocator than to edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p>
+      <a href="http://kihlander.net/post/registering-command-line-args/" class="post-read-more"
         >Read More</a
       >
     
@@ -170,57 +169,7 @@ After an update all line-breaks in code-segments just got removed, did I configu
   <div class="postmeta">
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
-  >&nbsp;Jul 23, 2022
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="http://kihlander.net/post/protothreads-with-a-twist/">
-    <h2 class="post-title">&#34;ProtoThreads&#34; with a twist.</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</p>
-      <a href="http://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Nov 20, 2018
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="http://kihlander.net/post/printf-based-tostr-on-the-stack/">
-    <h2 class="post-title">printf-based TOSTR on the stack</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
-printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</p>
-      <a href="http://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;May 15, 2018
+  >&nbsp;Feb 27, 2016
   
 </span>
 
@@ -232,14 +181,14 @@ printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for mult
     
       <ul class="pager">
         
-        
-          <li class="next">
+          <li class="previous">
             
-              <a href="http://kihlander.net/page/2/"
-                >Older &rarr;</a
+              <a href="http://kihlander.net/page/3/"
+                >&larr; Newer</a
               >
             
           </li>
+        
         
       </ul>
     

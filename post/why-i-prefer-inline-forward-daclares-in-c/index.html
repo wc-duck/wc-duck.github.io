@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Why I prefer inline forward-declares in C&#43;&#43;</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="http://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Why I prefer inline forward-declares in C&#43;&#43;"/>
+<meta name="twitter:description" content="Time for a short post on how I usually do the humble forward declare in C&#43;&#43;. I guess this is not something new but it is something I usually do not see in others code so it feels worth sharing.
+So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name to the compiler and not having to provide the entire class/struct declaration."/>
+
+
+
+<link rel="stylesheet" href="http://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="http://kihlander.net/" class="nav-logo">
+        <img
+          src="http://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Why I prefer inline forward-declares in C&#43;&#43;
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Nov 14, 2016
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <p>Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in
+others code so it feels worth sharing.</p>
+<p>So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name
+to the compiler and not having to provide the entire class/struct declaration. Mostly used as a compile-time optimization or to handle circular deps etc.</p>
+<p>A simple example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">// forward declare this struct.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">a_forward_declared_struct</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">my_struct</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    a_forward_declared_struct<span style="color:#f92672">*</span> a_forward_declared_pointer;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func</span>( a_forward_declared_struct<span style="color:#f92672">*</span> another_pointer );
+</span></span></code></pre></div><p>We&rsquo;re all used to see this kind of code, nothing new under the sun. I however like to write it like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">my_struct</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">a_forward_declared_struct</span><span style="color:#f92672">*</span> a_forward_declared_pointer;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func</span>( <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">a_forward_declared_struct</span><span style="color:#f92672">*</span> another_pointer );
+</span></span></code></pre></div><p>I don&rsquo;t know if inline-forward-declare is the correct term, but we&rsquo;ll use that until I&rsquo;m told otherwise ;)</p>
+<p>So what is better with this more verbose variant? Well, I have 2 reasons:</p>
+<ul>
+<li>It do not &ldquo;leak&rdquo; definitions into the global namespace.</li>
+<li>When usage is removed, so is the forward declare.</li>
+</ul>
+<p>Lets go through them one-by-one.</p>
+<h2 id="it-do-not-leak-definitions-into-the-global-namespace">It do not &ldquo;leak&rdquo; definitions into the global namespace.</h2>
+<p>The big thing here is that we can&rsquo;t break other code by removing our forward declares. Say that you have this code:</p>
+<p>&lt;<em>header1.h</em>&gt;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">a_forward_declared_struct</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func1</span>( a_forward_declared_struct<span style="color:#f92672">*</span> another_pointer );
+</span></span></code></pre></div><p>&lt;<em>header2.h</em>&gt;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func2</span>( a_forward_declared_struct<span style="color:#f92672">*</span> another_pointer ); <span style="color:#75715e">// OH NOES, we forgot our forward declare!
+</span></span></span></code></pre></div><p><em>file.cpp</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;header1.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;header2.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;a_forward_declared_struct.h&#34; // defining the actual struct.</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">a_function</span>( a_forward_declared_struct<span style="color:#f92672">*</span> ptr )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    my_func2( ptr );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now we work with our code and refactor my_func1() to no longer take a pointer to a <code>a_forward_declared_struct</code> and removing the forward declare.
+By doing this we break file.cpp since &ldquo;header2.h&rdquo; is now &ldquo;incomplete&rdquo;. This might not be a big issue in a smaller code-base but in a bigger one
+(especially one using unity-builds, batch-builds or whatever you want to call them ) this can pop up on another colleagues machine after you have
+submitted your code.</p>
+<p>If instead you would have used inline forward-declares header2.h would never have compiled to begin with so the initial implementer would not have
+missed the needed declarations.</p>
+<h2 id="when-usage-is-removed-so-is-the-forward-declare">When usage is removed, so is the forward declare.</h2>
+<p>The second improvement over the &ldquo;ordinary&rdquo; declarations is the fact that they are automatically removed when they are no longer needed since they
+are part of the actual code.</p>
+<p>How many times haven&rsquo;t we all found forward declares that no one uses ( and no one want to remove due to point 1 ;) ).</p>
+<p><em>Some thing like:</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">vec3</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">i_have_no_vec3</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> apa;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> kossa;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// I had a vec3 here a few years ago!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
+</span></span></code></pre></div><h2 id="final-words">Final words</h2>
+<p>Are there any drawbacks? Well, except for being slightly more verbose, the only one I can think of is that it do not work together with namespaces.
+For me that is no real problem since I really do not like namespaces to begin with ( topic for another rant/blog-post? ) but if you do this tip
+is not as useful. If you mix and match I would still recommend using inline forward-declares where possible and fallback to namespace:d declares
+when you have to.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">namespace</span> foo
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">bar</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>Do you agree, am I totally wrong? Feel free to tell me on twitter!</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="http://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="http://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2022
+      
+        &nbsp;/&nbsp;
+        <a href="http://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>

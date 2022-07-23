@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Compile-time hashes in c&#43;&#43;, im not convinced!</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="http://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Compile-time hashes in c&#43;&#43;, im not convinced!"/>
+<meta name="twitter:description" content="I recently read a blogpost about compile-time string-hashes and constexpr and I&rsquo;m still not convinced and see no real reason to leave my old and true friend the script :)
+So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).
+void my_func( uint32_t val ) { switch( val ) { case HashOfString(&#34;some_string&#34;): do_some_stuff(); break; case HashOfString(&#34;some_other_string&#34;): do_some_other_stuff(); break; } } Simple enough."/>
+
+
+
+<link rel="stylesheet" href="http://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="http://kihlander.net/" class="nav-logo">
+        <img
+          src="http://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Compile-time hashes in c&#43;&#43;, im not convinced!
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Sep 24, 2016
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <p>I recently read a blogpost about <a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/">compile-time string-hashes and constexpr</a> and I&rsquo;m still not convinced and
+see no real reason to leave my old and true friend the script :)</p>
+<p>So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func</span>( <span style="color:#66d9ef">uint32_t</span> val )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span>( val )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HashOfString(<span style="color:#e6db74">&#34;some_string&#34;</span>)<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            do_some_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HashOfString(<span style="color:#e6db74">&#34;some_other_string&#34;</span>)<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            do_some_other_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Simple enough. What seems to come up over and over again is ways of doing this with the compiler compile-time and now recently just marking <code>HashOfString</code> as <code>constexpr</code> and &ldquo;trust the compiler&rdquo;.
+The solution I usually fall back to is to just have a text-file where each line is hashed with a custom script and written to a .h file with values such as:</p>
+<p><em><strong>my_hashes.hash</strong></em></p>
+<pre tabindex="0"><code>some string
+some other string
+</code></pre><p><em><strong>my_hashes.hash.h</strong></em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define HASH_some_string       0xABCD0123 </span><span style="color:#75715e">// hash of &#34;some_string&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#define HASH_some_other_string 0x0123ABCD </span><span style="color:#75715e">// hash of &#34;some_other_string&#34;
+</span></span></span></code></pre></div><p><em><strong>usage in code</strong></em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;my_hashes.hash.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func</span>( <span style="color:#66d9ef">uint32_t</span> val )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span>( val )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HASH_some_string:
+</span></span><span style="display:flex;"><span>            do_some_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HASH_some_other_string:
+</span></span><span style="display:flex;"><span>            do_some_other_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With a resonable buildsystem in place this can be automated and never be in your way. I have it setup to collect all <code>&lt;filename&gt;.hash</code>-files and output <code>&lt;filename&gt;.hash.h</code>.</p>
+<p>So lets compare the different solutions and see why I prefer the one I do by just listing my perceived pros/cons.</p>
+<p>The biggest pro for using the c++-compiler itself for this is to not need a custom buildstep for the hashes and that is a really fair point. No need to setup a buildsystem or manually generate
+the headers can really be an important point in some cases, especially when distributing code to others. Also having the hashed string where it is used is by some considered a pro, for me it is
+a + but a small one.
+But that is about where the pros stop i.m.h.o.</p>
+<p>On the cons list I think the biggest 2 are that I have to trust the compiler to do the right thing and paying the cost for generating this each time I compile my code.</p>
+<p>Let&rsquo;s start of with the first one, trusting the compiler. Sure, compilers are smart etc but are we sure that the compiler will optimize a <code>HashOfString(&quot;some_string)</code> to a constant? If it does
+with your current compiler, will it with another compiler? What happens when a new version of your compiler is released?
+With the simple &ldquo;generate a .h&rdquo;-file I am quite sure that it will evaluate to a constant and I will not have to think about it.</p>
+<p>The other issue with compile-time hashes in pure c++ is why pay for something all the time when you can pay for it once? I.e. if I put code in a .cpp to generate a hash by the compiler it will
+cost time each time I compile that file. When generating a header I pay for it once, when I change the text-file with the strings to hash.</p>
+<p>We also have some other pros that are not as big, but I might just as well list them here for completeness:</p>
+<ul>
+<li>easier to find the actual value of the hash. When generating a header you just look in the header, when doing it with the compiler&hellip; it gets harder!</li>
+<li>you have control over how the header is generated, you want to add registering of hash-value -&gt; string? just add it!</li>
+</ul>
+<p>So what do you think, what pros have I missed on hashing with the c++-compiler? Why am I wrong?</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="http://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="http://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2022
+      
+        &nbsp;/&nbsp;
+        <a href="http://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>

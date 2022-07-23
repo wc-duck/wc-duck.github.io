@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-<title>What could possibly go wrong?</title>
+<title>When selecting a theme is your biggest problem!</title>
 <meta name="description" 
       content=""
 >
@@ -21,8 +21,9 @@
   title="What could possibly go wrong?"
 />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="What could possibly go wrong?"/>
-<meta name="twitter:description" content=""/>
+<meta name="twitter:title" content="When selecting a theme is your biggest problem!"/>
+<meta name="twitter:description" content="I have been using pellican to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.
+After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it?"/>
 
 
 
@@ -72,9 +73,7 @@
   <body>
     
   
-    
-  
-  
+
 
 
 
@@ -132,12 +131,19 @@
 
     <div class="intro-header">
       <div class="container">
-        <div class="page-heading">
+        <div class="post-heading">
           
             <h1>
-              What could possibly go wrong?
+              When selecting a theme is your biggest problem!
             </h1>
           
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Jul 23, 2022
+  
+</span>
+
           
         </div>
       </div>
@@ -147,101 +153,33 @@
 
     
   <div class="container" role="main">
-    <div class="posts-list">
+    <article class="article" class="blog-post">
       
-        
-        
+  <p>I have been using <a href="https://blog.getpelican.com/">pellican</a> to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.</p>
+<p>After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it? Don&rsquo;t know and Im not really keen on finding out.</p>
+<p>This looked like a perfect time to try out something new and since <a href="https://gohugo.io/">hugo</a> seems to be the &ldquo;hottest thing around&rdquo; I went for that&hellip;</p>
+<p>And such a treat it was! As the title states, the hardest thing of this migration was to actually select a theme I liked (ended up with <a href="https://github.com/matsuyoshi30/harbor">harbor</a> by <a href="https://github.com/matsuyoshi30/">Masaya Watanabe</a> as you might see :))! Everything else was just a smooth. Things such as:</p>
+<ul>
+<li>From having a single binary to &ldquo;install&rdquo;</li>
+<li>Really simple setup</li>
+<li>Great <a href="https://gohugo.io/getting-started/quick-start/">get started</a>-doc</li>
+<li>Smooth builtin server with auto-update on content updates.</li>
+<li>Being markdown-based, making it trivial to switch from pellican.</li>
+</ul>
+<p>Simply a treat to work with!</p>
+<p>Don&rsquo;t think I have anything else to add and I hope to be able to roll out some more &ldquo;meaty&rdquo; posts in the future. I have one in the making that has been sitting, waiting to be completed, since christmas that I hope to publish soon.</p>
 
-      
-        <article class="post-preview">
-  <a href="http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/">
-    <h2 class="post-title">When selecting a theme is your biggest problem!</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>I have been using pellican to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.
-After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it?</p>
-      <a href="http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
 
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Jul 23, 2022
-  
-</span>
 
-  </div>
-</article>
 
       
-        <article class="post-preview">
-  <a href="http://kihlander.net/post/protothreads-with-a-twist/">
-    <h2 class="post-title">&#34;ProtoThreads&#34; with a twist.</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</p>
-      <a href="http://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Nov 20, 2018
-  
-</span>
-
-  </div>
-</article>
 
       
-        <article class="post-preview">
-  <a href="http://kihlander.net/post/printf-based-tostr-on-the-stack/">
-    <h2 class="post-title">printf-based TOSTR on the stack</h2>
-  </a>
-  <div class="post-entry">
+    </article>
     
-      <p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
-printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</p>
-      <a href="http://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
-        >Read More</a
-      >
     
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;May 15, 2018
-  
-</span>
-
-  </div>
-</article>
-
       
-    </div>
-    
-      <ul class="pager">
-        
-        
-          <li class="next">
-            
-              <a href="http://kihlander.net/page/2/"
-                >Older &rarr;</a
-              >
-            
-          </li>
-        
-      </ul>
+
     
   </div>
 

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>The command-line as a poor mans config files</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="http://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="The command-line as a poor mans config files"/>
+<meta name="twitter:description" content="I like command-line arguments as mentioned in an earlier post about them. In this post I&rsquo;ll discuss a method to use them as simple config-files.
+Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i."/>
+
+
+
+<link rel="stylesheet" href="http://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="http://kihlander.net/" class="nav-logo">
+        <img
+          src="http://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              The command-line as a poor mans config files
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Mar 1, 2016
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <p>I like command-line arguments as mentioned in an earlier <a href="%7Bfilename%7D./registering-command-line-args.md">post</a> about them. In this
+post I&rsquo;ll discuss a method to use them as simple config-files.</p>
+<p>Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
+and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
+loading ( particles have a material to be rendered with etc ), i.e. resources from &ldquo;some game&rdquo; need to be found by the particle-viewer.
+Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make
+sure that &ldquo;some game&rdquo;:s resources is mounted in the particle-viewer!</p>
+<p>Luckily for me this can be done via, you guessed it, the command line!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>    ./meshviewer --vfs-mount-uri<span style="color:#f92672">=</span>file:///path/to/assets --vfs-mount-point<span style="color:#f92672">=</span>/assets/ /assets/mesh/mesh_in_game_to_view.mesh
+</span></span></code></pre></div><p>Nice! But writing out this when you want to just test a resource from one project might be hard to remember and a bit of a hassle =/
+So lets add one more command-line switch, <code>--cmd-file=&lt;path_to_file&gt;</code>!
+What this simply does is read the pointed to file, split it at white-space, add it to argc/argv. TADA! simple config-files done + all
+that can be configurate via files can also be configurated via the command-line.</p>
+<p>If we let <code>--cmd-file=&lt;path_to_file&gt;</code> be recursive, we can do sub-files as well.</p>
+<p>The above then becomes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>    ./meshviewer --cmd-file<span style="color:#f92672">=</span>setup_some_game.cmd /assets/mesh/mesh_in_game_to_view.mesh
+</span></span></code></pre></div><p>In this specific case it might not save you that much, but consider you having multiple games, multiple configs etc.</p>
+<p>Do I think this would replace all configuration ever? Absolutely not, but it works great for small things as above. I would absolutely not
+do this for settings that should be used in a shipped game, only for debug-settings and other settings used during development.</p>
+<p>Short post, but hopefully someone like this and steal it :)</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="http://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="http://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2022
+      
+        &nbsp;/&nbsp;
+        <a href="http://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>

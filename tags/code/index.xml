@@ -1,0 +1,107 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>code on What could possibly go wrong?</title>
+		<link>http://kihlander.net/tags/code/</link>
+		<description>Recent content in code </description>
+		<generator>Hugo -- gohugo.io</generator>
+		
+  		<language>en</language>
+		
+		<managingEditor>Page(/tags/code) (Fredrik Kihlander)</managingEditor>
+    	
+  		<lastBuildDate>Tue, 20 Nov 2018 00:00:00 +0000</lastBuildDate>
+		
+		<atom:link href="/tags/code/" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>When selecting a theme is your biggest problem!</title>
+			<link>http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</link>
+			<pubDate>Sat, 23 Jul 2022 09:36:55 +0200</pubDate>
+			<guid>http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</guid>
+			<description>I have been using pellican to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.
+After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it?</description>
+		</item>
+      	
+		<item>
+			<title>&#34;ProtoThreads&#34; with a twist.</title>
+			<link>http://kihlander.net/post/protothreads-with-a-twist/</link>
+			<pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/protothreads-with-a-twist/</guid>
+			<description>For a long time I&amp;rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
+void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &amp;lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</description>
+		</item>
+      	
+		<item>
+			<title>printf-based TOSTR on the stack</title>
+			<link>http://kihlander.net/post/printf-based-tostr-on-the-stack/</link>
+			<pubDate>Tue, 15 May 2018 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/printf-based-tostr-on-the-stack/</guid>
+			<description>As I might have written before I like printf-style string-formating. It&amp;rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &amp;ldquo;composite&amp;rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
+printf(&amp;#34;{ %.2f, %.2f, %.2f }&amp;#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</description>
+		</item>
+      	
+		<item>
+			<title>A story about an unexpected ABI break</title>
+			<link>http://kihlander.net/post/a-story-about-an-unexpected-abi-break/</link>
+			<pubDate>Wed, 15 Nov 2017 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/a-story-about-an-unexpected-abi-break/</guid>
+			<description>This is the story of an unexpected ABI break that I thought would be worth documenting.
+At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
+Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</description>
+		</item>
+      	
+		<item>
+			<title>Builtin resources and the resource-system</title>
+			<link>http://kihlander.net/post/builtin-resources-and-the-resource-system/</link>
+			<pubDate>Mon, 07 Aug 2017 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/builtin-resources-and-the-resource-system/</guid>
+			<description>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &amp;ldquo;in passing&amp;rdquo; but will dig down a bit deeper into one &amp;ldquo;feature&amp;rdquo; in it that I find kind of neat. I&amp;rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&amp;rsquo;ll be writing about how I handle builtin resources in the engine.</description>
+		</item>
+      	
+		<item>
+			<title>utf8_lookup, a write up.</title>
+			<link>http://kihlander.net/post/utf8_lookup-writeup/</link>
+			<pubDate>Mon, 26 Jun 2017 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/utf8_lookup-writeup/</guid>
+			<description>I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)
+Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up.</description>
+		</item>
+      	
+		<item>
+			<title>Why I prefer inline forward-declares in C&#43;&#43;</title>
+			<link>http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</link>
+			<pubDate>Mon, 14 Nov 2016 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</guid>
+			<description>Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in others code so it feels worth sharing.
+So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name to the compiler and not having to provide the entire class/struct declaration.</description>
+		</item>
+      	
+		<item>
+			<title>Compile-time hashes in c&#43;&#43;, im not convinced!</title>
+			<link>http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</link>
+			<pubDate>Sat, 24 Sep 2016 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</guid>
+			<description>I recently read a blogpost about compile-time string-hashes and constexpr and I&amp;rsquo;m still not convinced and see no real reason to leave my old and true friend the script :)
+So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).
+void my_func( uint32_t val ) { switch( val ) { case HashOfString(&amp;#34;some_string&amp;#34;): do_some_stuff(); break; case HashOfString(&amp;#34;some_other_string&amp;#34;): do_some_other_stuff(); break; } } Simple enough.</description>
+		</item>
+      	
+		<item>
+			<title>The command-line as a poor mans config files</title>
+			<link>http://kihlander.net/post/command-line-args-as-config/</link>
+			<pubDate>Tue, 01 Mar 2016 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/command-line-args-as-config/</guid>
+			<description>I like command-line arguments as mentioned in an earlier post about them. In this post I&amp;rsquo;ll discuss a method to use them as simple config-files.
+Let&amp;rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.</description>
+		</item>
+      	
+		<item>
+			<title>Registering command line arguments</title>
+			<link>http://kihlander.net/post/registering-command-line-args/</link>
+			<pubDate>Sat, 27 Feb 2016 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/registering-command-line-args/</guid>
+			<description>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the &amp;ldquo;resource&amp;rdquo;-domain to verbose or --memory-enable-stacktrace=render to enable save of stacktraces for all allocations done in the &amp;ldquo;render&amp;rdquo;-allocator than to edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</description>
+		</item>
+      	
+	</channel>
+</rss>

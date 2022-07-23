@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>printf-based TOSTR on the stack</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="http://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="printf-based TOSTR on the stack"/>
+<meta name="twitter:description" content="As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
+printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!"/>
+
+
+
+<link rel="stylesheet" href="http://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="http://kihlander.net/" class="nav-logo">
+        <img
+          src="http://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              printf-based TOSTR on the stack
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;May 15, 2018
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
+</span></span></code></pre></div><p>Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above! ).</p>
+<p>I have read/looked at a whole bunch of string-formating libs and &ldquo;tostr()&rdquo; implementations, usually in c++, returning an <code>std::string</code> and/or overloading <code>operator&lt;&lt;</code> for writing to <code>std::ostream</code> etc and not really liking any of them ( forcing dynamic allocation for known sized outputs for example, <em>yuck!</em> ).</p>
+<p>But complaining is easy, time to be constructive and get to some suggestions on how this can be done instead.</p>
+<h1 id="bytes2str">BYTES2STR()</h1>
+<p>I have found that most of these problems can be solved with a small trick, introducing a struct with the storage for the string. I will start introducing this with a simple macro to turn a <code>size_t</code> to a string in the format <code>&quot;234 bytes&quot;</code>, <code>&quot;2.9 kB&quot;</code> or <code>&quot;234 GB&quot;</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">enum</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	BYTES_PER_KB <span style="color:#f92672">=</span> <span style="color:#ae81ff">1024</span>,
+</span></span><span style="display:flex;"><span>	BYTES_PER_MB <span style="color:#f92672">=</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> BYTES_PER_KB,
+</span></span><span style="display:flex;"><span>	BYTES_PER_GB <span style="color:#f92672">=</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> BYTES_PER_MB
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_bytes_to_human</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> str[<span style="color:#ae81ff">64</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	_bytes_to_human( size_t bytes )
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span>     ( bytes <span style="color:#f92672">&gt;</span> BYTES_PER_GB ) snprintf( str, <span style="color:#66d9ef">sizeof</span>(str), <span style="color:#e6db74">&#34;%.02f GB&#34;</span>, (<span style="color:#66d9ef">double</span>)bytes <span style="color:#f92672">*</span> ( <span style="color:#ae81ff">1.0f</span> <span style="color:#f92672">/</span> (<span style="color:#66d9ef">double</span>)BYTES_PER_GB ) );
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span>( bytes <span style="color:#f92672">&gt;</span> BYTES_PER_MB ) snprintf( str, <span style="color:#66d9ef">sizeof</span>(str), <span style="color:#e6db74">&#34;%.02f MB&#34;</span>, (<span style="color:#66d9ef">double</span>)bytes <span style="color:#f92672">*</span> ( <span style="color:#ae81ff">1.0f</span> <span style="color:#f92672">/</span> (<span style="color:#66d9ef">double</span>)BYTES_PER_MB ) );
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span>( bytes <span style="color:#f92672">&gt;</span> BYTES_PER_KB ) snprintf( str, <span style="color:#66d9ef">sizeof</span>(str), <span style="color:#e6db74">&#34;%.02f kB&#34;</span>, (<span style="color:#66d9ef">double</span>)bytes <span style="color:#f92672">*</span> ( <span style="color:#ae81ff">1.0f</span> <span style="color:#f92672">/</span> (<span style="color:#66d9ef">double</span>)BYTES_PER_KB ) );
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">else</span>                            <span style="color:#a6e22e">snprintf</span>( str, <span style="color:#66d9ef">sizeof</span>(str), <span style="color:#e6db74">&#34;%zu bytes&#34;</span>, bytes );
+</span></span><span style="display:flex;"><span>	};
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define BYTES2STR( bytes ) _bytes_to_human( bytes ).str
+</span></span></span></code></pre></div><p>This can now be used simply as follows</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;you have allocated %s&#34;</span>, BYTES2STR(allocated_bytes));
+</span></span></code></pre></div><p>What we did here is to introduce a helper-struct containing the storage for the generated string and a macro to hide a bit of ugliness. Simple and easy to read and work with and I feel fairly confident when I say that the compiler will handle this will, NICE :)</p>
+<h1 id="extending-to-a-more-general-tostr">Extending to a more general TOSTR()</h1>
+<p>But can this be extended to be a general and extensible solution? Would I write this article if I didn&rsquo;t believe that it was? Of course it is and with a really small amount of code as well :)</p>
+<p>Our goal here is to be able to have one macro, <code>TOSTR(obj)</code>, that take an object that has an implementation defined with <code>TOSTR_DEFINE_TYPE_FUNCTION</code> that defines how to convert the type to string and reserve space for that string on the stack.</p>
+<p>If you just want the code or think it is easier to read the code directly here is a link to a github repo.</p>
+<p><a href="https://github.com/wc-duck/tostring">https://github.com/wc-duck/tostring</a>.</p>
+<p>Onto the code/implementation then!</p>
+<p>So lets say that we have a vec3-struct that we want to add TOSTR() support to. That is as simple as using the macro <code>TOSTR_DEFINE_TYPE_FUNCTION</code> as follows.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">vec3</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">float</span> x;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">float</span> y;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">float</span> z;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// declare with type to implement for and the amount of bytes that 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// is needed in the output-string.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>TOSTR_DEFINE_TYPE_FUNCTION(vec3, <span style="color:#ae81ff">64</span>) 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// the end of the macro-expansion expects you to declare how
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// to write the output value.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// you will get passed an output-buffer as &#39;out&#39; ( with space
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// for the requested 64-chars ) and a reference to the value 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// to print as &#39;value&#39;.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// &#39;out&#39; has one member-function called &#39;put&#39; that has a 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// printf-like format. ( yes, that makes it out.put :) )
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	out.put(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, value.x, value.y, value.z);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The macro will declare a static constant for the declared type with the size like this, but for a few different cases ( <code>vec3</code>, <code>const vec3</code>, <code>vec3&amp;</code> and <code>const vec3&amp;</code> )</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;&gt;</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_TOSTR_type_size</span><span style="color:#f92672">&lt;</span>vec3<span style="color:#f92672">&gt;</span> { <span style="color:#66d9ef">enum</span> { STRING_SIZE <span style="color:#f92672">=</span> <span style="color:#ae81ff">64</span> }; };
+</span></span></code></pre></div><p>And it also declare a function with this signature ( using the code in {} after the macro as its body )</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">_TOSTR_type_impl</span>( _TOSTR_builder<span style="color:#f92672">&amp;</span> out, <span style="color:#66d9ef">const</span> vec3<span style="color:#f92672">&amp;</span> value );
+</span></span></code></pre></div><p>Finally we have the <code>TOSTR(obj)</code>-macro that will create a temporary buffer on the stack, fetching its size from <code>_TOSTR_type_size&lt;decltype(obj)&gt;::STRING_SIZE</code> and pass that to the <code>_TOSTR_type_impl</code> that will use overloading to select the correct implementation.</p>
+<p>What we can simply do now is just use TOSTR() as expected with vec3.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;player: pos = %s, velocity = %s&#34;</span>, TOSTR(player_pos), TOSTR(player_vel));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ... or ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;player: pos = %s, velocity = %s&#34;</span>, TOSTR(player.pos()), TOSTR(player.vel()));
+</span></span></code></pre></div><p>that would output something like: <code>&quot;player: pos = { 11.0, 12.99, 13.37 }, velocity = { 0.14, 2.35, 3.71 }&quot;</code> ( depending on the actual position and velocity of the player hopefully ;) )</p>
+<p>btw, they also &ldquo;stack&rdquo; quite well such as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">aabb</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	vec3 min;
+</span></span><span style="display:flex;"><span>	vec3 max;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TOSTR_DEFINE_TYPE_FUNCTION(aabb, <span style="color:#ae81ff">128</span>) 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	out.put(<span style="color:#e6db74">&#34;{ %s, %s }&#34;</span>, TOSTR(value.min), TOSTR(value.max));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="any-negatives">Any negatives?</h1>
+<p>The biggest draw-back in my opinion is the fact that the lifetime of the generated string is only during the current expression, i.e. you can&rsquo;t &ldquo;save&rdquo; your string to use later. I.e. this is valid code but undefined behavior.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> vec_str <span style="color:#f92672">=</span> TOSTR(my_vec);
+</span></span><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;%s&#34;</span>, vec_str);
+</span></span></code></pre></div><p>This since the macro defines a temporary variable to hold the value.</p>
+<p>Also the fact that overflow might happen and you will get truncated output. I think this is a smaller problem as in many cases ( as the ones above and many more ) you actually know in advance the string-length that you will be generating.</p>
+<p>If you find the overflow issue as a big issues it would be quite easy to add an &ldquo;dynamic-alloc on overflow&rdquo; to the system.</p>
+<p>I also know that some has problems with printf and friends all together as it is not &ldquo;typesafe&rdquo; etc. Imho that is mostly a solved problem by modern compilers that do type-checks in compile-time for you on these. But that is my opinion :)</p>
+<p>Finally there might be some objections to the template-usage in the implementation but I think it is at a reasonable level, but I guess that it can be solved in other ways if you think this is a problem.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>This might not be anything new but it is a small trick that I haven&rsquo;t seen that much in the wild and that has made my own code &ldquo;better&rdquo; imho. It might not be to everybodys taste but hopefully someone has got a new tool to their toolbox!</p>
+<p>As usual, don&rsquo;t be afraid to reach out to me at twitter, github any other channel that you might know of!</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="http://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="http://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2022
+      
+        &nbsp;/&nbsp;
+        <a href="http://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>
