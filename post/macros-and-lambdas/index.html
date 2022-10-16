@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Macros and Lambdas</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="http://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Macros and Lambdas"/>
+<meta name="twitter:description" content="Time for a short post on using lambdas to construct macros&hellip; that was a sentence that will be able to trigger 2 camps in one go :D
+Defer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don&rsquo;t have to!
+A Defer Statement For C&#43;&#43;11
+Call once So from my end I&rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it IS_FIRST_CALL()."/>
+
+
+
+<link rel="stylesheet" href="http://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="http://kihlander.net/" class="nav-logo">
+        <img
+          src="http://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Macros and Lambdas
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Oct 16, 2022
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <p>Time for a short post on using lambdas to construct macros&hellip; that was a sentence that will be able to trigger 2 camps in one go :D</p>
+<h2 id="defer">Defer</h2>
+<p>First of, using lambdas to implement a <code>defer()</code> is really neat, however others has already written about that so that I don&rsquo;t have to!</p>
+<p><a href="https://www.gingerbill.org/article/2015/08/19/defer-in-cpp/">A Defer Statement For C++11</a></p>
+<h2 id="call-once">Call once</h2>
+<p>So from my end I&rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it <code>IS_FIRST_CALL()</code>.
+This can be used for things such as only logging something once or just asserting once. I&rsquo;ll leave it to the reader to decide if this is a &ldquo;good&rdquo; thing but it is absolutely things I have seen &ldquo;in the wild&rdquo;.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">// ... it can be used to implement other macros ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#define PRINT_ONCE(s, i)          \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    do {                          \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        if(IS_FIRST_CALL())       \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            printf(s &#34; %d\n&#34;, i); \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    } while(false)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">a_function</span>(<span style="color:#66d9ef">int</span> i)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(i <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">43</span>)
+</span></span><span style="display:flex;"><span>        PRINT_ONCE(<span style="color:#e6db74">&#34;first time i was bigger than 43 it was %d&#34;</span>, i);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... or by itself ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span>(i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">43</span> <span style="color:#f92672">&amp;&amp;</span> IS_FIRST_CALL())
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;first time i was smaller than 43 it was %d&#34;</span>, i);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>A implementation of this would be something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#define JOIN_2(x, y) x##y
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define JOIN_1(x, y) JOIN_2(x, y)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define JOIN(x, y) JOIN_1(x, y)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define IS_FIRST_CALL()                                      \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    [](){                                                    \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        static bool JOIN(call_it, __LINE__) = true;          \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        bool JOIN(call, __LINE__) = JOIN(call_it, __LINE__); \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        JOIN(call_it, __LINE__) = false;                     \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        return JOIN(call, __LINE__);                         \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    }()
+</span></span></span></code></pre></div><p>We use a lambda (i.e. introduce a local function) to enable us to declare and check a static variable in any scope and &ldquo;join&rdquo; in the line-number to make sure that we don&rsquo;t get warnings for variable &ldquo;shadowing&rdquo;.</p>
+<p>Not much code, but increasing readability according to me!</p>
+<h2 id="silence-unused-variables">Silence unused variables</h2>
+<p>Next one!</p>
+<p>In the codebase&rsquo;s where I usually work we treat unused variables as errors (for better or for worse!), imho this is usually valuable as it help with getting rid of dead code. However it do introduce issues with things such as logging and asserts where variables and functions only become unused in specific configs.</p>
+<p>Consider something like this, where we have a PRINT() function that can be disabled with a define.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#if !defined(SHOULD_PRINT)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">#define PRINT(fmt, ...) </span><span style="color:#75715e">// NOTHING!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#else
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">#define PRINT(fmt, ...) printf(fmt, __VA_ARGS__)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> var <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    PRINT(<span style="color:#e6db74">&#34;an int %d&#34;</span>, var);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Compiling and running this works just fine &hellip;</p>
+<pre tabindex="0"><code>wc-duck@WcLaptop:~/kod$ clang++ t.cpp -Wall
+wc-duck@WcLaptop:~/kod$ ./a.out 
+an int 1337
+</code></pre><p>&hellip; until someone disables the printing!</p>
+<pre tabindex="0"><code>wc-duck@WcLaptop:~/kod$ clang++ t.cpp -Wall -DNO_PRINT
+t.cpp:63:9: warning: unused variable &#39;var&#39; [-Wunused-variable]
+    int var = 1337;
+        ^
+1 warning generated.
+</code></pre><p>Time to introduce <code>SILENCE_UNUSED(...)</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#define SILENCE_UNUSED(...)          \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    do {                             \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        if(false)                    \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            [](...){} (__VA_ARGS__); \
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    } while(false)
+</span></span></span></code></pre></div><p>This can then be used to implement <code>PRINT()</code> or by itself!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#if !defined(SHOULD_PRINT)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">#define PRINT(fmt, ...) SILENCE_UNUSED(__VA_ARGS__)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#else
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">#define PRINT(fmt, ...) printf(fmt, __VA_ARGS__)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span></code></pre></div><p>There are however quite a bit to unpack here, why is all the different parts needed.</p>
+<p>First, we define a lambda taking variadic arguments, thus being able to use the argument without giving them a name&hellip; it turns out compilers have a hard time reporting warnings for variables they can&rsquo;t be sure that they exist ;)
+This could of course also be possible with a <code>[[maybe_unused]] void silence_me(...) {}</code> but I prefer a lambda here to not &ldquo;pollute&rdquo; the global namespace with an implementation detail.</p>
+<p>Secondly we need to put the call to the lambda within an <code>if(false)</code> to make sure that the actual arguments isn&rsquo;t evaluated. We wouldn&rsquo;t want a <code>SILENCE_UNUSED(expensive_call())</code> to actually call <code>expensive_call()</code> do we!</p>
+<p>Lastly we wrap all of it in the mandatory <code>do {} while(false)</code> to make the macro into a &ldquo;proper&rdquo; statement that is useable within if/else etc.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>So&hellip; there we have it, some simple tools to build your macros using lambdas! Personally I find them kind of neat and I think they server a purpose!</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="http://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/tips-n-tricks/"
+              >tips-n-tricks</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="http://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2022
+      
+        &nbsp;/&nbsp;
+        <a href="http://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>

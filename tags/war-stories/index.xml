@@ -14,6 +14,17 @@
 		<atom:link href="/tags/war-stories/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Macros and Lambdas</title>
+			<link>http://kihlander.net/post/macros-and-lambdas/</link>
+			<pubDate>Sun, 16 Oct 2022 00:00:00 +0000</pubDate>
+			<guid>http://kihlander.net/post/macros-and-lambdas/</guid>
+			<description>Time for a short post on using lambdas to construct macros&amp;hellip; that was a sentence that will be able to trigger 2 camps in one go :D
+Defer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don&amp;rsquo;t have to!
+A Defer Statement For C++11
+Call once So from my end I&amp;rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it IS_FIRST_CALL().</description>
+		</item>
+      	
+		<item>
 			<title>When selecting a theme is your biggest problem!</title>
 			<link>http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</link>
 			<pubDate>Sat, 23 Jul 2022 09:36:55 +0200</pubDate>
@@ -93,14 +104,6 @@ void my_func( uint32_t val ) { switch( val ) { case HashOfString(&amp;#34;some_s
 			<guid>http://kihlander.net/post/command-line-args-as-config/</guid>
 			<description>I like command-line arguments as mentioned in an earlier post about them. In this post I&amp;rsquo;ll discuss a method to use them as simple config-files.
 Let&amp;rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.</description>
-		</item>
-      	
-		<item>
-			<title>Registering command line arguments</title>
-			<link>http://kihlander.net/post/registering-command-line-args/</link>
-			<pubDate>Sat, 27 Feb 2016 00:00:00 +0000</pubDate>
-			<guid>http://kihlander.net/post/registering-command-line-args/</guid>
-			<description>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the &amp;ldquo;resource&amp;rdquo;-domain to verbose or --memory-enable-stacktrace=render to enable save of stacktraces for all allocations done in the &amp;ldquo;render&amp;rdquo;-allocator than to edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</description>
 		</item>
       	
 	</channel>

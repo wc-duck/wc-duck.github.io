@@ -1,17 +1,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>coroutines on What could possibly go wrong?</title>
-		<link>http://kihlander.net/tags/coroutines/</link>
-		<description>Recent content in coroutines </description>
+		<title>tips-n-tricks on What could possibly go wrong?</title>
+		<link>http://kihlander.net/tags/tips-n-tricks/</link>
+		<description>Recent content in tips-n-tricks </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
   		<language>en</language>
 		
-		<managingEditor>Page(/tags/coroutines) (Fredrik Kihlander)</managingEditor>
+		<managingEditor>Page(/tags/tips-n-tricks) (Fredrik Kihlander)</managingEditor>
     	
-  		<lastBuildDate>Tue, 20 Nov 2018 00:00:00 +0000</lastBuildDate>
+  		<lastBuildDate>Sun, 16 Oct 2022 00:00:00 +0000</lastBuildDate>
 		
-		<atom:link href="/tags/coroutines/" rel="self" type="application/rss+xml" />
+		<atom:link href="/tags/tips-n-tricks/" rel="self" type="application/rss+xml" />
 		
 		<item>
 			<title>Macros and Lambdas</title>

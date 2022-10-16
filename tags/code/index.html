@@ -152,6 +152,33 @@
 
       
         <article class="post-preview">
+  <a href="http://kihlander.net/post/macros-and-lambdas/">
+    <h2 class="post-title">Macros and Lambdas</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p>Time for a short post on using lambdas to construct macros&hellip; that was a sentence that will be able to trigger 2 camps in one go :D
+Defer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don&rsquo;t have to!
+A Defer Statement For C++11
+Call once So from my end I&rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it IS_FIRST_CALL().</p>
+      <a href="http://kihlander.net/post/macros-and-lambdas/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Oct 16, 2022
+  
+</span>
+
+  </div>
+</article>
+
+      
+        <article class="post-preview">
   <a href="http://kihlander.net/post/protothreads-with-a-twist/">
     <h2 class="post-title">&#34;ProtoThreads&#34; with a twist.</h2>
   </a>
@@ -194,32 +221,6 @@ printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for mult
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
   >&nbsp;May 15, 2018
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="http://kihlander.net/post/a-story-about-an-unexpected-abi-break/">
-    <h2 class="post-title">A story about an unexpected ABI break</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>This is the story of an unexpected ABI break that I thought would be worth documenting.
-At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
-Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</p>
-      <a href="http://kihlander.net/post/a-story-about-an-unexpected-abi-break/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Nov 15, 2017
   
 </span>
 
