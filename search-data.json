@@ -5,6 +5,16 @@
         
             {
                 "id": 0,
+                "href": "http://kihlander.net/post/macros-and-lambdas/",
+                "title": "Macros and Lambdas",
+                "section": "post",
+                "date" : "2022.10.16",
+                "body": "Time for a short post on using lambdas to construct macros\u0026hellip; that was a sentence that will be able to trigger 2 camps in one go :D\nDefer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don\u0026rsquo;t have to!\nA Defer Statement For C++11\nCall once So from my end I\u0026rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it IS_FIRST_CALL(). This can be used for things such as only logging something once or just asserting once. I\u0026rsquo;ll leave it to the reader to decide if this is a \u0026ldquo;good\u0026rdquo; thing but it is absolutely things I have seen \u0026ldquo;in the wild\u0026rdquo;.\n// ... it can be used to implement other macros ... #define PRINT_ONCE(s, i) \\ do { \\ if(IS_FIRST_CALL()) \\ printf(s \u0026#34; %d\\n\u0026#34;, i); \\ } while(false) int a_function(int i) { if(i \u0026gt; 43) PRINT_ONCE(\u0026#34;first time i was bigger than 43 it was %d\u0026#34;, i); // ... or by itself ... if(i \u0026lt; 43 \u0026amp;\u0026amp; IS_FIRST_CALL()) printf(\u0026#34;first time i was smaller than 43 it was %d\u0026#34;, i); } A implementation of this would be something like this:\n#define JOIN_2(x, y) x##y #define JOIN_1(x, y) JOIN_2(x, y) #define JOIN(x, y) JOIN_1(x, y) #define IS_FIRST_CALL() \\ [](){ \\ static bool JOIN(call_it, __LINE__) = true; \\ bool JOIN(call, __LINE__) = JOIN(call_it, __LINE__); \\ JOIN(call_it, __LINE__) = false; \\ return JOIN(call, __LINE__); \\ }() We use a lambda (i.e. introduce a local function) to enable us to declare and check a static variable in any scope and \u0026ldquo;join\u0026rdquo; in the line-number to make sure that we don\u0026rsquo;t get warnings for variable \u0026ldquo;shadowing\u0026rdquo;.\nNot much code, but increasing readability according to me!\nSilence unused variables Next one!\nIn the codebase\u0026rsquo;s where I usually work we treat unused variables as errors (for better or for worse!), imho this is usually valuable as it help with getting rid of dead code. However it do introduce issues with things such as logging and asserts where variables and functions only become unused in specific configs.\nConsider something like this, where we have a PRINT() function that can be disabled with a define.\n#if !defined(SHOULD_PRINT) #define PRINT(fmt, ...) // NOTHING! #else #define PRINT(fmt, ...) printf(fmt, __VA_ARGS__) #endif int main(int, char**) { int var = 0; PRINT(\u0026#34;an int %d\u0026#34;, var); return 0; } Compiling and running this works just fine \u0026hellip;\nwc-duck@WcLaptop:~/kod$ clang++ t.cpp -Wall wc-duck@WcLaptop:~/kod$ ./a.out an int 1337 \u0026hellip; until someone disables the printing!\nwc-duck@WcLaptop:~/kod$ clang++ t.cpp -Wall -DNO_PRINT t.cpp:63:9: warning: unused variable \u0026#39;var\u0026#39; [-Wunused-variable] int var = 1337; ^ 1 warning generated. Time to introduce SILENCE_UNUSED(...)\n#define SILENCE_UNUSED(...) \\ do { \\ if(false) \\ [](...){} (__VA_ARGS__); \\ } while(false) This can then be used to implement PRINT() or by itself!\n#if !defined(SHOULD_PRINT) #define PRINT(fmt, ...) SILENCE_UNUSED(__VA_ARGS__) #else #define PRINT(fmt, ...) printf(fmt, __VA_ARGS__) #endif There are however quite a bit to unpack here, why is all the different parts needed.\nFirst, we define a lambda taking variadic arguments, thus being able to use the argument without giving them a name\u0026hellip; it turns out compilers have a hard time reporting warnings for variables they can\u0026rsquo;t be sure that they exist ;) This could of course also be possible with a [[maybe_unused]] void silence_me(...) {} but I prefer a lambda here to not \u0026ldquo;pollute\u0026rdquo; the global namespace with an implementation detail.\nSecondly we need to put the call to the lambda within an if(false) to make sure that the actual arguments isn\u0026rsquo;t evaluated. We wouldn\u0026rsquo;t want a SILENCE_UNUSED(expensive_call()) to actually call expensive_call() do we!\nLastly we wrap all of it in the mandatory do {} while(false) to make the macro into a \u0026ldquo;proper\u0026rdquo; statement that is useable within if/else etc.\nConclusion So\u0026hellip; there we have it, some simple tools to build your macros using lambdas! Personally I find them kind of neat and I think they server a purpose!\n"
+            }
+    
+        ,
+            {
+                "id": 1,
                 "href": "http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
@@ -14,7 +24,7 @@
     
         ,
             {
-                "id": 1,
+                "id": 2,
                 "href": "http://kihlander.net/about/",
                 "title": "About",
                 "section": "",
@@ -24,7 +34,7 @@
     
         ,
             {
-                "id": 2,
+                "id": 3,
                 "href": "http://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
@@ -34,7 +44,7 @@
     
         ,
             {
-                "id": 3,
+                "id": 4,
                 "href": "http://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
@@ -44,7 +54,7 @@
     
         ,
             {
-                "id": 4,
+                "id": 5,
                 "href": "http://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
@@ -54,7 +64,7 @@
     
         ,
             {
-                "id": 5,
+                "id": 6,
                 "href": "http://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
@@ -64,7 +74,7 @@
     
         ,
             {
-                "id": 6,
+                "id": 7,
                 "href": "http://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
@@ -74,7 +84,7 @@
     
         ,
             {
-                "id": 7,
+                "id": 8,
                 "href": "http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
@@ -84,7 +94,7 @@
     
         ,
             {
-                "id": 8,
+                "id": 9,
                 "href": "http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
@@ -94,7 +104,7 @@
     
         ,
             {
-                "id": 9,
+                "id": 10,
                 "href": "http://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
@@ -104,7 +114,7 @@
     
         ,
             {
-                "id": 10,
+                "id": 11,
                 "href": "http://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",
