@@ -5,6 +5,16 @@
         
             {
                 "id": 0,
+                "href": "http://kihlander.net/post/when-memcpy-change/",
+                "title": "When memcpy() change!",
+                "section": "post",
+                "date" : "2022.10.23",
+                "body": " To start of, yes, I know that this article touch undefined behavior and that all bets are off!\nI am currently working on a bigger post on swapping memory that is THIS close to being done\u0026hellip; any day now (he has been saying the last year!).\nHowever this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it. As the other post is already quite big I opted for a shorter one here.\nSo what am I on about you might ask, weird title and all? memcpy() don\u0026rsquo;t just change right, it is well defined what it should do! It should copy memory from buffer a to buffer b\u0026hellip; as long as they don\u0026rsquo;t overlap, then your in undefined behavior territory (spooky sounds go here!).\nIn c and c++ we basically have 2 primitives to copy memory, we have memcpy() and memmove() where memcpy() is \u0026ldquo;as efficient as possible\u0026rdquo; and memmove() also handle the case where source and destination overlap and copy the data as if a temporary buffer was used in between.\nSo far so good, i.e. you, as a user of the functions, is expected to know if you have overlapping buffers in your src and dst.\nWell as it turns out, you and me as developers are quite bad att knowing if your buffers DO overlap or not, as seen by the kerfuffle back in 2010 when GLIBC decided to replace its old memcpy() that just used memmove() with an optimized version that really required the buffers not to overlap. \u0026ldquo;Hilarity\u0026rdquo; ensued and everyone had a great day at work\u0026hellip; or maybe I misunderstood something? ;)\nIMHO it is the right decision on a system-level to implement memcpy() as memmove() for the above mentioned reason, that reason being you and me as developers are stupid :) Many systems however don\u0026rsquo;t do this so we still need to think about it.\nAnd now to the interesting part\u0026hellip; lets try this out on my linux-machine. Let us add a simple program like this:\nIn this post I will define \u0026ldquo;the right\u0026rdquo; behavior to be memmove() all the time\u0026hellip; if this is right can absolutely be debated and I would not be on the side that it is ALWAYS the right choice, but for the sake of this article we define that as \u0026ldquo;right\u0026rdquo;.\nTrying it out #include \u0026lt;string.h\u0026gt; #include \u0026lt;stdio.h\u0026gt; int main(int, const char**) { int cpy[] {0, 1, 2, 3, 4, 5, 6}; int mov[] {0, 1, 2, 3, 4, 5, 6}; memcpy (\u0026amp;cpy[1], \u0026amp;cpy[0], 5 * sizeof(int)); // OHNO... overlap ahoy! memmove(\u0026amp;mov[1], \u0026amp;mov[0], 5 * sizeof(int)); printf(\u0026#34;cpy: \u0026#34;); for(int c : cpy) printf(\u0026#34;%d \u0026#34;, c); printf(\u0026#34;\\n\u0026#34;); printf(\u0026#34;mov: \u0026#34;); for(int c : mov) printf(\u0026#34;%d \u0026#34;, c); printf(\u0026#34;\\n\u0026#34;); return 0; } play along in compiler explorer\nCompile with gcc\u0026hellip;\nwc-duck@WcLaptop:~/kod$ gcc test.cpp -o t wc-duck@WcLaptop:~/kod$ ./t cpy: 0 0 1 2 3 4 6 mov: 0 0 1 2 3 4 6 \u0026hellip; and success!\n\u0026hellip; and clang? \u0026hellip;\nwc-duck@WcLaptop:~/kod$ clang test.cpp -o t wc-duck@WcLaptop:~/kod$ ./t cpy: 0 0 1 1 3 3 6 mov: 0 0 1 2 3 4 6 OH NO!\nIf we dig in to the code that clang generates we see that clang has replaced the call to memcpy() and memmove() with its own inline implementations that DO follow the rules and expect input to memcpy() to not overlap. A valid conversion as it seems really wasteful to copy a few bytes via a function-call. (Question however, is clang really allowed to do this in a non-optimized build?)\nWe can also try an optimized build.\nwc-duck@WcLaptop:~/kod$ gcc test.cpp -o t -O2 wc-duck@WcLaptop:~/kod$ ./t cpy: 0 0 1 2 3 3 6 mov: 0 0 1 2 3 4 6 wc-duck@WcLaptop:~/kod$ clang test.cpp -o t -O2 wc-duck@WcLaptop:~/kod$ ./t cpy: 0 0 1 2 3 4 6 mov: 0 0 1 2 3 4 6 Now we see that gcc generate an invalid(?) result but clang generate what would be expected(?). This time gcc decided to replace memcpy() with an inlined version that is a \u0026ldquo;pure\u0026rdquo; memcpy(). But how did clang get it \u0026ldquo;right\u0026rdquo;, lets dig in?\nIt seem like the diff on clang between -O0 and -O2 is that it uses vector-instructions to implement its inlined memcpy() and memmove() and unroll the loop here as there are no branch-instructions in the copies that should occur\u0026hellip; I\u0026rsquo;m not really sure what is going on here, but we can at least conclude that in this case clang generate different code that result in different semantics depending on optimization flags. I guess we are in undefined behavior land now ¯\\(ツ)/¯\nConclusions? So what have we learned? Don\u0026rsquo;t know really\u0026hellip; undefined behavior is undefined maybe?\nOn a more serious note, should we be able to expect our compilers to generate equivalent code depending optimization level? One might think so but I guess that would have a lot of repercussions in other areas.\nAnd in cases like this where the compiler could easily see that the buffers overlap, should they generate memmove()-semantics code here? I know that some static-analyzers warn about this, but for all old code, why not try to at least save them from them self (and emit a warning)? I would be surprised to find code where the undefined behavior of memcpy() would be what you actually wanted?\nRegardless, I found this little \u0026ldquo;thing\u0026rdquo; was worth a few words in blog-form just for the sake of it\u0026hellip; hope you found it at least worth your time reading it :)\n"
+            }
+    
+        ,
+            {
+                "id": 1,
                 "href": "http://kihlander.net/post/macros-and-lambdas/",
                 "title": "Macros and Lambdas",
                 "section": "post",
@@ -14,7 +24,7 @@
     
         ,
             {
-                "id": 1,
+                "id": 2,
                 "href": "http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
@@ -24,7 +34,7 @@
     
         ,
             {
-                "id": 2,
+                "id": 3,
                 "href": "http://kihlander.net/about/",
                 "title": "About",
                 "section": "",
@@ -34,7 +44,7 @@
     
         ,
             {
-                "id": 3,
+                "id": 4,
                 "href": "http://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
@@ -44,7 +54,7 @@
     
         ,
             {
-                "id": 4,
+                "id": 5,
                 "href": "http://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
@@ -54,7 +64,7 @@
     
         ,
             {
-                "id": 5,
+                "id": 6,
                 "href": "http://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
@@ -64,7 +74,7 @@
     
         ,
             {
-                "id": 6,
+                "id": 7,
                 "href": "http://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
@@ -74,7 +84,7 @@
     
         ,
             {
-                "id": 7,
+                "id": 8,
                 "href": "http://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
@@ -84,7 +94,7 @@
     
         ,
             {
-                "id": 8,
+                "id": 9,
                 "href": "http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
@@ -94,7 +104,7 @@
     
         ,
             {
-                "id": 9,
+                "id": 10,
                 "href": "http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
@@ -104,7 +114,7 @@
     
         ,
             {
-                "id": 10,
+                "id": 11,
                 "href": "http://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
@@ -114,7 +124,7 @@
     
         ,
             {
-                "id": 11,
+                "id": 12,
                 "href": "http://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",

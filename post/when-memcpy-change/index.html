@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>When memcpy() change!</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="http://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="When memcpy() change!"/>
+<meta name="twitter:description" content="To start of, yes, I know that this article touch undefined behavior and that all bets are off!
+I am currently working on a bigger post on swapping memory that is THIS close to being done&hellip; any day now (he has been saying the last year!).
+However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it."/>
+
+
+
+<link rel="stylesheet" href="http://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="http://kihlander.net/" class="nav-logo">
+        <img
+          src="http://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              When memcpy() change!
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Oct 23, 2022
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <blockquote>
+<p>To start of, yes, I know that this article touch undefined behavior and that all bets are off!</p>
+</blockquote>
+<p>I am currently working on a bigger post on swapping memory that is THIS close to being done&hellip; any day now (he has been saying the last year!).</p>
+<p>However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it. As the other post is already quite big I opted for a shorter one here.</p>
+<p>So what am I on about you might ask, weird title and all? <code>memcpy()</code> don&rsquo;t just change right, it is well defined what it should do! It should copy memory from buffer <code>a</code> to buffer <code>b</code>&hellip; as long as they don&rsquo;t overlap, then your in <em>undefined behavior territory</em> (spooky sounds go here!).</p>
+<p>In c and c++ we basically have 2 primitives to copy memory, we have <code>memcpy()</code> and <code>memmove()</code> where <code>memcpy()</code> is &ldquo;as efficient as possible&rdquo; and <code>memmove()</code> also handle the case where source and destination overlap and copy the data as if a temporary buffer was used in between.</p>
+<p>So far so good, i.e. you, as a user of the functions, is expected to know if you have overlapping buffers in your src and dst.</p>
+<p>Well as it turns out, you and me as developers are quite bad att knowing if your buffers DO overlap or not, as seen by the kerfuffle back in 2010 when GLIBC decided to replace its old <code>memcpy()</code> that just used <code>memmove()</code> with an optimized version that really required the buffers not to overlap. &ldquo;Hilarity&rdquo; ensued and everyone had a great day at work&hellip; or maybe I misunderstood something? ;)</p>
+<p>IMHO it is the right decision on a system-level to implement <code>memcpy()</code> as <code>memmove()</code> for the above mentioned reason, that reason being you and me as developers are stupid :) Many systems however don&rsquo;t do this so we still need to think about it.</p>
+<p>And now to the interesting part&hellip; lets try this out on my linux-machine. Let us add a simple program like this:</p>
+<blockquote>
+<p>In this post I will define &ldquo;the right&rdquo; behavior to be memmove() all the time&hellip; if this is right can absolutely be debated and I would not be on the side that it is ALWAYS the right choice, but for the sake of this article we define that as &ldquo;right&rdquo;.</p>
+</blockquote>
+<h1 id="trying-it-out">Trying it out</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> cpy[] {<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> mov[] {<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    memcpy (<span style="color:#f92672">&amp;</span>cpy[<span style="color:#ae81ff">1</span>], <span style="color:#f92672">&amp;</span>cpy[<span style="color:#ae81ff">0</span>], <span style="color:#ae81ff">5</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">int</span>)); <span style="color:#75715e">// OHNO... overlap ahoy!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    memmove(<span style="color:#f92672">&amp;</span>mov[<span style="color:#ae81ff">1</span>], <span style="color:#f92672">&amp;</span>mov[<span style="color:#ae81ff">0</span>], <span style="color:#ae81ff">5</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">int</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;cpy: &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> c : cpy) printf(<span style="color:#e6db74">&#34;%d &#34;</span>, c);
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;mov: &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> c : mov) printf(<span style="color:#e6db74">&#34;%d &#34;</span>, c);
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><a href="https://godbolt.org/z/jobGTbhfr">play along in compiler explorer</a></p>
+<p>Compile with gcc&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ gcc test.cpp -o t
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ ./t
+</span></span><span style="display:flex;"><span>cpy: 0 0 1 2 3 4 6 
+</span></span><span style="display:flex;"><span>mov: 0 0 1 2 3 4 6
+</span></span></code></pre></div><p>&hellip; and success!</p>
+<p>&hellip; and clang? &hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ clang test.cpp -o t
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ ./t
+</span></span><span style="display:flex;"><span>cpy: 0 0 1 1 3 3 6 
+</span></span><span style="display:flex;"><span>mov: 0 0 1 2 3 4 6 
+</span></span></code></pre></div><p>OH NO!</p>
+<p>If we dig in to the code that clang generates we see that clang has replaced the call to <code>memcpy()</code> and <code>memmove()</code> with its own inline implementations that DO follow the rules and expect input to memcpy() to not overlap. A valid conversion as it seems really wasteful to copy a few bytes via a function-call. (Question however, is clang really allowed to do this in a non-optimized build?)</p>
+<p>We can also try an optimized build.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-console" data-lang="console"><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ gcc test.cpp -o t -O2
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ ./t
+</span></span><span style="display:flex;"><span>cpy: 0 0 1 2 3 3 6 
+</span></span><span style="display:flex;"><span>mov: 0 0 1 2 3 4 6
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ clang test.cpp -o t -O2
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod$ ./t
+</span></span><span style="display:flex;"><span>cpy: 0 0 1 2 3 4 6 
+</span></span><span style="display:flex;"><span>mov: 0 0 1 2 3 4 6
+</span></span></code></pre></div><p>Now we see that gcc generate an invalid(?) result but clang generate what would be expected(?). This time gcc decided to replace <code>memcpy()</code> with an inlined version that is a &ldquo;pure&rdquo; <code>memcpy()</code>. But how did clang get it &ldquo;right&rdquo;, lets dig in?</p>
+<p>It seem like the diff on clang between -O0 and -O2 is that it uses vector-instructions to implement its inlined <code>memcpy()</code> and <code>memmove()</code> and unroll the loop here as there are no branch-instructions in the copies that should occur&hellip; I&rsquo;m not really sure what is going on here, but we can at least conclude that in this case clang generate different code that result in different semantics depending on optimization flags. I guess we are in undefined behavior land now <em>¯\<em>(ツ)</em>/¯</em></p>
+<h1 id="conclusions">Conclusions?</h1>
+<p>So what have we learned? Don&rsquo;t know really&hellip; undefined behavior is undefined maybe?</p>
+<p>On a more serious note, should we be able to expect our compilers to generate equivalent code depending optimization level? One might think so but I guess that would have a lot of repercussions in other areas.</p>
+<p>And in cases like this where the compiler could easily see that the buffers overlap, should they generate <code>memmove()</code>-semantics code here? I know that some static-analyzers warn about this, but for all old code, why not try to at least save them from them self (and emit a warning)? I would be surprised to find code where the undefined behavior of <code>memcpy()</code> would be what you actually wanted?</p>
+<p>Regardless, I found this little &ldquo;thing&rdquo; was worth a few words in blog-form just for the sake of it&hellip; hope you found it at least worth your time reading it :)</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="http://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+            <a
+              href="http://kihlander.net/tags/optimization/"
+              >optimization</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="http://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2022
+      
+        &nbsp;/&nbsp;
+        <a href="http://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>

@@ -14,6 +14,16 @@
 		<atom:link href="/tags/war-stories/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>When memcpy() change!</title>
+			<link>http://kihlander.net/post/when-memcpy-change/</link>
+			<pubDate>Sun, 23 Oct 2022 09:38:33 +0200</pubDate>
+			<guid>http://kihlander.net/post/when-memcpy-change/</guid>
+			<description>To start of, yes, I know that this article touch undefined behavior and that all bets are off!
+I am currently working on a bigger post on swapping memory that is THIS close to being done&amp;hellip; any day now (he has been saying the last year!).
+However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it.</description>
+		</item>
+      	
+		<item>
 			<title>Macros and Lambdas</title>
 			<link>http://kihlander.net/post/macros-and-lambdas/</link>
 			<pubDate>Sun, 16 Oct 2022 00:00:00 +0000</pubDate>
@@ -95,15 +105,6 @@ So lets start of with just defining what we are talking about just to get everyo
 			<description>I recently read a blogpost about compile-time string-hashes and constexpr and I&amp;rsquo;m still not convinced and see no real reason to leave my old and true friend the script :)
 So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).
 void my_func( uint32_t val ) { switch( val ) { case HashOfString(&amp;#34;some_string&amp;#34;): do_some_stuff(); break; case HashOfString(&amp;#34;some_other_string&amp;#34;): do_some_other_stuff(); break; } } Simple enough.</description>
-		</item>
-      	
-		<item>
-			<title>The command-line as a poor mans config files</title>
-			<link>http://kihlander.net/post/command-line-args-as-config/</link>
-			<pubDate>Tue, 01 Mar 2016 00:00:00 +0000</pubDate>
-			<guid>http://kihlander.net/post/command-line-args-as-config/</guid>
-			<description>I like command-line arguments as mentioned in an earlier post about them. In this post I&amp;rsquo;ll discuss a method to use them as simple config-files.
-Let&amp;rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.</description>
 		</item>
       	
 	</channel>
