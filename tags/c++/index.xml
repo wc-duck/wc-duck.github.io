@@ -1,7 +1,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title>c&#43;&#43; on What could possibly go wrong?</title>
-		<link>https://kihlander.net/tags/c&#43;&#43;/</link>
+		<link>http://kihlander.net/tags/c&#43;&#43;/</link>
 		<description>Recent content in c&#43;&#43; </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
@@ -15,9 +15,9 @@
 		
 		<item>
 			<title>When memcpy() change!</title>
-			<link>https://kihlander.net/post/when-memcpy-change/</link>
+			<link>http://kihlander.net/post/when-memcpy-change/</link>
 			<pubDate>Sun, 23 Oct 2022 09:38:33 +0200</pubDate>
-			<guid>https://kihlander.net/post/when-memcpy-change/</guid>
+			<guid>http://kihlander.net/post/when-memcpy-change/</guid>
 			<description>To start of, yes, I know that this article touch undefined behavior and that all bets are off!
 I am currently working on a bigger post on swapping memory that is THIS close to being done&amp;hellip; any day now (he has been saying the last year!).
 However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it.</description>
@@ -25,9 +25,9 @@ However this topic popped up and I was wondering if it was worth making the othe
       	
 		<item>
 			<title>Macros and Lambdas</title>
-			<link>https://kihlander.net/post/macros-and-lambdas/</link>
+			<link>http://kihlander.net/post/macros-and-lambdas/</link>
 			<pubDate>Sun, 16 Oct 2022 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/macros-and-lambdas/</guid>
+			<guid>http://kihlander.net/post/macros-and-lambdas/</guid>
 			<description>Time for a short post on using lambdas to construct macros&amp;hellip; that was a sentence that will be able to trigger 2 camps in one go :D
 Defer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don&amp;rsquo;t have to!
 A Defer Statement For C++11
@@ -36,36 +36,36 @@ Call once So from my end I&amp;rsquo;ll start of with a quick one for constructi
       	
 		<item>
 			<title>When selecting a theme is your biggest problem!</title>
-			<link>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</link>
+			<link>http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</link>
 			<pubDate>Sat, 23 Jul 2022 09:36:55 +0200</pubDate>
-			<guid>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</guid>
+			<guid>http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</guid>
 			<description>I have been using pellican to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.
 After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it?</description>
 		</item>
       	
 		<item>
 			<title>&#34;ProtoThreads&#34; with a twist.</title>
-			<link>https://kihlander.net/post/protothreads-with-a-twist/</link>
+			<link>http://kihlander.net/post/protothreads-with-a-twist/</link>
 			<pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/protothreads-with-a-twist/</guid>
+			<guid>http://kihlander.net/post/protothreads-with-a-twist/</guid>
 			<description>For a long time I&amp;rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
 void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &amp;lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</description>
 		</item>
       	
 		<item>
 			<title>printf-based TOSTR on the stack</title>
-			<link>https://kihlander.net/post/printf-based-tostr-on-the-stack/</link>
+			<link>http://kihlander.net/post/printf-based-tostr-on-the-stack/</link>
 			<pubDate>Tue, 15 May 2018 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/printf-based-tostr-on-the-stack/</guid>
+			<guid>http://kihlander.net/post/printf-based-tostr-on-the-stack/</guid>
 			<description>As I might have written before I like printf-style string-formating. It&amp;rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &amp;ldquo;composite&amp;rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
 printf(&amp;#34;{ %.2f, %.2f, %.2f }&amp;#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</description>
 		</item>
       	
 		<item>
 			<title>A story about an unexpected ABI break</title>
-			<link>https://kihlander.net/post/a-story-about-an-unexpected-abi-break/</link>
+			<link>http://kihlander.net/post/a-story-about-an-unexpected-abi-break/</link>
 			<pubDate>Wed, 15 Nov 2017 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/a-story-about-an-unexpected-abi-break/</guid>
+			<guid>http://kihlander.net/post/a-story-about-an-unexpected-abi-break/</guid>
 			<description>This is the story of an unexpected ABI break that I thought would be worth documenting.
 At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
 Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</description>
@@ -73,35 +73,35 @@ Why would you want a class like this you might ask, well we use it for adding a 
       	
 		<item>
 			<title>Builtin resources and the resource-system</title>
-			<link>https://kihlander.net/post/builtin-resources-and-the-resource-system/</link>
+			<link>http://kihlander.net/post/builtin-resources-and-the-resource-system/</link>
 			<pubDate>Mon, 07 Aug 2017 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/builtin-resources-and-the-resource-system/</guid>
+			<guid>http://kihlander.net/post/builtin-resources-and-the-resource-system/</guid>
 			<description>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &amp;ldquo;in passing&amp;rdquo; but will dig down a bit deeper into one &amp;ldquo;feature&amp;rdquo; in it that I find kind of neat. I&amp;rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&amp;rsquo;ll be writing about how I handle builtin resources in the engine.</description>
 		</item>
       	
 		<item>
 			<title>utf8_lookup, a write up.</title>
-			<link>https://kihlander.net/post/utf8_lookup-writeup/</link>
+			<link>http://kihlander.net/post/utf8_lookup-writeup/</link>
 			<pubDate>Mon, 26 Jun 2017 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/utf8_lookup-writeup/</guid>
+			<guid>http://kihlander.net/post/utf8_lookup-writeup/</guid>
 			<description>I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)
 Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up.</description>
 		</item>
       	
 		<item>
 			<title>Why I prefer inline forward-declares in C&#43;&#43;</title>
-			<link>https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</link>
+			<link>http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</link>
 			<pubDate>Mon, 14 Nov 2016 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</guid>
+			<guid>http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</guid>
 			<description>Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in others code so it feels worth sharing.
 So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name to the compiler and not having to provide the entire class/struct declaration.</description>
 		</item>
       	
 		<item>
 			<title>Compile-time hashes in c&#43;&#43;, im not convinced!</title>
-			<link>https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</link>
+			<link>http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</link>
 			<pubDate>Sat, 24 Sep 2016 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</guid>
+			<guid>http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</guid>
 			<description>I recently read a blogpost about compile-time string-hashes and constexpr and I&amp;rsquo;m still not convinced and see no real reason to leave my old and true friend the script :)
 So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).
 void my_func( uint32_t val ) { switch( val ) { case HashOfString(&amp;#34;some_string&amp;#34;): do_some_stuff(); break; case HashOfString(&amp;#34;some_other_string&amp;#34;): do_some_other_stuff(); break; } } Simple enough.</description>

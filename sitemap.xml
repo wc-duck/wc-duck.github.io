@@ -2,82 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://kihlander.net/tags/c&#43;&#43;/</loc>
+    <loc>http://kihlander.net/tags/c&#43;&#43;/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/code/</loc>
+    <loc>http://kihlander.net/tags/code/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/optimization/</loc>
+    <loc>http://kihlander.net/tags/optimization/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/</loc>
+    <loc>http://kihlander.net/post/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/</loc>
+    <loc>http://kihlander.net/tags/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/</loc>
+    <loc>http://kihlander.net/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/when-memcpy-change/</loc>
+    <loc>http://kihlander.net/post/when-memcpy-change/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/macros-and-lambdas/</loc>
+    <loc>http://kihlander.net/post/macros-and-lambdas/</loc>
     <lastmod>2022-10-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/tips-n-tricks/</loc>
+    <loc>http://kihlander.net/tags/tips-n-tricks/</loc>
     <lastmod>2022-10-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</loc>
+    <loc>http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</loc>
     <lastmod>2022-07-23T09:36:55+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/about/</loc>
+    <loc>http://kihlander.net/about/</loc>
     <lastmod>2022-07-19T16:33:26+02:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/protothreads-with-a-twist/</loc>
+    <loc>http://kihlander.net/post/protothreads-with-a-twist/</loc>
     <lastmod>2018-11-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/coroutines/</loc>
+    <loc>http://kihlander.net/tags/coroutines/</loc>
     <lastmod>2018-11-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/printf-based-tostr-on-the-stack/</loc>
+    <loc>http://kihlander.net/post/printf-based-tostr-on-the-stack/</loc>
     <lastmod>2018-05-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/a-story-about-an-unexpected-abi-break/</loc>
+    <loc>http://kihlander.net/post/a-story-about-an-unexpected-abi-break/</loc>
     <lastmod>2017-11-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/war-stories/</loc>
+    <loc>http://kihlander.net/tags/war-stories/</loc>
     <lastmod>2017-11-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/assets/</loc>
+    <loc>http://kihlander.net/tags/assets/</loc>
     <lastmod>2017-08-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/builtin-resources-and-the-resource-system/</loc>
+    <loc>http://kihlander.net/post/builtin-resources-and-the-resource-system/</loc>
     <lastmod>2017-08-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/utf8/</loc>
+    <loc>http://kihlander.net/tags/utf8/</loc>
     <lastmod>2017-06-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/utf8_lookup-writeup/</loc>
+    <loc>http://kihlander.net/post/utf8_lookup-writeup/</loc>
     <lastmod>2017-06-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</loc>
+    <loc>http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</loc>
     <lastmod>2016-11-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</loc>
+    <loc>http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/</loc>
     <lastmod>2016-09-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/command-line-args-as-config/</loc>
+    <loc>http://kihlander.net/post/command-line-args-as-config/</loc>
     <lastmod>2016-03-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/registering-command-line-args/</loc>
+    <loc>http://kihlander.net/post/registering-command-line-args/</loc>
     <lastmod>2016-02-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/categories/</loc>
+    <loc>http://kihlander.net/categories/</loc>
   </url><url>
-    <loc>https://kihlander.net/search/</loc>
+    <loc>http://kihlander.net/search/</loc>
   </url><url>
-    <loc>https://kihlander.net/archives/</loc>
+    <loc>http://kihlander.net/archives/</loc>
   </url>
 </urlset>
