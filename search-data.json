@@ -5,7 +5,7 @@
         
             {
                 "id": 0,
-                "href": "http://kihlander.net/post/when-memcpy-change/",
+                "href": "https://kihlander.net/post/when-memcpy-change/",
                 "title": "When memcpy() change!",
                 "section": "post",
                 "date" : "2022.10.23",
@@ -15,7 +15,7 @@
         ,
             {
                 "id": 1,
-                "href": "http://kihlander.net/post/macros-and-lambdas/",
+                "href": "https://kihlander.net/post/macros-and-lambdas/",
                 "title": "Macros and Lambdas",
                 "section": "post",
                 "date" : "2022.10.16",
@@ -25,7 +25,7 @@
         ,
             {
                 "id": 2,
-                "href": "http://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
+                "href": "https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
                 "date" : "2022.07.23",
@@ -35,7 +35,7 @@
         ,
             {
                 "id": 3,
-                "href": "http://kihlander.net/about/",
+                "href": "https://kihlander.net/about/",
                 "title": "About",
                 "section": "",
                 "date" : "2022.07.19",
@@ -45,7 +45,7 @@
         ,
             {
                 "id": 4,
-                "href": "http://kihlander.net/post/protothreads-with-a-twist/",
+                "href": "https://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
                 "date" : "2018.11.20",
@@ -55,7 +55,7 @@
         ,
             {
                 "id": 5,
-                "href": "http://kihlander.net/post/printf-based-tostr-on-the-stack/",
+                "href": "https://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
                 "date" : "2018.05.15",
@@ -65,7 +65,7 @@
         ,
             {
                 "id": 6,
-                "href": "http://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
+                "href": "https://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
                 "date" : "2017.11.15",
@@ -75,7 +75,7 @@
         ,
             {
                 "id": 7,
-                "href": "http://kihlander.net/post/builtin-resources-and-the-resource-system/",
+                "href": "https://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
                 "date" : "2017.08.07",
@@ -85,7 +85,7 @@
         ,
             {
                 "id": 8,
-                "href": "http://kihlander.net/post/utf8_lookup-writeup/",
+                "href": "https://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
                 "date" : "2017.06.26",
@@ -95,7 +95,7 @@
         ,
             {
                 "id": 9,
-                "href": "http://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
+                "href": "https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
                 "date" : "2016.11.14",
@@ -105,7 +105,7 @@
         ,
             {
                 "id": 10,
-                "href": "http://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
+                "href": "https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
                 "date" : "2016.09.24",
@@ -115,7 +115,7 @@
         ,
             {
                 "id": 11,
-                "href": "http://kihlander.net/post/command-line-args-as-config/",
+                "href": "https://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
                 "date" : "2016.03.01",
@@ -125,7 +125,7 @@
         ,
             {
                 "id": 12,
-                "href": "http://kihlander.net/post/registering-command-line-args/",
+                "href": "https://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",
                 "date" : "2016.02.27",
