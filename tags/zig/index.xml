@@ -1,17 +1,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>war-stories on What could possibly go wrong?</title>
-		<link>https://kihlander.net/tags/war-stories/</link>
-		<description>Recent content in war-stories </description>
+		<title>zig on What could possibly go wrong?</title>
+		<link>https://kihlander.net/tags/zig/</link>
+		<description>Recent content in zig </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
   		<language>en</language>
 		
-		<managingEditor>Page(/tags/war-stories) (Fredrik Kihlander)</managingEditor>
+		<managingEditor>Page(/tags/zig) (Fredrik Kihlander)</managingEditor>
     	
-  		<lastBuildDate>Wed, 15 Nov 2017 00:00:00 +0000</lastBuildDate>
+  		<lastBuildDate>Sun, 08 Jan 2023 19:34:19 +0100</lastBuildDate>
 		
-		<atom:link href="/tags/war-stories/" rel="self" type="application/rss+xml" />
+		<atom:link href="/tags/zig/" rel="self" type="application/rss+xml" />
 		
 		<item>
 			<title>A Zig Diary</title>
