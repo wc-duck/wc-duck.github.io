@@ -1,17 +1,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>assets on What could possibly go wrong?</title>
-		<link>https://kihlander.net/tags/assets/</link>
-		<description>Recent content in assets </description>
+		<title>memcpy_util on What could possibly go wrong?</title>
+		<link>https://kihlander.net/tags/memcpy_util/</link>
+		<description>Recent content in memcpy_util </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
   		<language>en</language>
 		
-		<managingEditor>Page(/tags/assets) (Fredrik Kihlander)</managingEditor>
+		<managingEditor>Page(/tags/memcpy_util) (Fredrik Kihlander)</managingEditor>
     	
-  		<lastBuildDate>Mon, 07 Aug 2017 00:00:00 +0000</lastBuildDate>
+  		<lastBuildDate>Sat, 11 Mar 2023 00:00:00 +0000</lastBuildDate>
 		
-		<atom:link href="/tags/assets/" rel="self" type="application/rss+xml" />
+		<atom:link href="/tags/memcpy_util/" rel="self" type="application/rss+xml" />
 		
 		<item>
 			<title>Swapping memory and compiler optimizations</title>

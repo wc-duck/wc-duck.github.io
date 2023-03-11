@@ -14,6 +14,14 @@
 		<atom:link href="/tags/zig/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Swapping memory and compiler optimizations</title>
+			<link>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</link>
+			<pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
+			<guid>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</guid>
+			<description>During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &amp;ldquo;family life&amp;rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while. I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!</description>
+		</item>
+      	
+		<item>
 			<title>A Zig Diary</title>
 			<link>https://kihlander.net/post/a-zig-diary/</link>
 			<pubDate>Sun, 08 Jan 2023 19:34:19 +0100</pubDate>
@@ -96,15 +104,6 @@ Why would you want a class like this you might ask, well we use it for adding a 
 			<guid>https://kihlander.net/post/utf8_lookup-writeup/</guid>
 			<description>I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)
 Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up.</description>
-		</item>
-      	
-		<item>
-			<title>Why I prefer inline forward-declares in C&#43;&#43;</title>
-			<link>https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</link>
-			<pubDate>Mon, 14 Nov 2016 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/</guid>
-			<description>Time for a short post on how I usually do the humble forward declare in C++. I guess this is not something new but it is something I usually do not see in others code so it feels worth sharing.
-So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name to the compiler and not having to provide the entire class/struct declaration.</description>
 		</item>
       	
 	</channel>

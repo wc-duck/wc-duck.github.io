@@ -2,29 +2,35 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://kihlander.net/post/a-zig-diary/</loc>
-    <lastmod>2023-01-08T19:34:19+01:00</lastmod>
+    <loc>https://kihlander.net/tags/c&#43;&#43;/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/tags/code/</loc>
-    <lastmod>2023-01-08T19:34:19+01:00</lastmod>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/tags/memcpy_util/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/tags/optimization/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/post/</loc>
-    <lastmod>2023-01-08T19:34:19+01:00</lastmod>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/tags/</loc>
-    <lastmod>2023-01-08T19:34:19+01:00</lastmod>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/post/a-zig-diary/</loc>
     <lastmod>2023-01-08T19:34:19+01:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/tags/zig/</loc>
     <lastmod>2023-01-08T19:34:19+01:00</lastmod>
-  </url><url>
-    <loc>https://kihlander.net/tags/c&#43;&#43;/</loc>
-    <lastmod>2022-10-23T09:38:33+02:00</lastmod>
-  </url><url>
-    <loc>https://kihlander.net/tags/optimization/</loc>
-    <lastmod>2022-10-23T09:38:33+02:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/post/when-memcpy-change/</loc>
     <lastmod>2022-10-23T09:38:33+02:00</lastmod>

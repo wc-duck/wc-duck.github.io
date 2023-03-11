@@ -152,6 +152,30 @@
 
       
         <article class="post-preview">
+  <a href="https://kihlander.net/post/swapping-memory-and-compiler-optimizations/">
+    <h2 class="post-title">Swapping memory and compiler optimizations</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p>During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &ldquo;family life&rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while. I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!</p>
+      <a href="https://kihlander.net/post/swapping-memory-and-compiler-optimizations/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Mar 11, 2023
+  
+</span>
+
+  </div>
+</article>
+
+      
+        <article class="post-preview">
   <a href="https://kihlander.net/post/when-memcpy-change/">
     <h2 class="post-title">When memcpy() change!</h2>
   </a>
@@ -197,31 +221,6 @@ Call once So from my end I&rsquo;ll start of with a quick one for constructing a
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
   >&nbsp;Oct 16, 2022
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="https://kihlander.net/post/protothreads-with-a-twist/">
-    <h2 class="post-title">&#34;ProtoThreads&#34; with a twist.</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</p>
-      <a href="https://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Nov 20, 2018
   
 </span>
 

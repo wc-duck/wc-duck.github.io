@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Swapping memory and compiler optimizations</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="https://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Swapping memory and compiler optimizations"/>
+<meta name="twitter:description" content="During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &ldquo;family life&rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while. I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!"/>
+
+
+
+<link rel="stylesheet" href="https://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="https://kihlander.net/" class="nav-logo">
+        <img
+          src="https://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Swapping memory and compiler optimizations
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Mar 11, 2023
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      <p>During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &ldquo;family life&rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while.
+I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!</p>
+<p>Now about 1.5 years later, I didn&rsquo;t say what holidays right, The post is finally done!</p>
+<p>The work on this has been a constant cycle of:</p>
+<ul>
+<li>&lsquo;Why this difference?&rsquo;</li>
+<li>Ahh&hellip; ok!</li>
+<li>Take a few weeks without looking at it&hellip;</li>
+<li>&lsquo;Where were I? Ahhh soon done&hellip; I just have this to check!&rsquo;</li>
+<li>&lsquo;WTF? why did this happen?&rsquo;</li>
+<li>Rinse and repeat!</li>
+</ul>
+<p>But here we are, finally!</p>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#memcpy_utilh">memcpy_util.h</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#swapping-memory-buffers">Swapping memory buffers</a></li>
+    <li><a href="#generic-memswap">Generic memswap</a>
+      <ul>
+        <li><a href="#debug----o0">Debug - <code>-O0</code></a></li>
+        <li><a href="#optimized----o2-o3">Optimized - <code>-O2</code>/<code>-O3</code></a></li>
+        <li><a href="#small----os">Small - <code>-Os</code></a></li>
+      </ul>
+    </li>
+    <li><a href="#use-memcpy-in-chunks">Use memcpy() in chunks</a>
+      <ul>
+        <li><a href="#why-is-clang-this-much-faster-than-gcc">Why is clang this much faster than gcc?</a></li>
+        <li><a href="#memcpy-to-inline-or-not-to-inline-thats-the-question">memcpy(), to inline or not to inline, thats the question?</a></li>
+      </ul>
+    </li>
+    <li><a href="#manual-vectorization-with-sse">Manual vectorization with SSE</a></li>
+    <li><a href="#manual-vectorization-with-avx">Manual vectorization with AVX</a></li>
+    <li><a href="#unrolling">Unrolling!</a></li>
+    <li><a href="#how-about-stdswap_ranges-and-stdswap">How about <code>std::swap_ranges()</code> and <code>std::swap()</code>?</a></li>
+    <li><a href="#we-have-only-tested-on-4mb-how-do-we-fare-on-smaller-and-bigger-buffers">We have only tested on 4MB, how do we fare on smaller and bigger buffers?</a></li>
+    <li><a href="#different-buffer-sizes--o0">Different buffer-sizes, <code>-O0</code></a></li>
+    <li><a href="#different-buffer-sizes--o2--o3">Different buffer-sizes, <code>-O2</code>/ <code>-O3</code></a></li>
+    <li><a href="#a-short-note-on-code-size">A short note on code size</a></li>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#apendix">Apendix</a></li>
+  </ul>
+</nav><h2 id="memcpy_utilh">memcpy_util.h</h2>
+<p>That code was a small header called <a href="https://github.com/wc-duck/memcpy_util">memcpy_util.h</a> containing functions to work on memory buffers, operations such as copy, swap, rotate, flip etc.</p>
+<p>Said and done, I did set out to work on breaking it out of my own codebase, updating docs, fixing some API:s, adding a few more unittests and putting some benchmarks around the code as prep for having a go at optimizing the functions at hand.</p>
+<p>Kudos to <a href="https://twitter.com/silentbicycle">Scott Vokes</a> for <a href="https://github.com/silentbicycle/greatest">greatest.h</a> and <a href="https://www.duskborn.com/">Neil Henning</a> for the excellent little <a href="https://github.com/sheredom/ubench.h">ubench.h</a>!.</p>
+<p>The code is published on github at the same time as this post goes live. However some quite interesting things popped out while benchmarking the code. I would say that most of this is not rocket-surgery and many of you might not find something new in here. But what the heck, the worst thing that can happen is that someone comes around and tell me that I have done some obvious errors and I&rsquo;ll learn something, otherwise maybe someone else might learn a thing or two?</p>
+<p>It should also be noted that what started as a single article might actually turn out to be a series, we&rsquo;ll see what happens :)</p>
+<blockquote>
+<p>Before we start I would like to acknowledge that I understand that writing compilers is hard and that there are a bazillion things to consider when doing so. This is only observations and not me bashing &ldquo;them pesky compiler-developers&rdquo;!</p>
+</blockquote>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>All this work has been done on my laptop with the following specs:</p>
+<blockquote>
+<p><strong>CPU</strong> Intel i7-10710U</p>
+<p><strong>RAM</strong> 16GB LPDDR3 at 2133 MT/s (around 17GB/sec peak bandwidth)</p>
+</blockquote>
+<p>And I&rsquo;ll use the compilers that I have installed, that being</p>
+<blockquote>
+<p><strong>Clang:</strong>  10.0.0-4ubuntu1</p>
+<p><strong>GCC:</strong> g++ (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0</p>
+</blockquote>
+<p>And all the usual caveats on micro-benchmarking goes here as well!</p>
+<h2 id="swapping-memory-buffers">Swapping memory buffers</h2>
+<p>So we&rsquo;ll start where I started, by swapping memory in 2 buffers, something that is the basis of many of the other operations in <a href="https://github.com/wc-duck/memcpy_util">memcpy_util.h</a>, such as flipping an image.
+What I thought would be a quick introduction turned out to be the entire article, so lets get to swapping memory between 2 buffers!</p>
+<p>The first thing to notice is that <code>c</code> do not have a <code>memswap()</code>. c++ do have <code>std::swap_ranges()</code> but we&rsquo;ll get back to that later!</p>
+<p>However, just implementing your own <code>memswap()</code> is a simple operation as long as you do not want to get fancy. I would consider this the simplest thing you could do!</p>
+<blockquote>
+<p>Note:
+I am not handling overlap of the buffers to swap in this version as that was not something that was currently needed.
+Probably there should be an assert() or similar that checks for overlap however.</p>
+</blockquote>
+<h2 id="generic-memswap">Generic memswap</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">memswap</span>( <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr1, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr2, size_t bytes )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr1;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr2;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>( size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> bytes; <span style="color:#f92672">++</span>i )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint8_t</span> tmp <span style="color:#f92672">=</span> s1[i];
+</span></span><span style="display:flex;"><span>        s1[i] <span style="color:#f92672">=</span> s2[i];
+</span></span><span style="display:flex;"><span>        s2[i] <span style="color:#f92672">=</span> tmp;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>How does such a simple function perform? It turns out &ldquo;it depends&rdquo; is the best answer to that question!</p>
+<p>To answer the question we&rsquo;ll add 2 benchmark functions, one to swap a really small buffer and one to swap a quite large one (4MB).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>UBENCH_NOINLINE <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">memswap_noinline</span>(<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr1, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr2, size_t s)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    memswap(ptr1, ptr2, s);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>UBENCH_EX(swap, small)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span> b1[<span style="color:#ae81ff">16</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span> b2[<span style="color:#ae81ff">16</span>];
+</span></span><span style="display:flex;"><span>    fill_with_random_data(b1);
+</span></span><span style="display:flex;"><span>    fill_with_random_data(b2);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    UBENCH_DO_BENCHMARK()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        memswap_noinline(b1, b2, <span style="color:#66d9ef">sizeof</span>(b1));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>UBENCH_EX(swap, big)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> size_t BUF_SZ <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1024</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> b1 <span style="color:#f92672">=</span> alloc_random_buffer<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">&gt;</span>(BUF_SZ);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> b2 <span style="color:#f92672">=</span> alloc_random_buffer<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">&gt;</span>(BUF_SZ);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    UBENCH_DO_BENCHMARK()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        memswap_noinline(b1, b2, BUF_SZ);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    free(b1);
+</span></span><span style="display:flex;"><span>    free(b2);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Notice how <code>memswap()</code> was wrapped in a function marked as noinline, this as clang would just optimize the function away otherwise.</p>
+<p>Time to take a look at the results, we&rsquo;ll look at perf at different optimization level (perf in debug/<code>-O0</code> is also important!) as well as generated code-size.</p>
+<blockquote>
+<p>All graphs in this article is generated by my own tool that I don&rsquo;t recommend any one to use, but here is a link anyways! <a href="https://github.com/wc-duck/wccharts">wccharts</a></p>
+</blockquote>
+<blockquote>
+<p>the variance on these are quite high, so these numbers is me &lsquo;getting feeling&rsquo; and guessing at a mean :)</p>
+</blockquote>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_generic_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_generic_time.png" alt="" title="memswap_generic, time for 4MB"></a></p>
+<h3 id="debug----o0">Debug - <code>-O0</code></h3>
+<p>Lets start with <code>-O0</code> and just conclude that both clang and gcc generates basically the same code as would be expected. There is nothing magic here (and nor should there be in a debug-build!) and the code performs there after. A simple for-loop that swaps values as stated in the code.</p>
+<blockquote>
+<p><strong>looking at the generated assembly</strong></p>
+<p>Again most readers might be familiar with this but checking the generated asm on unix:es is easily done with &lsquo;objdump&rsquo;</p>
+<p><code>objdump -C -d local/linux_x86_64/gcc/O2/memcpy_util_bench | less</code></p>
+<p>or using the excellent little tool <a href="https://github.com/sharkdp/bat">bat</a> to get some nice syntax-highlighting</p>
+<p><code>objdump -C -d local/linux_x86_64/gcc/O2/memcpy_util_bench | bat -l asm</code></p>
+</blockquote>
+<p><em>clang -O0</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#a6e22e">memswap_generic</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">&gt;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">push</span>   %rbp
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rsp,%rbp
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rdi,-<span style="color:#ae81ff">0x8</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rsi,-<span style="color:#ae81ff">0x10</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rdx,-<span style="color:#ae81ff">0x18</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x8</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rax,-<span style="color:#ae81ff">0x20</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x10</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rax,-<span style="color:#ae81ff">0x28</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movq</span>   <span style="color:#66d9ef">$0x0</span>,-<span style="color:#ae81ff">0x30</span>(%rbp)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cmp</span>    -<span style="color:#ae81ff">0x18</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jae</span>    <span style="color:#ae81ff">418</span><span style="color:#66d9ef">c2b</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0x7b</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x20</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rcx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    (%rax,%rcx,<span style="color:#ae81ff">1</span>),%dl
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %dl,-<span style="color:#ae81ff">0x31</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x28</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rcx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    (%rax,%rcx,<span style="color:#ae81ff">1</span>),%dl
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x20</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rcx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %dl,(%rax,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x31</span>(%rbp),%dl
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x28</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rcx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %dl,(%rax,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    <span style="color:#66d9ef">$0x1</span>,%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rax,-<span style="color:#ae81ff">0x30</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jmpq</span>   <span style="color:#ae81ff">418</span><span style="color:#66d9ef">bd8</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0x28</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pop</span>    %rbp
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">retq</span>   
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">nopl</span>   (%rax)
+</span></span></code></pre></div><p><em>gcc -O0</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#a6e22e">memswap_generic</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">&gt;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">endbr64</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">push</span>   %rbp
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rsp,%rbp
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rdi,-<span style="color:#ae81ff">0x28</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rsi,-<span style="color:#ae81ff">0x30</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rdx,-<span style="color:#ae81ff">0x38</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x28</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rax,-<span style="color:#ae81ff">0x10</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x30</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %rax,-<span style="color:#ae81ff">0x8</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movq</span>   <span style="color:#66d9ef">$0x0</span>,-<span style="color:#ae81ff">0x18</span>(%rbp)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x18</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cmp</span>    -<span style="color:#ae81ff">0x38</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jae</span>    <span style="color:#ae81ff">62</span><span style="color:#66d9ef">bd</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0x7a</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x10</span>(%rbp),%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x18</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    %rdx,%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movzbl</span> (%rax),%eax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %al,-<span style="color:#ae81ff">0x19</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x8</span>(%rbp),%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x18</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    %rdx,%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x10</span>(%rbp),%rcx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x18</span>(%rbp),%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    %rcx,%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movzbl</span> (%rax),%eax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %al,(%rdx)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x8</span>(%rbp),%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    -<span style="color:#ae81ff">0x18</span>(%rbp),%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    %rax,%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movzbl</span> -<span style="color:#ae81ff">0x19</span>(%rbp),%eax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %al,(%rdx)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">addq</span>   <span style="color:#66d9ef">$0x1</span>,-<span style="color:#ae81ff">0x18</span>(%rbp)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jmp</span>    <span style="color:#ae81ff">626</span><span style="color:#66d9ef">f</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0x2c</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">nop</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pop</span>    %rbp
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">retq</span>
+</span></span></code></pre></div><h3 id="optimized----o2-o3">Optimized - <code>-O2</code>/<code>-O3</code></h3>
+<p>At <code>-O2</code> we will see that clang finds that it can use the SSE-registers to copy the data and gives us a huge speedup at the cost of roughly 2.5x the code size. Huge in this case is 9600 us vs 310 us, i.e. near 31 times faster!</p>
+<p>If we look at the generated assembly we can see that the meat-and-potatoes of this function just falls down to copying the data with SSE vector-registers + a preamble that handles all bytes that are not an even multiple of 16, i.e. can&rsquo;t be handled by the vector registers.</p>
+<p>Listing the assembly generated here would be quite verbose, but the main loop doing the heavy lifting looks like this:</p>
+<p><em>clang -O2/-O3</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>    <span style="color:#75715e"># ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e"># 401aa0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">movups</span> (%rdi,%rcx,<span style="color:#ae81ff">1</span>),%xmm0
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> <span style="color:#ae81ff">0x10</span>(%rdi,%rcx,<span style="color:#ae81ff">1</span>),%xmm1
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> (%rsi,%rcx,<span style="color:#ae81ff">1</span>),%xmm2
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> <span style="color:#ae81ff">0x10</span>(%rsi,%rcx,<span style="color:#ae81ff">1</span>),%xmm3
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm2,(%rdi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm3,<span style="color:#ae81ff">0x10</span>(%rdi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm0,(%rsi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm1,<span style="color:#ae81ff">0x10</span>(%rsi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> <span style="color:#ae81ff">0x20</span>(%rdi,%rcx,<span style="color:#ae81ff">1</span>),%xmm0
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> <span style="color:#ae81ff">0x30</span>(%rdi,%rcx,<span style="color:#ae81ff">1</span>),%xmm1
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> <span style="color:#ae81ff">0x20</span>(%rsi,%rcx,<span style="color:#ae81ff">1</span>),%xmm2
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> <span style="color:#ae81ff">0x30</span>(%rsi,%rcx,<span style="color:#ae81ff">1</span>),%xmm3
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm2,<span style="color:#ae81ff">0x20</span>(%rdi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm3,<span style="color:#ae81ff">0x30</span>(%rdi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm0,<span style="color:#ae81ff">0x20</span>(%rsi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movups</span> %xmm1,<span style="color:#ae81ff">0x30</span>(%rsi,%rcx,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    <span style="color:#66d9ef">$0x40</span>,%rcx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    <span style="color:#66d9ef">$0xfffffffffffffffe</span>,%r9
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jne</span>    <span style="color:#ae81ff">401</span><span style="color:#66d9ef">aa0</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic_noinline</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0xb0</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...
+</span></span></span></code></pre></div><p>This code is fast! And if I were to guess there is some heuristic in clang that detects the pattern of swapping memory buffers and have a fast-path for it and that we are not seeing any &ldquo;clever&rdquo; auto-vectorization (said by &ldquo;not an expert (tm)&rdquo;). If I&rsquo;m wrong I would love to hear about it so that I can make a clarification here!</p>
+<p>We can also observe that clang generates identical code with <code>-O3</code>, this is something that will show up consistently through out this article.</p>
+<p>Now lets look at gcc as that is way more interesting.</p>
+<p><em>gcc -O2</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#a6e22e">memswap_generic_noinline</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">&gt;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">endbr64</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">test</span>   %rdx,%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">je</span>     <span style="color:#ae81ff">3</span><span style="color:#66d9ef">ae9</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic_noinline</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0x29</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">xor</span>    %eax,%eax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">nopl</span>   <span style="color:#ae81ff">0x0</span>(%rax,%rax,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movzbl</span> (%rdi,%rax,<span style="color:#ae81ff">1</span>),%ecx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">movzbl</span> (%rsi,%rax,<span style="color:#ae81ff">1</span>),%r8d
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %r8b,(%rdi,%rax,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mov</span>    %cl,(%rsi,%rax,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">add</span>    <span style="color:#66d9ef">$0x1</span>,%rax
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cmp</span>    %rax,%rdx
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jne</span>    <span style="color:#ae81ff">3</span><span style="color:#66d9ef">ad0</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">memswap_generic_noinline</span>(<span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">void</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>)<span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">0x10</span><span style="color:#960050;background-color:#1e0010">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">retq</span>   
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">nopw</span>   <span style="color:#ae81ff">0x0</span>(%rax,%rax,<span style="color:#ae81ff">1</span>)
+</span></span></code></pre></div><p>First of we see that gcc generates really small code with -02, just 42 bytes. Code that is way slower than clang but still a great improvement over the non optimized code, 9600 us vs 2450 us, nearly 4 times faster. It has just generated a really simple loop and removed some general debug-overhead (such as keeping <code>bytes</code> in its own register and loading/storing it).</p>
+<p>In <code>-O3</code> however&hellip; now we reach the same perf as clang in -02, but with double the code size, what is going on here?
+Well, loop-unrolling :)</p>
+<blockquote>
+<p>using <a href="https://godbolt.org/">compiler explorer</a> we can see that msvc is generating similar code as <code>gcc</code> for <code>/O2</code> and also quite similar code for <code>/O3</code>, i.e. loop-unrolling!</p>
+</blockquote>
+<h3 id="small----os">Small - <code>-Os</code></h3>
+<p>In <code>-Os</code> both clang and gcc generate almost identical code, and that is code very close to what gcc generates in <code>-02</code>. Really small, efficient &ldquo;enough&rdquo;&hellip; ok I guess.</p>
+<h2 id="use-memcpy-in-chunks">Use memcpy() in chunks</h2>
+<p>So what can we do to generate better code on gcc in <code>-O2</code>? How about we try to just change the copy to use <code>memcpy()</code> instead? I.e. using <code>memcpy()</code> in chunks of, lets say 256 bytes? This should hopefully also improve our perf in <code>-O0</code></p>
+<p>Something like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">memswap_memcpy</span>( <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr1, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr2, size_t bytes )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr1;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> tmp[<span style="color:#ae81ff">256</span>];
+</span></span><span style="display:flex;"><span>    size_t chunks <span style="color:#f92672">=</span> bytes <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(tmp);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> chunks; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        size_t offset <span style="color:#f92672">=</span> i <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp);
+</span></span><span style="display:flex;"><span>        memcpy(tmp,         s1 <span style="color:#f92672">+</span> offset, <span style="color:#66d9ef">sizeof</span>(tmp));
+</span></span><span style="display:flex;"><span>        memcpy(s1 <span style="color:#f92672">+</span> offset, s2 <span style="color:#f92672">+</span> offset, <span style="color:#66d9ef">sizeof</span>(tmp));
+</span></span><span style="display:flex;"><span>        memcpy(s2 <span style="color:#f92672">+</span> offset, tmp,         <span style="color:#66d9ef">sizeof</span>(tmp));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    memcpy(tmp,                       s1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(tmp) );
+</span></span><span style="display:flex;"><span>    memcpy(s1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), s2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(tmp) );
+</span></span><span style="display:flex;"><span>    memcpy(s2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), tmp,                       bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(tmp) );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>First, lets compare with the generic implementation.
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_generic_memcpy_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_generic_memcpy_time.png" alt="" title="memswap_memcpy, time for 4MB"></a></p>
+<p>&hellip; and lets just look at the memcpy-versions by them self.
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_memcpy_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_memcpy_time.png" alt="" title="memswap_memcpy, time for 4MB"></a></p>
+<p>Now this is better! Both for clang ang gcc we are outperforming the &lsquo;generic&rsquo; implementation by a huge margin in debug and we see clang being close to the same perf as <code>-O2</code>/<code>-O3</code> in debug!:</p>
+<p><strong>Debug perf</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>generic</th>
+<th>GB/sec</th>
+<th>memcpy</th>
+<th>GB/sec</th>
+<th>perf</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clang</td>
+<td>9600 us</td>
+<td>0.4</td>
+<td>370 us</td>
+<td>10.6</td>
+<td>26x</td>
+</tr>
+<tr>
+<td>gcc</td>
+<td>9600 us</td>
+<td>0.4</td>
+<td>525 us</td>
+<td>7.4</td>
+<td>18x</td>
+</tr>
+</tbody>
+</table>
+<p>There are a few things that we might want to dig into here!</p>
+<h3 id="why-is-clang-this-much-faster-than-gcc">Why is clang this much faster than gcc?</h3>
+<p>As we can see, clang is generating faster code in all configs, and usually smaller as well. The only exception when it comes to size is <code>-Os</code> where gcc generate really small code.</p>
+<p>But what make the code generated by clang faster? Let&rsquo;s start with a look at <code>-O0</code> and the disassembly of the generated code.</p>
+<p>The actual assembly can be found in the appendix (<a href="appendix/#memswap_generic--o0-clang">clang</a>, <a href="appendix/#memswap_generic--o0-gcc">gcc</a>) as the listing is quite big.</p>
+<blockquote>
+<p>I feel like I&rsquo;m missing something here&hellip; is GCC inlining the copy for x bytes and if the copy is bigger it falls back to memcpy? Need to understand this better.</p>
+</blockquote>
+<p>Looking at the disassembly we can see that gcc has decided to replace many of the calls to <code>memcpy()</code> (however not all of them?) with a whole bunch of unrolled &lsquo;mov&rsquo; instructions while clang has decided to still generate calls to <code>memcpy()</code>.</p>
+<p>Unfortunately for gcc this inlined code is a lot slower than the system <code>memcpy()</code> implementation. That kind of makes sense that calling into an optimized <code>memcpy()</code> from debug code would yield faster execution when copying larger chunks of memory. I would guess that gcc has tried to optimized for the case where the <code>memcpy()</code> would be small and the jump to memcpy would eat all perf-gain? I don&rsquo;t know what heuristics went into this but I&rsquo;ll ascribe it to &ldquo;it is hard to write a compiler and what is best for x is not necessarily best for y&rdquo;.</p>
+<p>One thing we can try is to get gcc to call <code>memcpy()</code> by calling it via a pointer and by that not inline it. Something like this?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">memswap_memcpy</span>( <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr1, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr2, size_t bytes )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> (<span style="color:#f92672">*</span>memcpy_ptr)(<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>, size_t s) <span style="color:#f92672">=</span> memcpy;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr1;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> tmp[<span style="color:#ae81ff">256</span>];
+</span></span><span style="display:flex;"><span>    size_t chunks <span style="color:#f92672">=</span> bytes <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(tmp);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> chunks; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        size_t offset <span style="color:#f92672">=</span> i <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp);
+</span></span><span style="display:flex;"><span>        memcpy_ptr(tmp,         s1 <span style="color:#f92672">+</span> offset, <span style="color:#66d9ef">sizeof</span>(tmp));
+</span></span><span style="display:flex;"><span>        memcpy_ptr(s1 <span style="color:#f92672">+</span> offset, s2 <span style="color:#f92672">+</span> offset, <span style="color:#66d9ef">sizeof</span>(tmp));
+</span></span><span style="display:flex;"><span>        memcpy_ptr(s2 <span style="color:#f92672">+</span> offset, tmp,         <span style="color:#66d9ef">sizeof</span>(tmp));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    memcpy_ptr(tmp,                       s1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(tmp) );
+</span></span><span style="display:flex;"><span>    memcpy_ptr(s1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), s2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(tmp) );
+</span></span><span style="display:flex;"><span>    memcpy_ptr(s2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(tmp), tmp,                       bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(tmp) );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_memcpy_ptr_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_memcpy_ptr_time.png" alt="" title="memswap_memcpy_ptr, time for 4MB"></a></p>
+<p>First observation, clang generate the same code for all configs except <code>-O0</code>.</p>
+<p>Secondly, in <code>-O0</code>, we see WAY better perf on gcc and slightly better on clang. Calling into an optimized <code>memcpy()</code>, albeit via a pointer, instead of a bunch of unrolled <code>mov</code> instructions seem like a smart thing to do :)</p>
+<p>Next up, lets have a look at <code>-O2/-O3</code>, here we see that clang still decide to just call <code>memcpy()</code> and be done with it while gcc tries to be smart and add an inlined vectorized implementation using the SSE-registers (this is the same vectorization that it uses when its just a pure <code>memcpy()</code>).
+Unfortunately for GCC it&rsquo;s generated memcpy-replacement is both slower and bulkier than just calling <code>memcpy()</code> directly resulting in both slower and bigger code :(</p>
+<p>An interesting observation here is that in the measurements we see that clang is faster when going through a function pointer than directly calling <code>memcpy()</code>. I found this quite odd and checked the generated assembly&hellip; and that is identical! As I wrote earlier, all the usual caveats on micro benchmarking apply :D</p>
+<h3 id="memcpy-to-inline-or-not-to-inline-thats-the-question">memcpy(), to inline or not to inline, thats the question?</h3>
+<p>Calling memcpy or inlining, how do the compiler decide if it should call the system <code>memcpy()</code> or generate its own? It is not really clear to me and it would be interesting to dig into but I feel that it is out of the scope of this already big post. Maybe there will be a follow up some day :)</p>
+<h2 id="manual-vectorization-with-sse">Manual vectorization with SSE</h2>
+<p>Next up&hellip; we found on the generic implementations that clangs vectorization performed quite well&hellip; and what the compiler can do we can do as well right?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">memswap_sse2</span>( <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr1, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr2, size_t bytes )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    size_t chunks <span style="color:#f92672">=</span> bytes <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// swap as much as possible with the sse-registers ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span>(size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> chunks; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> i <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> i <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">__m128</span> tmp <span style="color:#f92672">=</span>_mm_loadu_ps(src1);
+</span></span><span style="display:flex;"><span>        _mm_storeu_ps(src1, _mm_loadu_ps(src2));
+</span></span><span style="display:flex;"><span>        _mm_storeu_ps(src2, tmp);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... and swap the remaining bytes with the generic swap ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>);
+</span></span><span style="display:flex;"><span>    memswap_generic(s1, s2, bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Again lets compare with the generic implementation.
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_generic_sse2_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_generic_sse2_time.png" alt="" title="memswap_sse2, time for 4MB"></a></p>
+<p>&hellip; and the sse2-versions among them selfs.
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_sse2_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_sse2_time.png" alt="memswap_sse2,time" title="memswap_sse2, time for 4MB"></a></p>
+<p><strong>Data in table form</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>generic</th>
+<th>GB/sec</th>
+<th>memcpy</th>
+<th>GB/sec</th>
+<th>sse2</th>
+<th>GB/sec</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clang -O0</td>
+<td>9600 us</td>
+<td>0.4</td>
+<td>370 us</td>
+<td>10.56</td>
+<td>1540 us</td>
+<td>2.54</td>
+</tr>
+<tr>
+<td>clang -Os</td>
+<td>2900 us</td>
+<td>1.35</td>
+<td>270 us</td>
+<td>14.47</td>
+<td>280 us</td>
+<td>13.95</td>
+</tr>
+<tr>
+<td>clang -O2</td>
+<td>310 us</td>
+<td>12.6</td>
+<td>318 us</td>
+<td>12.28</td>
+<td>310 us</td>
+<td>12.60</td>
+</tr>
+<tr>
+<td>clang -O3</td>
+<td>307 us</td>
+<td>12.6</td>
+<td>318 us</td>
+<td>12.28</td>
+<td>310 us</td>
+<td>12.60</td>
+</tr>
+<tr>
+<td>gcc   -O0</td>
+<td>9600 us</td>
+<td>0.4</td>
+<td>525 us</td>
+<td>7.44</td>
+<td>1550 us</td>
+<td>2.54</td>
+</tr>
+<tr>
+<td>gcc   -Os</td>
+<td>2900 us</td>
+<td>1.35</td>
+<td>570 us</td>
+<td>6.85</td>
+<td>285 us</td>
+<td>13.71</td>
+</tr>
+<tr>
+<td>gcc   -O2</td>
+<td>2450 us</td>
+<td>1.59</td>
+<td>355 us</td>
+<td>11.0</td>
+<td>320 us</td>
+<td>12.21</td>
+</tr>
+<tr>
+<td>gcc   -O3</td>
+<td>325 us</td>
+<td>12.0</td>
+<td>355 us</td>
+<td>11.0</td>
+<td>320 us</td>
+<td>12.21</td>
+</tr>
+</tbody>
+</table>
+<p>Now we&rsquo;r talking. By sacrificing support on all platforms and only focusing on x86 we can get both compilers to generate code that can compete with the calls to <code>memcpy()</code> in all but the <code>-O0</code> builds. IMHO that is not surprising as we are comparing an optimized <code>memcpy()</code> against unoptimized code, however 1.5ms compared to the generic implementations 9.6ms is nothing to scoff at!</p>
+<blockquote>
+<p>For better perf it seems it might be worth calling the memcpy-version in debug, but should one select different code-paths depending on optimization level&hellip; not really sure? Maybe hide it behind a define and let the user decide?</p>
+<p>Or why not just make a pure assembly implementation right away?</p>
+</blockquote>
+<h2 id="manual-vectorization-with-avx">Manual vectorization with AVX</h2>
+<p>So if going wide with SSE registers was this kind of improvement, will it perform even better if we go wider with AVX? Lets try it out!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">memswap_avx</span>( <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr1, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr2, size_t bytes )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>     size_t chunks <span style="color:#f92672">=</span> bytes <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(__m256);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// swap as much as possible with the avx-registers ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span>(size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> chunks; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> i <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(__m256) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> i <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(__m256) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		__m256 tmp  <span style="color:#f92672">=</span> _mm256_loadu_ps(src1);
+</span></span><span style="display:flex;"><span>		_mm256_storeu_ps(src1, _mm256_loadu_ps(src2));
+</span></span><span style="display:flex;"><span>		_mm256_storeu_ps(src2, tmp);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// ... and swap the remaining bytes with the generic swap ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(__m256);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span> s2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint8_t</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(__m256);
+</span></span><span style="display:flex;"><span>	memswap_generic(s1, s2, bytes <span style="color:#f92672">%</span> <span style="color:#66d9ef">sizeof</span>(__m256));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Avx vs SSE2
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_sse2_avx_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_sse2_avx_time.png" alt="" title="memswap_avx, time for 4MB"></a></p>
+<p>They seem fairly similar in perf even as the AVX implementation is consistently slightly faster in optimized builds. Clang generally performing a bit better than gcc perf-wise.
+However the most interesting thing is seeing that clang in <code>-O0</code> makes such a poor job of AVX compared to SSE while gcc seems to handle it just fine, actually generating faster <code>-O0</code>-code than the SSE-versions.</p>
+<p>We&rsquo;ll get to that later, but first &hellip;</p>
+<h2 id="unrolling">Unrolling!</h2>
+<p>Another thing we found when looking at clangs generated SSE-code was that it was unrolled to do 4 swaps each iteration of the loop. Will that bring us better perf in our sse and avx implementations? lets try!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>	size_t chunks <span style="color:#f92672">=</span> bytes <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span>(size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> chunks <span style="color:#f92672">/</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src1_0 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src1_1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src1_2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src1_3 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src2_0 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src2_1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src2_2 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span> src2_3 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">__m128</span> tmp0 <span style="color:#f92672">=</span> _mm_loadu_ps(src1_0);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">__m128</span> tmp1 <span style="color:#f92672">=</span> _mm_loadu_ps(src1_1);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">__m128</span> tmp2 <span style="color:#f92672">=</span> _mm_loadu_ps(src1_2);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">__m128</span> tmp3 <span style="color:#f92672">=</span> _mm_loadu_ps(src1_3);
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src1_0, _mm_loadu_ps(src2_0));
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src1_1, _mm_loadu_ps(src2_1));
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src1_2, _mm_loadu_ps(src2_2));
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src1_3, _mm_loadu_ps(src2_3));
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src2_0, tmp0);
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src2_1, tmp1);
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src2_2, tmp2);
+</span></span><span style="display:flex;"><span>		_mm_storeu_ps(src2_3, tmp3);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	memswap_sse2((<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr1 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>)), 
+</span></span><span style="display:flex;"><span>				 (<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)ptr2 <span style="color:#f92672">+</span> chunks <span style="color:#f92672">*</span> (<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>)),
+</span></span><span style="display:flex;"><span>				 bytes <span style="color:#f92672">-</span> chunks <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">__m128</span>));
+</span></span></code></pre></div><p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_unroll_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_unroll_time.png" alt="" title="memswap_unroll, time for 4MB"></a></p>
+<p>First of, it seems that we gain a bit of perf yes, nothing major but still nothing to scoff at! However what I find mostly interesting is how, in <code>-O0</code>, clang generate similar code as gcc for SSE, but way worse for AVX, same as for the non-unrolled case? What&rsquo;s going on here?</p>
+<p>If we inspec the generated assembly for the sse-version, both clang and gcc has generated almost the same code. There is an instruction here and there that are a bit different, but generally the same.</p>
+<p>However for AVX the story is different&hellip;</p>
+<blockquote>
+<p>assembly can be found in the appendix, (<a href="appendix/#memswap_avx_unroll--o0-clang">clang</a>, <a href="appendix/#memswap_avx_unroll--o0-gcc">gcc</a>)</p>
+</blockquote>
+<p>first of, if we look at code size, we see that clang has generate a function clocking in at 1817 byte while gcc is clocking in at 1125 bytes.
+All of this diff in size is taken up by the fact tha gcc has decided to use <code>vinsertf128</code> and <code>vextractf128</code> while clang decide to do the same move to and from registers with your plain old <code>mov</code> and quite a few of them.</p>
+<p>I guess gcc has just been coming further in their AVX support than clang. This is not my field of expertise, so I might have missed something crucial here. If I have, please point it out!</p>
+<h2 id="how-about-stdswap_ranges-and-stdswap">How about <code>std::swap_ranges()</code> and <code>std::swap()</code>?</h2>
+<p>Now I guess some of you ask yourself, why doesn&rsquo;t he just use what is given to him by the c++ standard library? It is after all &ldquo;standard&rdquo; and available to all by default, it should be at least decent right?
+So let&rsquo;s add some benchmarks and just test it out! According to all info I can find <a href="https://en.cppreference.com/w/cpp/algorithm/swap_ranges"><code>std::swap_ranges()</code></a> is the way to go.</p>
+<p>So lets add the benchmark, run and&hellip; OH NO!</p>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_all_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_all_time.png" alt="" title="memswap_all, time for 4MB"></a></p>
+<p>On my machine, with -O0, it runs in about 3.3x the time on clang and 4.7x slower on gcc than the generic version we started of with! And compared to the fastest ones that we have implemented ourself its almost 112x slower in debug! Even if we don&rsquo;t &ldquo;cheat&rdquo; and call into an optimized <code>memcpy()</code> we can quite easily device a version that run around 32x faster!</p>
+<p>Even the optimized builds only reach the same perf as we do with the standard &lsquo;generic&rsquo; implementation we had to begin with, not to weird as if you look at its implementation it is basically a really complex way of writing what we had in the generic case!</p>
+<blockquote>
+<p>I&rsquo;m leaving comparing compile-time of &ldquo;generic loop&rdquo; vs &ldquo;memcpy_util&rdquo; vs &ldquo;std::swap_ranges()&rdquo; as an exercise for the reader!</p>
+</blockquote>
+<p>So lets dig into why the performance is so terrible in debug for <code>std::swap_ranges</code>&hellip; should we maybe blame the &ldquo;lazy compiler devs&rdquo;? Nah, not really, the compiler is really just doing what it was told to do, and it was told to generate a lot of function-calls!</p>
+<p>Lets take a trip to <a href="https://godbolt.org/z/Mf7rPrjc1">compiler explorer</a> and have a look at what assembly is actually generated for this.</p>
+<p><em><code>std::swap_ranges()</code></em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>    <span style="color:#a6e22e">swap_it</span>():
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">push</span>    <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">eax</span>, <span style="color:#66d9ef">OFFSET</span> <span style="color:#66d9ef">FLAT</span>:<span style="color:#66d9ef">b1</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">4096</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">edx</span>, <span style="color:#66d9ef">OFFSET</span> <span style="color:#66d9ef">FLAT</span>:<span style="color:#66d9ef">b2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rsi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">edi</span>, <span style="color:#66d9ef">OFFSET</span> <span style="color:#66d9ef">FLAT</span>:<span style="color:#66d9ef">b1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>* <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">swap_ranges</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*<span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">nop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pop</span>     <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>Only 15 lines of assembly&hellip; nothing really interesting here, we&rsquo;ll have to dig deeper. Time to tell <a href="https://godbolt.org/z/Gxj3Gr5za">compiler explorer</a> to show &ldquo;library functions&rdquo;</p>
+<p><em><code>std::swap_ranges()</code> - expanded</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">unsigned</span> <span style="color:#66d9ef">char</span>* <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">swap_ranges</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*<span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*):
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">push</span>    <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sub</span>     <span style="color:#66d9ef">rsp</span>, <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>], <span style="color:#66d9ef">rdi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-16</span>], <span style="color:#66d9ef">rsi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>], <span style="color:#66d9ef">rdx</span>
+</span></span><span style="display:flex;"><span>.L3:
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">cmp</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-16</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">je</span>      <span style="color:#66d9ef">.L2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdx</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rsi</span>, <span style="color:#66d9ef">rdx</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">void</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">iter_swap</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*<span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">add</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>], <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">add</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>], <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">jmp</span>     <span style="color:#66d9ef">.L3</span>
+</span></span><span style="display:flex;"><span>.L2:
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">leave</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">swap_it</span>():
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">push</span>    <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">eax</span>, <span style="color:#66d9ef">OFFSET</span> <span style="color:#66d9ef">FLAT</span>:<span style="color:#66d9ef">b1</span><span style="color:#960050;background-color:#1e0010">+</span><span style="color:#ae81ff">4096</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">edx</span>, <span style="color:#66d9ef">OFFSET</span> <span style="color:#66d9ef">FLAT</span>:<span style="color:#66d9ef">b2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rsi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">edi</span>, <span style="color:#66d9ef">OFFSET</span> <span style="color:#66d9ef">FLAT</span>:<span style="color:#66d9ef">b1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>* <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">swap_ranges</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*<span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">nop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pop</span>     <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">void</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">iter_swap</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*<span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>*):
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">push</span>    <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sub</span>     <span style="color:#66d9ef">rsp</span>, <span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>], <span style="color:#66d9ef">rdi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-16</span>], <span style="color:#66d9ef">rsi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdx</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-16</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rsi</span>, <span style="color:#66d9ef">rdx</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">enable_if</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">__and_</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">__not_</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">__is_tuple_like</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&gt;</span>, <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">is_move_constructible</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span>, <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">is_move_assignable</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&gt;</span>::<span style="color:#66d9ef">value</span>, <span style="color:#66d9ef">void</span><span style="color:#960050;background-color:#1e0010">&gt;</span>::<span style="color:#66d9ef">type</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">swap</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">nop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">leave</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>std:<span style="color:#960050;background-color:#1e0010">:</span><span style="color:#a6e22e">enable_if</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">__and_</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">__not_</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">__is_tuple_like</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&gt;</span>, <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">is_move_constructible</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span>, <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">is_move_assignable</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&gt;</span>::<span style="color:#66d9ef">value</span>, <span style="color:#66d9ef">void</span><span style="color:#960050;background-color:#1e0010">&gt;</span>::<span style="color:#66d9ef">type</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">swap</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">push</span>    <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sub</span>     <span style="color:#66d9ef">rsp</span>, <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>], <span style="color:#66d9ef">rdi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-32</span>], <span style="color:#66d9ef">rsi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">remove_reference</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>::<span style="color:#66d9ef">type</span><span style="color:#960050;background-color:#1e0010">&amp;&amp;</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">move</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">movzx</span>   <span style="color:#66d9ef">eax</span>, <span style="color:#66d9ef">BYTE</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rax</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">BYTE</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-1</span>], <span style="color:#66d9ef">al</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-32</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">remove_reference</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>::<span style="color:#66d9ef">type</span><span style="color:#960050;background-color:#1e0010">&amp;&amp;</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">move</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">movzx</span>   <span style="color:#66d9ef">edx</span>, <span style="color:#66d9ef">BYTE</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rax</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-24</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">BYTE</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rax</span>], <span style="color:#66d9ef">dl</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">lea</span>     <span style="color:#66d9ef">rax</span>, [<span style="color:#66d9ef">rbp-1</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">rax</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">call</span>    <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">remove_reference</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>::<span style="color:#66d9ef">type</span><span style="color:#960050;background-color:#1e0010">&amp;&amp;</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">move</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">movzx</span>   <span style="color:#66d9ef">edx</span>, <span style="color:#66d9ef">BYTE</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rax</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-32</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">BYTE</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rax</span>], <span style="color:#66d9ef">dl</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">nop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">leave</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>std:<span style="color:#960050;background-color:#1e0010">:</span><span style="color:#a6e22e">remove_reference</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>::<span style="color:#66d9ef">type</span><span style="color:#960050;background-color:#1e0010">&amp;&amp;</span> <span style="color:#66d9ef">std</span>::<span style="color:#66d9ef">move</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;&gt;</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#960050;background-color:#1e0010">&amp;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">push</span>    <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>], <span style="color:#66d9ef">rdi</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">rax</span>, <span style="color:#66d9ef">QWORD</span> <span style="color:#66d9ef">PTR</span> [<span style="color:#66d9ef">rbp-8</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pop</span>     <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>Ouch&hellip; we have <code>call</code> instructions generated for <code>std::remove_reference</code>, <code>std::enable_if</code> and <code>std::iter_swap</code> (so much for zero-cost abstractions)&hellip; and there is nothing wrong with that from a compiler standpoint, you told it that you had functions that needed to be called so the compiler will generate the functions call!
+FYI the same code is generated for <code>std::swap</code>, <code>std::array</code> and similar constructs as well.</p>
+<p>Why did the code end up like this? I can&rsquo;t really answer that as I have neither written or, with an emphasis on, maintained a standard library implementation. I see that the generic code that we have there today lead to less code to maintain and maybe the concept of swapping buffers of memcpy:able data is not something that <code>std::swap_ranges</code> isn&rsquo;t often used for but there is absolutely room for improvement here.</p>
+<p>Just having a top-level check for &ldquo;can be moved via <code>memcpy()</code>&rdquo; and have a plain for-loop in that case would generate faster code in debug-builds for all of us.
+But as stated, I have not worked on a standard library implementation nor have I maintained one (a &ldquo;standard library&rdquo; for a commercial, AAA game-engine however!) so I&rsquo;m sure that I have missed lots of details here <em>¯\<em>(ツ)</em>/¯</em></p>
+<p>What rubs me the wrong way with this is that there is nothing in the spec of <code>std::swap_ranges</code> that say that it has to be implemented(!) generically for all underlying types. If the type can be moved with a <code>memcpy</code> it could be implemented by a simple loop (or even better something optimized!).</p>
+<blockquote>
+<p>This was done in Apex:s containers recently and saved us a BUNCH of perf, especially in debug-builds but also in optimized builds!</p>
+</blockquote>
+<p>This is code and APIs used by millions of developers around the world, all of them having less of a chance to use a debug-build to track down their hairy bugs and issues.
+I can see the logic behind &ldquo;just have one implementation for all cases&rdquo; and how that might make sense if you look at code from a &ldquo;purity&rdquo; standpoint but in this case there are such a huge amount of developers that are affected that imho that &ldquo;purity&rdquo; is not important at all. Your assignment as standard library developers should not be to write readable and &ldquo;nice&rdquo; code (or maybe it is and in that case that is not the right focus!) it is to write something that work well for all the developers using your code! And that goes for non-optimized builds as well!</p>
+<h2 id="we-have-only-tested-on-4mb-how-do-we-fare-on-smaller-and-bigger-buffers">We have only tested on 4MB, how do we fare on smaller and bigger buffers?</h2>
+<p>Up until now we have only checked performance on 4MB buffers but what happen in smaller and bigger buffers? Lets add some tests over a range of buffer sizes, we&rsquo;ll add benchmarks on swapping buffers from 16 bytes up to 2GB in &ldquo;reasonable&rdquo; intervals and plot them against each other as a byte/sec vs buffer-size. For comparison we&rsquo;ll also add in a pure <code>memcpy()</code> perf test as a benchmark as well.</p>
+<p>We&rsquo;ll split this section in debug and release build so let the graph-fest begin!</p>
+<h2 id="different-buffer-sizes--o0">Different buffer-sizes, <code>-O0</code></h2>
+<p>Fist of, some graphs for all our implementations.</p>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O0_all.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O0_all.png" alt="" title="size vs speed, gcc, -O0"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O0_all.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O0_all.png" alt="" title="size vs speed, clang, -O0"></a></p>
+<p>It is clear that we have a point ( around 12MB ) where perf flattens out for all implementations and everything above that it not really interesting, this for both compilers. It just happens to be that my machine has an L3 cache size of 12 MB! Another observation is that after this point the best implementation of memswap is roughly half the perf of a pure memcpy which also make sense as that is the mount of memory that has to be copied in a swap :D</p>
+<p>So conclusion 1, our best implementation in debug (just using <code>memcpy()</code>) saturates the memory-bus! Hard to beat that!</p>
+<p>We also see that all other implementations seem to be CPU-bound on different levels as they basically perform the same on all buffer-sizes and is NOT reaching what the memory on the machine should support.</p>
+<blockquote>
+<p>Cpu-cache sizes can be queried on via <code>cat /sys/devices/system/cpu/cpu0/cache/index[0-3]/size</code></p>
+</blockquote>
+<p>Lets remove <code>memcpy()-only</code> and zoom in on sizes under 12MB!</p>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O0_under_12.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O0_under_12.png" alt="" title="size vs speed, gcc, -O0"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O0_under_12.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O0_under_12.png" alt="" title="size vs speed, clang, -O0"></a></p>
+<p>It is clear than calling into memcpy is performing well on both compilers. It is also clear here that, as we concluded earlier, that GCC:s inlining of <code>memcpy()</code> is not doing it any favours here as going via a pointer (i.e. tricking gcc not to inline) is so much faster!</p>
+<p>We also see how much better gcc performs with AVX than clang, we have dug into this before but these graphs shows it clearly.</p>
+<p>Do we have to mention the &ldquo;flat-line&rdquo; that is <code>std::swap_ranges()</code>?</p>
+<p>Other than this, the both compilers do a similar job an all implementations!</p>
+<h2 id="different-buffer-sizes--o2--o3">Different buffer-sizes, <code>-O2</code>/ <code>-O3</code></h2>
+<p>Lets dig into the optimized builds!</p>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O2_all.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O2_all.png" alt="" title="size vs speed, gcc, -O2"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O2_all.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O2_all.png" alt="" title="size vs speed, clang, -O2"></a></p>
+<p>First thing we can see here is that over 12MB all implementations just flattens out at &ldquo;memory speed&rdquo; except for the generic implementation and <code>std::swap_ranges()</code> that on GCC performs really bad while on clang the same as the others.</p>
+<p>So lets focus on what happens under the L3-cache boundary and remove the pure-memcpy()!</p>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O2_under_12.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_gcc_O2_under_12.png" alt="" title="size vs speed, gcc, -O0"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O2_under_12.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_size_vs_speed_clang_O2_under_12.png" alt="" title="size vs speed, clang, -O0"></a></p>
+<h2 id="a-short-note-on-code-size">A short note on code size</h2>
+<p>A short note on code size as we haven&rsquo;t really dug into it yet. From my point of view code-size of this code is not really interesting. Back in the old days of the PS3 and SPU:s it definitively was, but today I think there is bigger fish to fry. At least for code like this that tend to only be called in a few spots.
+However if it would be a problem a simple fix would be to just not inline the code as is done now. I doubt that on the kind of buffer-sizes where this would be used that extra call overhead would make any difference what so ever.</p>
+<p>However for other sectors of this business I guess it could be of a lot of importance.</p>
+<p>So just for completeness, lets have a quick look at code size of the different investigated implementations.</p>
+<blockquote>
+<p>At the time of writing I do not have access to a windows-machine for me to test out msvc on but I will add a few observations on generated code fetched via <a href="https://godbolt.org/">compiler explorer</a> but no numbers.</p>
+</blockquote>
+<blockquote>
+<p><strong>dumping function size</strong></p>
+<p>For most readers this is nothing new, but dumping symbol/function-sizes is easily done on most unix:es with the use of &rsquo;nm&rsquo;.</p>
+<p><code>nm --print-size -C local/linux_x86_64/clang/O2/memcpy_util_bench | grep memswap</code></p>
+</blockquote>
+<blockquote>
+<p><code>std::swap_ranges</code> in <code>-O0</code> is an estimate and sum of all non-inlined std functions, functions used are</p>
+</blockquote>
+<p><a href="/images/swapping-memory-and-compiler-optimizations/code_size_O0.png"><img src="/images/swapping-memory-and-compiler-optimizations/code_size_O0.png" alt="" title="code size -O0"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/code_size_Os.png"><img src="/images/swapping-memory-and-compiler-optimizations/code_size_Os.png" alt="" title="code size -Os"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/code_size_O2.png"><img src="/images/swapping-memory-and-compiler-optimizations/code_size_O2.png" alt="" title="code size -O2"></a>
+<a href="/images/swapping-memory-and-compiler-optimizations/code_size_O3.png"><img src="/images/swapping-memory-and-compiler-optimizations/code_size_O3.png" alt="" title="code size -O3"></a></p>
+<p>What is most interesting to note is that GCC is, in most cases, generating much smaller code and seem to optimize for that a lot harder. Could that be due to gcc being used more in software where that is more desireable? I can only guess and it surely seems like it.</p>
+<p>It would be interesting to hear if there is someone with more knowledge about this than me :)</p>
+<h2 id="summary">Summary</h2>
+<p>So what have we learned? Honestly I&rsquo;m not really sure :) Writing compilers that generate good code is hard? I feel that both clang and gcc do a decent job at what is presented to them, of course there are more things you can do if you know your problem up front compared to producing an optimized result from &ldquo;whatever the user throws your way&rdquo;.</p>
+<p>We can also conclude that clang seems to do a better job when it comes to perf compared to GCC, that on the other hand generate smaller code on average. This being true with one caveat, that GCC does a much better job with AVX than clang.</p>
+<p>This might seem like ordinary bashing of c++ standard libraries and I really didn&rsquo;t want it to be&hellip; but debug perf is important! Compile time is important! and it seems like it isn&rsquo;t really taken into account when it should be.
+I&rsquo;m not alone in seeing this. In the last year we have seen other more &ldquo;c++-leaning&rdquo; developers also raising this issue. For example <a href="https://twitter.com/supahvee1234">Vittorio Romeo</a> has been raising that <code>std::move</code>, <code>std::forward</code> and other &ldquo;small&rdquo; function generate expensive calls in debug that really isn&rsquo;t needed and has been pushing for changes to both clang and gcc + it now seems that msvc is also coming along for the ride with <code>[[msvc::intrinsic]]</code></p>
+<p>See:
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe src="https://www.youtube.com/embed/ffFT-gIPCRE" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
+</div>
+</p>
+<p>and:</p>
+<ul>
+<li><a href="https://vittorioromeo.info/index/blog/debug_performance_cpp.html">the sad state of debug performance in c++</a></li>
+<li><a href="https://devblogs.microsoft.com/cppblog/improving-the-state-of-debug-performance-in-c/">Improving the State of Debug Performance in C++</a></li>
+</ul>
+<p>Personally I would just like to see less <code>std::</code> and less meta-programming in the code I work in, but since I work in reality it is kind of hard to avoid so I think work being done on making these kind of things cheaper is very welcome!</p>
+<p>It might also be worth noting that I quickly tested out some &ldquo;auto-vectorization&rdquo; pragmas and that kind of stuff as well and at a first glance it didn&rsquo;t change the generated code one bit. I might have done something wrong or just missed something, I don&rsquo;t think so but I have been proven wrong before :D</p>
+<blockquote>
+<p>Also, during me writing this post gcc was updated in my ubuntu dist and I saw that some of the perf-issues noticed in here had been fixed. We&rsquo;ll see if it is noticeable enough to warrant me writing more on the topic!</p>
+</blockquote>
+<p>So were do we go from here? There are a lot of things that might be worth looking into in followup posts, things such as:</p>
+<ul>
+<li>What do MSVC do?</li>
+<li>Is it worth looking into some inline assembly in some parts of the code?</li>
+<li>optimizing (and making sure they work as expected) the other functions in <a href="https://github.com/wc-duck/memcpy_util">memcpy_util.h</a>.</li>
+</ul>
+<p>Last words. Was this interesting? Where did I mess up? Want to see more like this? Hit me up on mastodoon and/or &ldquo;the bird site&rdquo; and tell me! (As long as you are fairly nice!)
+If something interesting pops out I might do a followup :)</p>
+<h2 id="apendix">Apendix</h2>
+<p><a href="appendix">Appendix</a> with asm-listings and tables!</p>
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="https://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="https://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+            <a
+              href="https://kihlander.net/tags/optimization/"
+              >optimization</a
+            >&nbsp;
+          
+            <a
+              href="https://kihlander.net/tags/memcpy_util/"
+              >memcpy_util</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://mastodon.gamedev.place/@wcduck" name="mastodon">
+        <em class="fab fa-mastodon"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2023
+      
+        &nbsp;/&nbsp;
+        <a href="https://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>
