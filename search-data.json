@@ -5,6 +5,16 @@
         
             {
                 "id": 0,
+                "href": "https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/",
+                "title": "Looking at c for better closures in c++",
+                "section": "post",
+                "date" : "2024.01.07",
+                "body": " Note: before we begin, finding a name for this post was really hard!\nIn this post I\u0026rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn\u0026rsquo;t seen before either. Probably it\u0026rsquo;s not something new and some of you will probably just say \u0026ldquo;yeah yeah, nothing new under the sun\u0026rdquo; but it\u0026rsquo;s probably worth a few words!\nMost of us has been in situations where we need to pass a function + userdata to another function. It might be that we have some kind of \u0026ldquo;for each\u0026rdquo; over some collection of things or polling events from a system.\nI, for example, like to write systems that need polling that can also emit events/results that happened since the last poll for the user to react to. One convenient way to do this is to just pass a callback to your poll-function that is called per item. This will not \u0026ldquo;force\u0026rdquo; any storage on the user such as returning an allocated array would do and leave the actual decision on what to do with the data to the user.\nSomething like this:\nstruct the_system_msg { msg_type type; // ... payload goes here! ... union { struct event1 { // ... payload if type == event1 }; struct event2 { // ... payload if type == event2 }; } evt; }; void the_system_poll(the_system sys, /*callback here*/); void poll_me(the_system sys) { some_other_system\u0026amp; other = get_other_system(); // our poll-function will give you a callback for x amount of events... you don\u0026#39;t know how many... but \u0026#34;a potential bunch\u0026#34;. the_system_poll(sys, [\u0026amp;other](const the_system_msg\u0026amp; msg) { switch(msg.type) { case type_event1: other.do_stuff_with_x(msg.event1); break; case type_event2: other.do_stuff_with_y(msg.event2); break; } }); } As you can see I left out \u0026lsquo;callback\u0026rsquo; here as that is what we are about to come to now.\nstd::function The canonical way of doing this in c++ is to reach for std::function, something like this:\n#include \u0026lt;functional\u0026gt; void the_system_poll(the_system sys, std::function\u0026lt;void(const the_system_msg\u0026amp; msg)\u0026gt; cb); This works\u0026hellip; but it is not without its drawbacks!\nMemory allocations First of, std::function can allocate memory on the heap, something that would be wasteful if we aren\u0026rsquo;t saving our closure, i.e. the lifetime of the closure is the same as function-call. All modern std::-lib implementations seem to optimize that by putting smaller closures into the std::function object itself, but bigger ones is forced to end up on the heap.\nThis behavior can lead to your application all of a sudden starting to allocate without you seeing it. For example you might need to \u0026ldquo;just capture one more int\u0026rdquo; or a struct \u0026ldquo;grows\u0026rdquo; without you seeing it. Boom, allocation creeping in!\nIs an allocation here and there a massive problem? Probably not for code like this BUT, at least in my line of work, trying to not do work that you don\u0026rsquo;t have to is \u0026ldquo;in the job description\u0026rdquo; and one day that thing you were calling 3 times a frame is now being called all over the place.\nCompile times Including \u0026lt;functional\u0026gt; on my system adds a shitton (metric!) of lines to compile to you pre-processed c++-file! However you turn this, throwing more code on your compiler to work with will probably not make it complete faster! We will get to numbers and comparisons later on!\nDebug performance Thirdly, debug-performance! Yes, we should care about performance in debug-builds as optimized builds can be way harder to use when tracking down issues.\nThe fact that, at work, I can run a full debug-build of Apex (the Avalanche Engine) and still reach decent performance is worth a lot to your day to day productivity!\nAs we can see in a previous post about swapping memory we can see that the c++ standard library can be far from great in a non optimized build (and honestly in an optimized one as well)!\nJust pass the closure! So, what can we do instead? \u0026lsquo;Just pass the closure\u0026rsquo; is the simplest solution! This is suggested by many, for example in this article.\nSomething like this:\ntemplate\u0026lt;typename FUNC\u0026gt; void the_system_poll(the_system sys, FUNC\u0026amp;\u0026amp; cb) { // ... implement me ... } Yay, no more std::function! This should solve all the lines included from \u0026lt;functional\u0026gt; and will probably make your perf in a -O0 build quite a bit better! Yet again we will come to numbers later!\nSo all numbers look great (trust me!), we are all happy right? RIGHT? Well not quite. What does the above code really mean? It means that all our code in the_system_poll() need to be inlined due to the template. For a smaller function this is just fine and maybe even desired! But in this case it might mean that we need to inline a big part of a bigger system! What if the_system need a lot of lines of code to implement or that the implementation of the storage for the_system requires a whole bunch of expensive includes to just be able to be declared. We would not want to expose that to your humble user just by including the_system.h!\nHeader hygiene is a virtue!\nc-style So how do we handle this? As usual a good way to solve this is to look at a c-style interface. This is something I personally see as the solution to many problems and maybe a topic for its own post some day :)\nWhen I say c-style here doesn\u0026rsquo;t necessarily mean full c, just functions + handles + structs. A reference here and a constexpr there is just fine.\nBut how would this look if you would do it in c? Probably something like this:\nvoid the_system_poll(the_system sys, void(*cb)(the_system_msg\u0026amp; msg, void* userdata), void* userdata); I.e. we would pass a function pointer and userdata as a void* and on the implementation side cast that void* back to what we originally passed in. By doing this we can put the entire implementation of this function in a .c/.cpp-file and hide it for the user! This works but the ergonomics maybe leave a bit to be desired:\n// ... first we need to declare our payload sturct to pass to our callback ... struct my_user_data { int data1; int data2; }; // ... and then declare the actuall callback function ... static void poll_function(const the_system_msg\u0026amp; msg, void* user_data) { // ... cast our passed in userdata to our payload struct ... my_user_data* ud = (my_user_data*)user_data; // ... run the actual code that we want to run ... use_me(ud-\u0026gt;data1); use_me(ud-\u0026gt;data2); } void poll_me(the_system sys) { // ... declare our payload sturct and fill out the data we need to use ... my_user_data ud; ud.data1 = some_value1; ud.data1 = some_value2; // ... and call it ... the_system_poll(sys, poll_function, \u0026amp;ud); } That is quite a bit of code and honestly quite a few things to get wrong.\nKihlanders reverse But what if we combine these 2 approaches? I.e. use the classical c-style function + userdata to be able to hide away all implementation and use the templated closure for ergonomics! If we combine them it could look something like this:\nvoid the_system_poll(the_system sys, void(*cb)(the_system_msg\u0026amp; msg, void* userdata), void* userdata); template\u0026lt;typename FUNC\u0026gt; void the_system_poll(the_system sys, FUNC\u0026amp;\u0026amp; cb) { // ... add a second wrapper-function to handle the casting for us ... auto wrap = [](const the_system_msg\u0026amp; msg, void* userdata) { // ... as we passed a pointer to the closure as userdata // we can just cast it back here and call it and we get // all the payload etc for free ... FUNC\u0026amp; f = *(FUNC*)userdata; f(msg); }; // ... pass the wrapper as the callback to the c-function and the // generated closure as userdata ... the_system_poll(sys, wrap, \u0026amp;cb); } If this hasn\u0026rsquo;t been described before I would like to dub this Kihlanders reverse, it has a nice ring to it right?\nThis will make it possible to write this:\nvoid poll_me(the_system sys) { the_system_poll(sys, [\u0026amp;some_value1, \u0026amp;some_value2]()){ use_me(some_value1); use_me(some_value2); }); } Just by introducing a 5 line wrapper we can give the user all the ergonomics of the original std::function without much of the cost! We also have an API that is compatible with c and all the languages that can call c by just adding a pre-processor check for __cplusplus:\n#if defined(__cplusplus) // .... #endif Numbers! But enough talk about perf without numbers!\nBefore we start, this is the standard disclaimer about micro benchmarks. They are hard and might be inaccurate compared to a real world scenario etc. You know the drill!\nAll this work has been done on my laptop with the following specs:\nCPU Intel i7-10710U\nRAM 16GB LPDDR3 at 2133 MT/s (around 17GB/sec peak bandwidth)\nAnd I\u0026rsquo;ll use the compilers that I have installed, that being\nClang: 14.0.0-1ubuntu1.1\nGCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0\nCompile time First of, lets look at the compile-time claim. Let\u0026rsquo;s create the smallest possible test-file that we can create:\n#if defined(USE_STD_FUNC) #include \u0026lt;functional\u0026gt; #endif struct the_system_msg { int i; }; #if defined(USE_STD_FUNC) void func(int sys, std::function\u0026lt;void(const the_system_msg\u0026amp;)\u0026gt; cb); #else void func(int sys, void(*)(const the_system_msg\u0026amp; msg, void* userdata), void* user_data); template\u0026lt;typename FUNC\u0026gt; void func(int sys, FUNC\u0026amp;\u0026amp; cb) { auto wrap = [](const the_system_msg\u0026amp; msg, void* userdata) { FUNC\u0026amp; f = *(FUNC*)userdata; f(msg); }; func(sys, wrap, \u0026amp;cb); } #endif Timing this small file is probably not that realistic, but lets do it anyways and see what we end up with. We can start with noticing that the time is basically the same across all the optimization levels (-O0, -O2, -O3, -Os). Not really surprising as we don\u0026rsquo;t give the compiler anything to work with\u0026hellip;\nBut just using time we get roughly these numbers for clang and gcc.\nwc-duck@WcLaptop:~/kod/functor_test$ time clang++ -c -O2 functor_preproc.cpp -o functor_preproc.o real 0m0,031s user 0m0,009s sys 0m0,023s wc-duck@WcLaptop:~/kod/functor_test$ time clang++ -c -O2 -D USE_STD_FUNC functor_preproc.cpp -o functor_preproc.o real 0m0,105s user 0m0,084s sys\t0m0,021s wc-duck@WcLaptop:~/kod/functor_test$ time g++ -c -O2 functor_preproc.cpp -o functor_preproc.o real 0m0,022s user 0m0,009s sys 0m0,008s wc-duck@WcLaptop:~/kod/functor_test$ time g++ -c -O2 -D USE_STD_FUNC functor_preproc.cpp -o functor_preproc.o real 0m0,174s user 0m0,137s sys 0m0,032s This is highly unscientific, but we see a diff in cost just compiling the code and in a bigger codebase things like this tend to add up. But where is the time spent. We could dig in deeper with something like clang -ftime-report but it is probably enough to just look at the pre-processed code.\nPreprocessed code for the non-std::function code is about the same lines that we wrote, i.e.\n# 1 \u0026#34;functor_preproc.cpp\u0026#34; # 1 \u0026#34;\u0026lt;built-in\u0026gt;\u0026#34; 1 # 1 \u0026#34;\u0026lt;built-in\u0026gt;\u0026#34; 3 # 404 \u0026#34;\u0026lt;built-in\u0026gt;\u0026#34; 3 # 1 \u0026#34;\u0026lt;command line\u0026gt;\u0026#34; 1 # 1 \u0026#34;\u0026lt;built-in\u0026gt;\u0026#34; 2 # 1 \u0026#34;functor_preproc.cpp\u0026#34; 2 struct the_system_msg { int i; }; void func(int sys, void(*)(const the_system_msg\u0026amp; msg, void* userdata), void* user_data); template\u0026lt;typename FUNC\u0026gt; void func(int sys, FUNC\u0026amp;\u0026amp; cb) { auto wrap = [](const the_system_msg\u0026amp; msg, void* userdata) { FUNC\u0026amp; f = *(FUNC*)userdata; f(msg); }; func(sys, wrap, \u0026amp;cb); } I\u0026rsquo;m pretty sure that you don\u0026rsquo;t want me to paste out the thousands of lines that you get with std::function. Depending on what c++-version you target you get these numbers, these are lines with all empty lines stripped via:\ng++ -E functor_preproc.cpp -DUSE_STD_FUNC -std=c++98 | sed \u0026#39;/^\\s*#/d;/^\\s*$/d\u0026#39; | wc -l It is worth noting that I decided to strip out empty lines as the preprocessor seem to produce a lot of it. My really uneducated guess is that it is just faster for the preprocessor to strip out \u0026ldquo;ifdef\u0026rdquo;:ed code by switching the lines with new-lines instead of removing them from the data properly? But that is just a guess. However I think it is much fairer to count the lines without the empty lines as a compiler probably handle these lines quickly.\nHowever, here are the line counts for a few different c++ versions.\nstd=c++98 std=c++11 std=c++14 std=c++17 std=c++20 clang 505 8477 9252 23622 27211 gcc 505 8477 9248 23589 27180 That is a lot of lines compared to 14 that was the non std-one! Regardless of how you put it, that will take time to process. And this is BEFORE we have actually started to turn all these lines into instructions for the CPU to execute!\nPerformance Next up is performance, how do the different solutions stand up against each other? To test this out we\u0026rsquo;ll write a benchmark app using the excellent ubench.h.\nfunctor_bench.cpp\nI have added a few different test-cases to benchmark, both tested with a \u0026lsquo;small\u0026rsquo; capture and \u0026lsquo;big\u0026rsquo; one where the \u0026lsquo;big\u0026rsquo; one should be big enough to not trigger small-object optimization. All \u0026ldquo;calling back into user code\u0026rdquo; 1000-times per iteration.\nstd::function passed to a non-inlined function std::function passed to an inlined function just pass a simple closure to an inlined function a c-style function passing a void* userdata and a Kihlanders reverse one. Let\u0026rsquo;s see how they perform, these are the times captured by the benchmark.\ngcc -O0 gcc -O2 clang -O0 clang -O2 std::function small 32.5us 1.3us 24.2us 1.5us std::function big 29.2us 1.3us 23.2us 1.5us inlined std::function small 32.9us 1.5us 24.2us 1.5us inlined std::function big 27.6us 1.5us 23.2us 1.8us inlined closure small 3.2us 0.02us 2.9us 0.02us inlined closure big 3.2us 0.02us 2.9us 0.02us c-style small 5.9us 1.3us 4.6us 1.4us c-style big 5.9us 1.3us 4.4us 1.4us Kihlanders reverse small 8.3us 1.3us 5.3us 1.4us Kihlanders reverse big 8.3us 1.3us 5.4us 1.4us these are mean values of the above tests. To note is also that the results are not super stable but \u0026lsquo;within reason\u0026rsquo; determined by me.\nSo what can we take away from these numbers.\nOne takeaway is, just as in swapping memory-article, debug-performance of std:: is just horrible. You are paying a lot for that \u0026ldquo;convenience\u0026rdquo; in your non-optimized build. I find it really \u0026ldquo;amusing\u0026rdquo; that the small-object version is actually significantly slower than the bigger closure in debug on gcc!\nSecondly an inline function is, obviously, faster in all builds and in -O2 it is taken as far as both gcc and clang just calculating the answer to my benchmark right away and just store an int directly. Interestingly they can\u0026rsquo;t do the same thing with the std::function version even if you inline it. Throwing complexity at the compiler will force the compiler to spend time on the complexity instead of optimizing the actual code!\nI also find it interesting that clang seems to do quite a bit better work with all of the code in -O0 while gcc performs better in -O2.\nFinally we see that Kihlanders reverse seem to add no overhead to any of the non-inlined alternatives and generally better than std::function in all cases.\nConclusion According to me this is a really nifty way to provide your users with a good API at low cost in both compile-time and performance. I, for example, use this in https://github.com/wc-duck/dirutil and it\u0026rsquo;s dir_walk() function and in quite a few API:s in the \u0026ldquo;Apex Engine\u0026rdquo;. It is obviously not for all your usecases as you can\u0026rsquo;t store the closure and using something like this for a sort or similar that you want inlined is probably not a good idea.\nSo to close this article, was this useful? Did I miss something? Feel free to reach out and tell me (if you are civil that is :) ).\n"
+            }
+    
+        ,
+            {
+                "id": 1,
                 "href": "https://kihlander.net/post/swapping-memory-and-compiler-optimizations/",
                 "title": "Swapping memory and compiler optimizations",
                 "section": "post",
@@ -14,7 +24,7 @@
     
         ,
             {
-                "id": 1,
+                "id": 2,
                 "href": "https://kihlander.net/post/a-zig-diary/",
                 "title": "A Zig Diary",
                 "section": "post",
@@ -24,7 +34,7 @@
     
         ,
             {
-                "id": 2,
+                "id": 3,
                 "href": "https://kihlander.net/post/when-memcpy-change/",
                 "title": "When memcpy() change!",
                 "section": "post",
@@ -34,7 +44,7 @@
     
         ,
             {
-                "id": 3,
+                "id": 4,
                 "href": "https://kihlander.net/post/macros-and-lambdas/",
                 "title": "Macros and Lambdas",
                 "section": "post",
@@ -44,7 +54,7 @@
     
         ,
             {
-                "id": 4,
+                "id": 5,
                 "href": "https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
@@ -54,7 +64,7 @@
     
         ,
             {
-                "id": 5,
+                "id": 6,
                 "href": "https://kihlander.net/about/",
                 "title": "About",
                 "section": "",
@@ -64,7 +74,7 @@
     
         ,
             {
-                "id": 6,
+                "id": 7,
                 "href": "https://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
@@ -74,7 +84,7 @@
     
         ,
             {
-                "id": 7,
+                "id": 8,
                 "href": "https://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
@@ -84,7 +94,7 @@
     
         ,
             {
-                "id": 8,
+                "id": 9,
                 "href": "https://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
@@ -94,7 +104,7 @@
     
         ,
             {
-                "id": 9,
+                "id": 10,
                 "href": "https://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
@@ -104,7 +114,7 @@
     
         ,
             {
-                "id": 10,
+                "id": 11,
                 "href": "https://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
@@ -114,7 +124,7 @@
     
         ,
             {
-                "id": 11,
+                "id": 12,
                 "href": "https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
@@ -124,7 +134,7 @@
     
         ,
             {
-                "id": 12,
+                "id": 13,
                 "href": "https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
@@ -134,7 +144,7 @@
     
         ,
             {
-                "id": 13,
+                "id": 14,
                 "href": "https://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
@@ -144,7 +154,7 @@
     
         ,
             {
-                "id": 14,
+                "id": 15,
                 "href": "https://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",

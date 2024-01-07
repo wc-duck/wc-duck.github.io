@@ -14,6 +14,15 @@
 		<atom:link href="/tags/utf8/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Looking at c for better closures in c&#43;&#43;</title>
+			<link>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</link>
+			<pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
+			<guid>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</guid>
+			<description>Note: before we begin, finding a name for this post was really hard!
+In this post I&amp;rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&amp;rsquo;t seen before either. Probably it&amp;rsquo;s not something new and some of you will probably just say &amp;ldquo;yeah yeah, nothing new under the sun&amp;rdquo; but it&amp;rsquo;s probably worth a few words!</description>
+		</item>
+      	
+		<item>
 			<title>Swapping memory and compiler optimizations</title>
 			<link>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</link>
 			<pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
@@ -95,15 +104,6 @@ Why would you want a class like this you might ask, well we use it for adding a 
 			<pubDate>Mon, 07 Aug 2017 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/builtin-resources-and-the-resource-system/</guid>
 			<description>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &amp;ldquo;in passing&amp;rdquo; but will dig down a bit deeper into one &amp;ldquo;feature&amp;rdquo; in it that I find kind of neat. I&amp;rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&amp;rsquo;ll be writing about how I handle builtin resources in the engine.</description>
-		</item>
-      	
-		<item>
-			<title>utf8_lookup, a write up.</title>
-			<link>https://kihlander.net/post/utf8_lookup-writeup/</link>
-			<pubDate>Mon, 26 Jun 2017 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/utf8_lookup-writeup/</guid>
-			<description>I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)
-Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up.</description>
 		</item>
       	
 	</channel>

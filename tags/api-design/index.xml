@@ -1,17 +1,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>tips-n-tricks on What could possibly go wrong?</title>
-		<link>https://kihlander.net/tags/tips-n-tricks/</link>
-		<description>Recent content in tips-n-tricks </description>
+		<title>api-design on What could possibly go wrong?</title>
+		<link>https://kihlander.net/tags/api-design/</link>
+		<description>Recent content in api-design </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
   		<language>en</language>
 		
-		<managingEditor>Page(/tags/tips-n-tricks) (Fredrik Kihlander)</managingEditor>
+		<managingEditor>Page(/tags/api-design) (Fredrik Kihlander)</managingEditor>
     	
-  		<lastBuildDate>Sun, 16 Oct 2022 00:00:00 +0000</lastBuildDate>
+  		<lastBuildDate>Sun, 07 Jan 2024 00:00:00 +0000</lastBuildDate>
 		
-		<atom:link href="/tags/tips-n-tricks/" rel="self" type="application/rss+xml" />
+		<atom:link href="/tags/api-design/" rel="self" type="application/rss+xml" />
 		
 		<item>
 			<title>Looking at c for better closures in c&#43;&#43;</title>

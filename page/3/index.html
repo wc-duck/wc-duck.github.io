@@ -20,8 +20,7 @@
   href="https://kihlander.net/index.xml"
   title="What could possibly go wrong?"
 />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="What could possibly go wrong?"/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="What could possibly go wrong?"/>
 <meta name="twitter:description" content=""/>
 
 
@@ -67,7 +66,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.121.2">
   </head>
   <body>
     
@@ -154,6 +153,31 @@
 
       
         <article class="post-preview">
+  <a href="https://kihlander.net/post/protothreads-with-a-twist/">
+    <h2 class="post-title">&#34;ProtoThreads&#34; with a twist.</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
+void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</p>
+      <a href="https://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Nov 20, 2018
+  
+</span>
+
+  </div>
+</article>
+
+      
+        <article class="post-preview">
   <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/">
     <h2 class="post-title">printf-based TOSTR on the stack</h2>
   </a>
@@ -197,30 +221,6 @@ Why would you want a class like this you might ask, well we use it for adding a 
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
   >&nbsp;Nov 15, 2017
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="https://kihlander.net/post/builtin-resources-and-the-resource-system/">
-    <h2 class="post-title">Builtin resources and the resource-system</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &ldquo;in passing&rdquo; but will dig down a bit deeper into one &ldquo;feature&rdquo; in it that I find kind of neat. I&rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&rsquo;ll be writing about how I handle builtin resources in the engine.</p>
-      <a href="https://kihlander.net/post/builtin-resources-and-the-resource-system/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Aug 7, 2017
   
 </span>
 
@@ -296,7 +296,7 @@ Why would you want a class like this you might ask, well we use it for adding a 
     <p class="credits copyright">
       <a href="https://kihlander.net/about">Fredrik Kihlander</a>
       &nbsp;&copy;
-      2023
+      2024
       
         &nbsp;/&nbsp;
         <a href="https://kihlander.net/">What could possibly go wrong?</a>

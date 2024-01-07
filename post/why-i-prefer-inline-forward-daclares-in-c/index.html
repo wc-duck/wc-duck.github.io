@@ -20,8 +20,7 @@
   href="https://kihlander.net/index.xml"
   title="What could possibly go wrong?"
 />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Why I prefer inline forward-declares in C&#43;&#43;"/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Why I prefer inline forward-declares in C&#43;&#43;"/>
 <meta name="twitter:description" content="Time for a short post on how I usually do the humble forward declare in C&#43;&#43;. I guess this is not something new but it is something I usually do not see in others code so it feels worth sharing.
 So lets start of with just defining what we are talking about just to get everyone on the same page, we are talking about declaring only a class/struct name to the compiler and not having to provide the entire class/struct declaration."/>
 
@@ -68,7 +67,7 @@ So lets start of with just defining what we are talking about just to get everyo
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.121.2">
   </head>
   <body>
     
@@ -195,7 +194,7 @@ to the compiler and not having to provide the entire class/struct declaration. M
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;header1.h&#34;</span><span style="color:#75715e">
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;header2.h&#34;</span><span style="color:#75715e">
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;a_forward_declared_struct.h&#34; // defining the actual struct.</span><span style="color:#75715e">
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;a_forward_declared_struct.h&#34;</span><span style="color:#75715e"> </span><span style="color:#75715e">// defining the actual struct.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">a_function</span>( a_forward_declared_struct<span style="color:#f92672">*</span> ptr )
 </span></span><span style="display:flex;"><span>{
@@ -303,7 +302,7 @@ when you have to.</p>
     <p class="credits copyright">
       <a href="https://kihlander.net/about">Fredrik Kihlander</a>
       &nbsp;&copy;
-      2023
+      2024
       
         &nbsp;/&nbsp;
         <a href="https://kihlander.net/">What could possibly go wrong?</a>

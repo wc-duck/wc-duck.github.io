@@ -20,8 +20,7 @@
   href="https://kihlander.net/index.xml"
   title="What could possibly go wrong?"
 />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="A story about an unexpected ABI break"/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="A story about an unexpected ABI break"/>
 <meta name="twitter:description" content="This is the story of an unexpected ABI break that I thought would be worth documenting.
 At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
 Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed."/>
@@ -69,7 +68,7 @@ Why would you want a class like this you might ask, well we use it for adding a 
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.121.2">
   </head>
   <body>
     
@@ -300,7 +299,7 @@ is built from latest the lib and the exe disagrees on how to pass values to the 
     <p class="credits copyright">
       <a href="https://kihlander.net/about">Fredrik Kihlander</a>
       &nbsp;&copy;
-      2023
+      2024
       
         &nbsp;/&nbsp;
         <a href="https://kihlander.net/">What could possibly go wrong?</a>

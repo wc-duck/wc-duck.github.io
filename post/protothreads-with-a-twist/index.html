@@ -20,8 +20,7 @@
   href="https://kihlander.net/index.xml"
   title="What could possibly go wrong?"
 />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="&#34;ProtoThreads&#34; with a twist."/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="&#34;ProtoThreads&#34; with a twist."/>
 <meta name="twitter:description" content="For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
 void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos&#43;&#43;; for(int i = 0; i &lt; 4; &#43;&#43;i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration."/>
 
@@ -68,7 +67,7 @@ void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.101.0" />
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.121.2">
   </head>
   <body>
     
@@ -625,7 +624,7 @@ Please hit me up on twitter or post in the coro issue-tracker! And remember, the
     <p class="credits copyright">
       <a href="https://kihlander.net/about">Fredrik Kihlander</a>
       &nbsp;&copy;
-      2023
+      2024
       
         &nbsp;/&nbsp;
         <a href="https://kihlander.net/">What could possibly go wrong?</a>

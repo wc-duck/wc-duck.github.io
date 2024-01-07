@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Looking at c for better closures in c&#43;&#43;</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="https://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Looking at c for better closures in c&#43;&#43;"/>
+<meta name="twitter:description" content="Note: before we begin, finding a name for this post was really hard!
+In this post I&rsquo;m going to touch on a c&#43;&#43;-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&rsquo;t seen before either. Probably it&rsquo;s not something new and some of you will probably just say &ldquo;yeah yeah, nothing new under the sun&rdquo; but it&rsquo;s probably worth a few words!"/>
+
+
+
+<link rel="stylesheet" href="https://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.121.2">
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="https://kihlander.net/" class="nav-logo">
+        <img
+          src="https://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Looking at c for better closures in c&#43;&#43;
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Jan 7, 2024
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <blockquote>
+<p>Note: before we begin, finding a name for this post was really hard!</p>
+</blockquote>
+<p>In this post I&rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&rsquo;t seen before either. Probably it&rsquo;s not something new and some of you will probably just say &ldquo;yeah yeah, nothing new under the sun&rdquo; but it&rsquo;s probably worth a few words!</p>
+<p>Most of us has been in situations where we need to pass a function + userdata to another function. It might be that we have some kind of &ldquo;for each&rdquo; over some collection of things or polling events from a system.</p>
+<p>I, for example, like to write systems that need polling that can also emit events/results that happened since the last poll for the user to react to. One convenient way to do this is to just pass a callback to your poll-function that is called per item.
+This will not &ldquo;force&rdquo; any storage on the user such as returning an allocated array would do and leave the actual decision on what to do with the data to the user.</p>
+<p>Something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">the_system_msg</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    msg_type type;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... payload goes here! ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">union</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">event1</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ... payload if type == event1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">event2</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ... payload if type == event2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        };
+</span></span><span style="display:flex;"><span>    } evt;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">the_system_poll</span>(the_system sys, <span style="color:#75715e">/*callback here*/</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">poll_me</span>(the_system sys)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    some_other_system<span style="color:#f92672">&amp;</span> other <span style="color:#f92672">=</span> get_other_system();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// our poll-function will give you a callback for x amount of events... you don&#39;t know how many... but &#34;a potential bunch&#34;.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    the_system_poll(sys, [<span style="color:#f92672">&amp;</span>other](<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">switch</span>(msg.type)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> type_event1:
+</span></span><span style="display:flex;"><span>                other.do_stuff_with_x(msg.event1);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> type_event2:
+</span></span><span style="display:flex;"><span>                other.do_stuff_with_y(msg.event2);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As you can see I left out &lsquo;callback&rsquo; here as that is what we are about to come to now.</p>
+<h2 id="stdfunction">std::function</h2>
+<p>The canonical way of doing this in c++ is to reach for <code>std::function</code>, something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;functional&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">the_system_poll</span>(the_system sys, std<span style="color:#f92672">::</span>function<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span>(<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg)<span style="color:#f92672">&gt;</span> cb);
+</span></span></code></pre></div><p>This works&hellip; but it is not without its drawbacks!</p>
+<h3 id="memory-allocations">Memory allocations</h3>
+<p>First of, <code>std::function</code> can allocate memory on the heap, something that would be wasteful if we aren&rsquo;t saving our closure, i.e. the lifetime of the closure is the same as function-call. All modern <code>std::</code>-lib implementations seem to optimize that by putting smaller closures into the <code>std::function</code> object itself, but bigger ones is forced to end up on the heap.</p>
+<p>This behavior can lead to your application all of a sudden starting to allocate without you seeing it. For example you might need to &ldquo;just capture one more int&rdquo; or a struct &ldquo;grows&rdquo; without you seeing it. Boom, allocation creeping in!</p>
+<p>Is an allocation here and there a massive problem? Probably not for code like this BUT, at least in my line of work, trying to not do work that you don&rsquo;t have to is &ldquo;in the job description&rdquo; and one day that thing you were calling 3 times a frame is now being called all over the place.</p>
+<h3 id="compile-times">Compile times</h3>
+<p>Including <code>&lt;functional&gt;</code> on my system adds a shitton (metric!) of lines to compile to you pre-processed c++-file! However you turn this, throwing more code on your compiler to work with will probably not make it complete faster! We will get to numbers and comparisons later on!</p>
+<h3 id="debug-performance">Debug performance</h3>
+<p>Thirdly, debug-performance! Yes, we should care about performance in debug-builds as optimized builds can be way harder to use when tracking down issues.</p>
+<blockquote>
+<p>The fact that, at work, I can run a full debug-build of Apex (the Avalanche Engine) and still reach decent performance is worth a lot to your day to day productivity!</p>
+</blockquote>
+<p>As we can see in a previous post about <a href="../swapping-memory-and-compiler-optimizations">swapping memory</a> we can see that the c++ standard library can be far from great in a non optimized build (and honestly in an optimized one as well)!</p>
+<h2 id="just-pass-the-closure">Just pass the closure!</h2>
+<p>So, what can we do instead? &lsquo;Just pass the closure&rsquo; is the simplest solution! This is suggested by many, for example in this <a href="https://wolchok.org/posts/cxx-trap-2-std-function/">article</a>.</p>
+<p>Something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> FUNC<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> the_system_poll(the_system sys, FUNC<span style="color:#f92672">&amp;&amp;</span> cb)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... implement me ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>Yay, no more <code>std::function</code>! This should solve all the lines included from <code>&lt;functional&gt;</code> and will probably make your perf in a <code>-O0</code> build quite a bit better!
+Yet again we will come to numbers later!</p>
+<p>So all numbers look great (trust me!), we are all happy right? RIGHT? Well not quite. What does the above code really mean? It means that all our code in <code>the_system_poll()</code> need to be inlined due to the template. For a smaller function this is just fine and maybe even desired! But in this case it might mean that we need to inline a big part of a bigger system! What if <code>the_system</code> need a lot of lines of code to implement or that the implementation of the storage for <code>the_system</code> requires a whole bunch of expensive includes to just be able to be declared. We would not want to expose that to your humble user just by including <code>the_system.h</code>!</p>
+<p>Header hygiene is a virtue!</p>
+<h2 id="c-style">c-style</h2>
+<p>So how do we handle this? As usual a good way to solve this is to look at a c-style interface. This is something I personally see as the solution to many problems and maybe a topic for its own post some day :)</p>
+<blockquote>
+<p>When I say c-style here doesn&rsquo;t necessarily mean full c, just functions + handles + structs. A reference here and a constexpr there is just fine.</p>
+</blockquote>
+<p>But how would this look if you would do it in c? Probably something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">the_system_poll</span>(the_system sys, <span style="color:#66d9ef">void</span>(<span style="color:#f92672">*</span>cb)(the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata), <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata);
+</span></span></code></pre></div><p>I.e. we would pass a function pointer and userdata as a <code>void*</code> and on the implementation side cast that <code>void*</code> back to what we originally passed in. By doing this we can put the entire implementation of this function in a <code>.c</code>/<code>.cpp</code>-file and hide it for the user! This works but the ergonomics maybe leave a bit to be desired:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">// ... first we need to declare our payload sturct to pass to our callback ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">my_user_data</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> data1;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> data2;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ... and then declare the actuall callback function ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">poll_function</span>(<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> user_data)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... cast our passed in userdata to our payload struct ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    my_user_data<span style="color:#f92672">*</span> ud <span style="color:#f92672">=</span> (my_user_data<span style="color:#f92672">*</span>)user_data;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... run the actual code that we want to run ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    use_me(ud<span style="color:#f92672">-&gt;</span>data1);
+</span></span><span style="display:flex;"><span>    use_me(ud<span style="color:#f92672">-&gt;</span>data2);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">poll_me</span>(the_system sys)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... declare our payload sturct and fill out the data we need to use ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    my_user_data ud;
+</span></span><span style="display:flex;"><span>    ud.data1 <span style="color:#f92672">=</span> some_value1;
+</span></span><span style="display:flex;"><span>    ud.data1 <span style="color:#f92672">=</span> some_value2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... and call it ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    the_system_poll(sys, poll_function, <span style="color:#f92672">&amp;</span>ud);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>That is quite a bit of code and honestly quite a few things to get wrong.</p>
+<h2 id="kihlanders-reverse">Kihlanders reverse</h2>
+<p>But what if we combine these 2 approaches? I.e. use the classical c-style function + userdata to be able to hide away all implementation and use the templated closure for ergonomics! If we combine them it could look something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">the_system_poll</span>(the_system sys, <span style="color:#66d9ef">void</span>(<span style="color:#f92672">*</span>cb)(the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata), <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> FUNC<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> the_system_poll(the_system sys, FUNC<span style="color:#f92672">&amp;&amp;</span> cb)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... add a second wrapper-function to handle the casting for us ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">auto</span> wrap <span style="color:#f92672">=</span> [](<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ... as we passed a pointer to the closure as userdata
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//     we can just cast it back here and call it and we get
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//     all the payload etc for free ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        FUNC<span style="color:#f92672">&amp;</span> f <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(FUNC<span style="color:#f92672">*</span>)userdata;
+</span></span><span style="display:flex;"><span>        f(msg);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... pass the wrapper as the callback to the c-function and the 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//     generated closure as userdata ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    the_system_poll(sys, wrap, <span style="color:#f92672">&amp;</span>cb);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>If this hasn&rsquo;t been described before I would like to dub this <code>Kihlanders reverse</code>, it has a nice ring to it right?</p>
+</blockquote>
+<p>This will make it possible to write this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">poll_me</span>(the_system sys)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    the_system_poll(sys, [<span style="color:#f92672">&amp;</span>some_value1, <span style="color:#f92672">&amp;</span>some_value2]()){
+</span></span><span style="display:flex;"><span>        use_me(some_value1);
+</span></span><span style="display:flex;"><span>        use_me(some_value2);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Just by introducing a 5 line wrapper we can give the user all the ergonomics of the original <code>std::function</code> without much of the cost! We also have an API that is compatible with <code>c</code> and all the languages that can call <code>c</code> by just adding a pre-processor check for <code>__cplusplus</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#if defined(__cplusplus)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">// ....
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#endif
+</span></span></span></code></pre></div><h1 id="numbers">Numbers!</h1>
+<p>But enough talk about perf without numbers!</p>
+<blockquote>
+<p>Before we start, this is the standard disclaimer about micro benchmarks. They are hard and might be inaccurate compared to a real world scenario etc. You know the drill!</p>
+</blockquote>
+<p>All this work has been done on my laptop with the following specs:</p>
+<blockquote>
+<p><strong>CPU</strong> Intel i7-10710U</p>
+<p><strong>RAM</strong> 16GB LPDDR3 at 2133 MT/s (around 17GB/sec peak bandwidth)</p>
+</blockquote>
+<p>And I&rsquo;ll use the compilers that I have installed, that being</p>
+<blockquote>
+<p><strong>Clang:</strong>  14.0.0-1ubuntu1.1</p>
+<p><strong>GCC:</strong> (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0</p>
+</blockquote>
+<h2 id="compile-time">Compile time</h2>
+<p>First of, lets look at the compile-time claim. Let&rsquo;s create the smallest possible test-file that we can create:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#if defined(USE_STD_FUNC)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;functional&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">the_system_msg</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> i;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#if defined(USE_STD_FUNC)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">func</span>(<span style="color:#66d9ef">int</span> sys, std<span style="color:#f92672">::</span>function<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span>(<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span>)<span style="color:#f92672">&gt;</span> cb);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#else
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">func</span>(<span style="color:#66d9ef">int</span> sys, <span style="color:#66d9ef">void</span>(<span style="color:#f92672">*</span>)(<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata), <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> user_data);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> FUNC<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> func(<span style="color:#66d9ef">int</span> sys, FUNC<span style="color:#f92672">&amp;&amp;</span> cb)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> wrap <span style="color:#f92672">=</span> [](<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata) {
+</span></span><span style="display:flex;"><span>        FUNC<span style="color:#f92672">&amp;</span> f <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(FUNC<span style="color:#f92672">*</span>)userdata;
+</span></span><span style="display:flex;"><span>        f(msg);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    func(sys, wrap, <span style="color:#f92672">&amp;</span>cb);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span></code></pre></div><p>Timing this small file is probably not that realistic, but lets do it anyways and see what we end up with.
+We can start with noticing that the time is basically the same across all the optimization levels (<code>-O0</code>, <code>-O2</code>, <code>-O3</code>, <code>-Os</code>). Not really surprising as we don&rsquo;t give the compiler anything to work with&hellip;</p>
+<p>But just using <code>time</code> we get roughly these numbers for clang and gcc.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod/functor_test$ time clang++ -c -O2 functor_preproc.cpp -o functor_preproc.o
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m0,031s
+</span></span><span style="display:flex;"><span>user    0m0,009s
+</span></span><span style="display:flex;"><span>sys     0m0,023s
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod/functor_test$ time clang++ -c -O2 -D USE_STD_FUNC functor_preproc.cpp -o functor_preproc.o
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m0,105s
+</span></span><span style="display:flex;"><span>user    0m0,084s
+</span></span><span style="display:flex;"><span>sys	    0m0,021s
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod/functor_test$ time g++ -c -O2 functor_preproc.cpp -o functor_preproc.o
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m0,022s
+</span></span><span style="display:flex;"><span>user    0m0,009s
+</span></span><span style="display:flex;"><span>sys     0m0,008s
+</span></span><span style="display:flex;"><span>wc-duck@WcLaptop:~/kod/functor_test$ time g++ -c -O2 -D USE_STD_FUNC functor_preproc.cpp -o functor_preproc.o
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>real    0m0,174s
+</span></span><span style="display:flex;"><span>user    0m0,137s
+</span></span><span style="display:flex;"><span>sys     0m0,032s
+</span></span></code></pre></div><p>This is highly unscientific, but we see a diff in cost just compiling the code and in a bigger codebase things like this tend to add up. But where is the time spent. We could dig in deeper with something like clang <a href="https://aras-p.info/blog/2019/01/12/Investigating-compile-times-and-Clang-ftime-report/">-ftime-report</a> but it is probably enough to just look at the pre-processed code.</p>
+<p>Preprocessed code for the non-<code>std::function</code> code is about the same lines that we wrote, i.e.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e"># 1 &#34;functor_preproc.cpp&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"># 1 &#34;&lt;built-in&gt;&#34; 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"># 1 &#34;&lt;built-in&gt;&#34; 3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"># 404 &#34;&lt;built-in&gt;&#34; 3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"># 1 &#34;&lt;command line&gt;&#34; 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"># 1 &#34;&lt;built-in&gt;&#34; 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"># 1 &#34;functor_preproc.cpp&#34; 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">the_system_msg</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> i;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">func</span>(<span style="color:#66d9ef">int</span> sys, <span style="color:#66d9ef">void</span>(<span style="color:#f92672">*</span>)(<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata), <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> user_data);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> FUNC<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> func(<span style="color:#66d9ef">int</span> sys, FUNC<span style="color:#f92672">&amp;&amp;</span> cb)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> wrap <span style="color:#f92672">=</span> [](<span style="color:#66d9ef">const</span> the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata) {
+</span></span><span style="display:flex;"><span>        FUNC<span style="color:#f92672">&amp;</span> f <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(FUNC<span style="color:#f92672">*</span>)userdata;
+</span></span><span style="display:flex;"><span>        f(msg);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    func(sys, wrap, <span style="color:#f92672">&amp;</span>cb);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>I&rsquo;m pretty sure that you don&rsquo;t want me to paste out the thousands of lines that you get with <code>std::function</code>. Depending on what c++-version you target you get these numbers, these are lines with all empty lines stripped via:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>g++ -E functor_preproc.cpp -DUSE_STD_FUNC -std<span style="color:#f92672">=</span>c++98 | sed <span style="color:#e6db74">&#39;/^\s*#/d;/^\s*$/d&#39;</span> | wc -l
+</span></span></code></pre></div><p>It is worth noting that I decided to strip out empty lines as the preprocessor seem to produce a lot of it. My really uneducated guess is that it is just faster for the preprocessor to strip out &ldquo;ifdef&rdquo;:ed code by switching the lines with new-lines instead of removing them from the data properly? But that is just a guess. However I think it is much fairer to count the lines without the empty lines as a compiler probably handle these lines quickly.</p>
+<p>However, here are the line counts for a few different c++ versions.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>std=c++98</th>
+<th>std=c++11</th>
+<th>std=c++14</th>
+<th>std=c++17</th>
+<th>std=c++20</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clang</td>
+<td>505</td>
+<td>8477</td>
+<td>9252</td>
+<td>23622</td>
+<td>27211</td>
+</tr>
+<tr>
+<td>gcc</td>
+<td>505</td>
+<td>8477</td>
+<td>9248</td>
+<td>23589</td>
+<td>27180</td>
+</tr>
+</tbody>
+</table>
+<p>That is a lot of lines compared to 14 that was the non std-one! Regardless of how you put it, that will take time to process. And this is BEFORE we have actually started to turn all these lines into instructions for the CPU to execute!</p>
+<h2 id="performance">Performance</h2>
+<p>Next up is performance, how do the different solutions stand up against each other?
+To test this out we&rsquo;ll write a benchmark app using the excellent <a href="https://github.com/sheredom/ubench.h">ubench.h</a>.</p>
+<p><a href="functor_bench.cpp">functor_bench.cpp</a></p>
+<p>I have added a few different test-cases to benchmark, both tested with a &lsquo;small&rsquo; capture and &lsquo;big&rsquo; one where the &lsquo;big&rsquo; one should be big enough to not trigger small-object optimization. All &ldquo;calling back into user code&rdquo; 1000-times per iteration.</p>
+<ul>
+<li>std::function passed to a non-inlined function</li>
+<li>std::function passed to an inlined function</li>
+<li>just pass a simple closure to an inlined function</li>
+<li>a c-style function passing a void* userdata</li>
+<li>and a Kihlanders reverse one.</li>
+</ul>
+<p>Let&rsquo;s see how they perform, these are the times captured by the benchmark.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>gcc -O0</th>
+<th>gcc -O2</th>
+<th>clang -O0</th>
+<th>clang -O2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>std::function small</td>
+<td>32.5us</td>
+<td>1.3us</td>
+<td>24.2us</td>
+<td>1.5us</td>
+</tr>
+<tr>
+<td>std::function big</td>
+<td>29.2us</td>
+<td>1.3us</td>
+<td>23.2us</td>
+<td>1.5us</td>
+</tr>
+<tr>
+<td>inlined std::function small</td>
+<td>32.9us</td>
+<td>1.5us</td>
+<td>24.2us</td>
+<td>1.5us</td>
+</tr>
+<tr>
+<td>inlined std::function big</td>
+<td>27.6us</td>
+<td>1.5us</td>
+<td>23.2us</td>
+<td>1.8us</td>
+</tr>
+<tr>
+<td>inlined closure small</td>
+<td>3.2us</td>
+<td>0.02us</td>
+<td>2.9us</td>
+<td>0.02us</td>
+</tr>
+<tr>
+<td>inlined closure big</td>
+<td>3.2us</td>
+<td>0.02us</td>
+<td>2.9us</td>
+<td>0.02us</td>
+</tr>
+<tr>
+<td>c-style small</td>
+<td>5.9us</td>
+<td>1.3us</td>
+<td>4.6us</td>
+<td>1.4us</td>
+</tr>
+<tr>
+<td>c-style big</td>
+<td>5.9us</td>
+<td>1.3us</td>
+<td>4.4us</td>
+<td>1.4us</td>
+</tr>
+<tr>
+<td>Kihlanders reverse small</td>
+<td>8.3us</td>
+<td>1.3us</td>
+<td>5.3us</td>
+<td>1.4us</td>
+</tr>
+<tr>
+<td>Kihlanders reverse big</td>
+<td>8.3us</td>
+<td>1.3us</td>
+<td>5.4us</td>
+<td>1.4us</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>these are mean values of the above tests. To note is also that the results are not super stable but &lsquo;within reason&rsquo; determined by me.</p>
+</blockquote>
+<p>So what can we take away from these numbers.</p>
+<p>One takeaway is, just as in <a href="../swapping-memory-and-compiler-optimizations">swapping memory</a>-article, debug-performance of <code>std::</code> is just horrible. You are paying a lot for that &ldquo;convenience&rdquo; in your non-optimized build. I find it really &ldquo;amusing&rdquo; that the small-object version is actually significantly slower than the bigger closure in debug on gcc!</p>
+<p>Secondly an inline function is, obviously, faster in all builds and in <code>-O2</code> it is taken as far as both gcc and clang just calculating the answer to my benchmark right away and just store an int directly. Interestingly they can&rsquo;t do the same thing with the <code>std::function</code> version even if you inline it. Throwing complexity at the compiler will force the compiler to spend time on the complexity instead of optimizing the actual code!</p>
+<p>I also find it interesting that clang seems to do quite a bit better work with all of the code in <code>-O0</code> while gcc performs better in <code>-O2</code>.</p>
+<p>Finally we see that Kihlanders reverse seem to add no overhead to any of the non-inlined alternatives and generally better than <code>std::function</code> in all cases.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>According to me this is a really nifty way to provide your users with a good API at low cost in both compile-time and performance. I, for example, use this in <a href="https://github.com/wc-duck/dirutil">https://github.com/wc-duck/dirutil</a> and it&rsquo;s <code>dir_walk()</code> function and in quite a few API:s in the &ldquo;Apex Engine&rdquo;.
+It is obviously not for all your usecases as you can&rsquo;t store the closure and using something like this for a <code>sort</code> or similar that you want inlined is probably not a good idea.</p>
+<p>So to close this article, was this useful? Did I miss something? Feel free to reach out and tell me (if you are civil that is :) ).</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="https://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="https://kihlander.net/tags/c&#43;&#43;/"
+              >c&#43;&#43;</a
+            >&nbsp;
+          
+            <a
+              href="https://kihlander.net/tags/api-design/"
+              >api-design</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://mastodon.gamedev.place/@wcduck" name="mastodon">
+        <em class="fab fa-mastodon"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="index.xml" name="rss">
+        <em class="fas fa-rss"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2024
+      
+        &nbsp;/&nbsp;
+        <a href="https://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>
