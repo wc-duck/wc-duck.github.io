@@ -14,6 +14,16 @@
 		<atom:link href="/tags/c&#43;&#43;/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Software I Like</title>
+			<link>https://kihlander.net/post/software-i-like/</link>
+			<pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
+			<guid>https://kihlander.net/post/software-i-like/</guid>
+			<description>I&amp;rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day. And since I like to read about what others use I might as well share some tips on tools that you might also like.
+My day-to-day OS of choice at home is xubuntu and at work Windows.
+I hope to make this post a living document so it might be updated from time to time.</description>
+		</item>
+      	
+		<item>
 			<title>Looking at c for better closures in c&#43;&#43;</title>
 			<link>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</link>
 			<pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
@@ -96,14 +106,6 @@ printf(&amp;#34;{ %.2f, %.2f, %.2f }&amp;#34;, vec.x, vec.x, vec.z); Doing this 
 			<description>This is the story of an unexpected ABI break that I thought would be worth documenting.
 At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
 Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</description>
-		</item>
-      	
-		<item>
-			<title>Builtin resources and the resource-system</title>
-			<link>https://kihlander.net/post/builtin-resources-and-the-resource-system/</link>
-			<pubDate>Mon, 07 Aug 2017 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/builtin-resources-and-the-resource-system/</guid>
-			<description>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &amp;ldquo;in passing&amp;rdquo; but will dig down a bit deeper into one &amp;ldquo;feature&amp;rdquo; in it that I find kind of neat. I&amp;rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&amp;rsquo;ll be writing about how I handle builtin resources in the engine.</description>
 		</item>
       	
 	</channel>

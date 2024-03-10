@@ -5,6 +5,16 @@
         
             {
                 "id": 0,
+                "href": "https://kihlander.net/post/software-i-like/",
+                "title": "Software I Like",
+                "section": "post",
+                "date" : "2024.03.10",
+                "body": "I\u0026rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day. And since I like to read about what others use I might as well share some tips on tools that you might also like.\nMy day-to-day OS of choice at home is xubuntu and at work Windows.\nI hope to make this post a living document so it might be updated from time to time.\nSome images in this post is stolen from the tools webpages, I really hope that that is not a problem, if it is, please reach out!\nSoftware clink - readline for the windows console The default terminal in Windos is damn near unusable, however thanks to Martin Ridgers wonderful little tool clink we can have a GNU readline based input in said terminal! This is a must-install on any windows machine that I do some work on!\nhttps://github.com/mridgers/clink/\nThe original repository has not been updated a quite a while and there is a fork here https://github.com/chrisant996/clink that claims to be maintaining the tool. I haven\u0026rsquo;t used that fork yet but I might give it a go some day.\nWinMerge - merging code Merging/diffing code is something that you do all of the time. My weapon of choice for a really long time has been winmerge. It does both code and directory diffs quite well and is the one I have stuck with and feel most comfortable with. However I can\u0026rsquo;t let go of the feeling that I should look for something new, for example WinMerge is windows only.\nMaybe I should look at writing something for myself? I would like something that both support windows and linux, that can be run in the console if I want to and has syntax highlighting.\nI\u0026rsquo;ll put that in the pile of \u0026lsquo;yet another project to start and maybe finish someday\u0026hellip; maybe\u0026hellip; hopefully\u0026hellip; probably not :D\u0026rsquo;\nWinDirStat - What is eating all my precious disk-space? At work I have to juggle quite a few different projects, all will a lot of GB:s of data and your bound to fill up your disk:s with temporary files, models, textures, object-files, and other build-artifacts.\nA great tool to visualize where you spend all these GB:s is WinDirStat. It is a great tool to give you an overview of where your disk is spent and make it simple to clean out what you don\u0026rsquo;t see and help you get an overview of where you can optimize!\nLately I have also started to test out WizTree that is faster than WinDirStat. I however hasn\u0026rsquo;t used it enough to say if I prefer it or not!\nEverything - Fast search in windows! What if windows search didn\u0026rsquo;t suck? In comes Everything! Lighting fast \u0026ldquo;find me the file with this name on my machine\u0026rdquo;, can\u0026rsquo;t live without it after starting to use it.\nI am looking for an alternative to use at home on linux but haven\u0026rsquo;t found anything yet but FSearch might be worth testing out?\nImHex - A great hex-editor. From time to time you need a hex-editor and I have found ImHex to be a great alternative. No installation, fast and snappy, feature-rich and no fuzz\u0026hellip; exactly like a tool should be!\nbat - A better cat. There is always times when you just want to check the content of a file without editing etc. The usual solution on a unix based system is to reach for cat. bat is basically cat with syntax highlighting!\nReally nice when you just want to check out some code and I have used it together with objdump for better assembly output!\nobjdump -C -d file | bat -l asm\nGet it here\nPython Python need no introduction, but it is my weapon of choice for \u0026ldquo;hacking together a small script\u0026rdquo; or just as a command line tool for doing quick math or converting utf8 strings to hex-bytes etc.\nWould I like to write a bigger program in python? NEVER AGAIN :)\nVisual Studio Plugins Visual Studio is what I usually write code in professionally for better and worse. I use it kind of vanilla, but there are some plugins that make it a better experience.\nSmart Command Line Arguments I work with a lot of command-line argument heavy applications so juggling command-line arguments to turn on and off features or run this or that unittest etc can get kind of daunting with the default command line interface in Visual Studio.\nSmart Command Line Arguments helps out a lot and make that work a lot smoother.\nA word of warning, it will override all settings done in the ordinary vs-interface and that can bite you in the behind!\nCompile Score A word of warning, this plugin can become kind of an addiction!\nCompile Score is a really neat plugin that hook into your build without any extra code or setup, works just as well with your custom buildsystem as with ordinary msbuild, and show you in a great way where you spend time compiling and what includes cost you the most etc.\nTry it out but don\u0026rsquo;t blame me when your hooked :)\nOn the \u0026ldquo;radar\u0026rdquo; These are tools that I haven\u0026rsquo;t tried yet, isn\u0026rsquo;t released yet etc but that I has some hope for.\nRAD Debugger RAD Debugger on GitHub\nThe world need some competition in the debugger-space and as a Linux user I definitively know!!! Professionally I use Visual Studio but it has been getting slower and slower and more bloated over time. So when Epic/RAD anounced that they are working on their own debugger and released a preview build that really made me want to try it out. Unfortunatly I haven\u0026rsquo;t had the time yet, but it is there to keep an eye on!\nDisk Voyager Disc Voyager is an in development replacement for windows explorer that looks really neat! Seems fast an well thought out. I would live to give it a spin and test it out some day.\n"
+            }
+    
+        ,
+            {
+                "id": 1,
                 "href": "https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/",
                 "title": "Looking at c for better closures in c++",
                 "section": "post",
@@ -14,7 +24,7 @@
     
         ,
             {
-                "id": 1,
+                "id": 2,
                 "href": "https://kihlander.net/post/swapping-memory-and-compiler-optimizations/",
                 "title": "Swapping memory and compiler optimizations",
                 "section": "post",
@@ -24,7 +34,7 @@
     
         ,
             {
-                "id": 2,
+                "id": 3,
                 "href": "https://kihlander.net/post/a-zig-diary/",
                 "title": "A Zig Diary",
                 "section": "post",
@@ -34,7 +44,7 @@
     
         ,
             {
-                "id": 3,
+                "id": 4,
                 "href": "https://kihlander.net/post/when-memcpy-change/",
                 "title": "When memcpy() change!",
                 "section": "post",
@@ -44,7 +54,7 @@
     
         ,
             {
-                "id": 4,
+                "id": 5,
                 "href": "https://kihlander.net/post/macros-and-lambdas/",
                 "title": "Macros and Lambdas",
                 "section": "post",
@@ -54,7 +64,7 @@
     
         ,
             {
-                "id": 5,
+                "id": 6,
                 "href": "https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
@@ -64,7 +74,7 @@
     
         ,
             {
-                "id": 6,
+                "id": 7,
                 "href": "https://kihlander.net/about/",
                 "title": "About",
                 "section": "",
@@ -74,7 +84,7 @@
     
         ,
             {
-                "id": 7,
+                "id": 8,
                 "href": "https://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
@@ -84,7 +94,7 @@
     
         ,
             {
-                "id": 8,
+                "id": 9,
                 "href": "https://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
@@ -94,7 +104,7 @@
     
         ,
             {
-                "id": 9,
+                "id": 10,
                 "href": "https://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
@@ -104,7 +114,7 @@
     
         ,
             {
-                "id": 10,
+                "id": 11,
                 "href": "https://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
@@ -114,7 +124,7 @@
     
         ,
             {
-                "id": 11,
+                "id": 12,
                 "href": "https://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
@@ -124,7 +134,7 @@
     
         ,
             {
-                "id": 12,
+                "id": 13,
                 "href": "https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
@@ -134,7 +144,7 @@
     
         ,
             {
-                "id": 13,
+                "id": 14,
                 "href": "https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
@@ -144,7 +154,7 @@
     
         ,
             {
-                "id": 14,
+                "id": 15,
                 "href": "https://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
@@ -154,7 +164,7 @@
     
         ,
             {
-                "id": 15,
+                "id": 16,
                 "href": "https://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",

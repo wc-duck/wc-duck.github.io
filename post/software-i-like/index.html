@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Software I Like</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="https://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Software I Like"/>
+<meta name="twitter:description" content="I&rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day. And since I like to read about what others use I might as well share some tips on tools that you might also like.
+My day-to-day OS of choice at home is xubuntu and at work Windows.
+I hope to make this post a living document so it might be updated from time to time."/>
+
+
+
+<link rel="stylesheet" href="https://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.122.0">
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="https://kihlander.net/" class="nav-logo">
+        <img
+          src="https://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Software I Like
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Mar 10, 2024
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      <p>I&rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day.
+And since I like to read about what others use I might as well share some tips on tools that you might also like.</p>
+<p>My day-to-day OS of choice at home is <a href="https://xubuntu.org/">xubuntu</a> and at work Windows.</p>
+<blockquote>
+<p>I hope to make this post a living document so it might be updated from time to time.</p>
+</blockquote>
+<blockquote>
+<p>Some images in this post is stolen from the tools webpages, I really hope that that is not a problem, if it is, please reach out!</p>
+</blockquote>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#software">Software</a>
+      <ul>
+        <li><a href="#clink---readline-for-the-windows-console">clink - readline for the windows console</a></li>
+        <li><a href="#winmerge---merging-code">WinMerge - merging code</a></li>
+        <li><a href="#windirstat---what-is-eating-all-my-precious-disk-space">WinDirStat - What is eating all my precious disk-space?</a></li>
+        <li><a href="#everything---fast-search-in-windows">Everything - Fast search in windows!</a></li>
+        <li><a href="#imhex---a-great-hex-editor">ImHex - A great hex-editor.</a></li>
+        <li><a href="#bat---a-better-cat">bat - A better cat.</a></li>
+        <li><a href="#python">Python</a></li>
+      </ul>
+    </li>
+    <li><a href="#visual-studio-plugins">Visual Studio Plugins</a>
+      <ul>
+        <li><a href="#smart-command-line-arguments">Smart Command Line Arguments</a></li>
+        <li><a href="#compile-score">Compile Score</a></li>
+      </ul>
+    </li>
+    <li><a href="#on-the-radar">On the &ldquo;radar&rdquo;</a>
+      <ul>
+        <li><a href="#rad-debugger">RAD Debugger</a></li>
+      </ul>
+    </li>
+    <li><a href="#disk-voyager">Disk Voyager</a></li>
+  </ul>
+</nav><h2 id="software">Software</h2>
+<h3 id="clink---readline-for-the-windows-console">clink - readline for the windows console</h3>
+<p><a href="/images/software-i-like/clink.png"><img src="/images/software-i-like/clink.png" alt="" title="clink"></a></p>
+<p>The default terminal in Windos is damn near unusable, however thanks to Martin Ridgers wonderful little tool clink we can have a GNU readline based input in said terminal!
+This is a must-install on any windows machine that I do some work on!</p>
+<p><a href="https://github.com/mridgers/clink/">https://github.com/mridgers/clink/</a></p>
+<blockquote>
+<p>The original repository has not been updated a quite a while and there is a fork here <a href="https://github.com/chrisant996/clink">https://github.com/chrisant996/clink</a> that claims to be maintaining the tool. I haven&rsquo;t used that fork yet but I might give it a go some day.</p>
+</blockquote>
+<h3 id="winmerge---merging-code">WinMerge - merging code</h3>
+<p><a href="/images/software-i-like/winmerge.gif"><img src="/images/software-i-like/winmerge.gif" alt="" title="winmerge"></a></p>
+<p>Merging/diffing code is something that you do all of the time. My weapon of choice for a really long time has been <a href="https://winmerge.org/">winmerge</a>. It does both code and directory diffs quite well and is the one I have stuck with and feel most comfortable with.
+However I can&rsquo;t let go of the feeling that I should look for something new, for example WinMerge is windows only.</p>
+<p>Maybe I should look at writing something for myself? I would like something that both support windows and linux, that can be run in the console if I want to and has syntax highlighting.</p>
+<blockquote>
+<p>I&rsquo;ll put that in the pile of &lsquo;yet another project to start and maybe finish someday&hellip; maybe&hellip; hopefully&hellip; probably not :D&rsquo;</p>
+</blockquote>
+<h3 id="windirstat---what-is-eating-all-my-precious-disk-space">WinDirStat - What is eating all my precious disk-space?</h3>
+<p><a href="/images/software-i-like/windirstat.jpg"><img src="/images/software-i-like/windirstat.jpg" alt="" title="windirstat"></a></p>
+<p>At work I have to juggle quite a few different projects, all will a lot of GB:s of data and your bound to fill up your disk:s with temporary files, models, textures, object-files, and other build-artifacts.</p>
+<p>A great tool to visualize where you spend all these GB:s is <a href="https://windirstat.net/">WinDirStat</a>. It is a great tool to give you an overview of where your disk is spent and make it simple to clean out what you don&rsquo;t see and help you get an overview of where you can optimize!</p>
+<p>Lately I have also started to test out <a href="https://diskanalyzer.com/">WizTree</a> that is faster than WinDirStat. I however hasn&rsquo;t used it enough to say if I prefer it or not!</p>
+<h3 id="everything---fast-search-in-windows">Everything - Fast search in windows!</h3>
+<p><a href="/images/software-i-like/everything.png"><img src="/images/software-i-like/everything.png" alt="" title="everything"></a></p>
+<p>What if windows search didn&rsquo;t suck? In comes <a href="https://www.voidtools.com/">Everything</a>! Lighting fast &ldquo;find me the file with this name on my machine&rdquo;, can&rsquo;t live without it after starting to use it.</p>
+<p>I am looking for an alternative to use at home on linux but haven&rsquo;t found anything yet but <a href="http://cboxdoerfer.github.io/fsearch/">FSearch</a> might be worth testing out?</p>
+<h3 id="imhex---a-great-hex-editor">ImHex - A great hex-editor.</h3>
+<p><a href="/images/software-i-like/imhex.png"><img src="/images/software-i-like/imhex.png" alt="" title="imhex"></a></p>
+<p>From time to time you need a hex-editor and I have found <a href="https://imhex.werwolv.net/">ImHex</a> to be a great alternative. No installation, fast and snappy, feature-rich and no fuzz&hellip; exactly like a tool should be!</p>
+<h3 id="bat---a-better-cat">bat - A better cat.</h3>
+<p><a href="/images/software-i-like/bat.png"><img src="/images/software-i-like/bat.png" alt="" title="bat"></a></p>
+<p>There is always times when you just want to check the content of a file without editing etc. The usual solution on a unix based system is to reach for <code>cat</code>. <code>bat</code> is basically <code>cat</code> with syntax highlighting!</p>
+<p>Really nice when you just want to check out some code and I have used it together with <code>objdump</code> for better assembly output!</p>
+<blockquote>
+<p><code>objdump -C -d file | bat -l asm</code></p>
+</blockquote>
+<p>Get it <a href="https://github.com/sharkdp/bat">here</a></p>
+<h3 id="python">Python</h3>
+<p><a href="/images/software-i-like/python.png"><img src="/images/software-i-like/python.png" alt="" title="bat"></a></p>
+<p><a href="https://www.python.org/">Python</a> need no introduction, but it is my weapon of choice for &ldquo;hacking together a small script&rdquo; or just as a command line tool for doing quick math or converting utf8 strings to hex-bytes etc.</p>
+<p>Would I like to write a bigger program in python? NEVER AGAIN :)</p>
+<h2 id="visual-studio-plugins">Visual Studio Plugins</h2>
+<p>Visual Studio is what I usually write code in professionally for better and worse. I use it kind of vanilla, but there are some plugins that make it a better experience.</p>
+<h3 id="smart-command-line-arguments">Smart Command Line Arguments</h3>
+<p><a href="/images/software-i-like/vs_smart_cmd.png"><img src="/images/software-i-like/vs_smart_cmd.png" alt="" title="Smart Command Line Arguments"></a></p>
+<p>I work with a lot of command-line argument heavy applications so juggling command-line arguments to turn on and off features or run this or that unittest etc can get kind of daunting with the default command line interface in Visual Studio.</p>
+<p><a href="https://marketplace.visualstudio.com/items?itemName=MBulli.SmartCommandlineArguments">Smart Command Line Arguments</a> helps out a lot and make that work a lot smoother.</p>
+<blockquote>
+<p>A word of warning, it will override all settings done in the ordinary vs-interface and that can bite you in the behind!</p>
+</blockquote>
+<h3 id="compile-score">Compile Score</h3>
+<p><a href="/images/software-i-like/vs_compile_score.png"><img src="/images/software-i-like/vs_compile_score.png" alt="" title="Compile Score"></a></p>
+<blockquote>
+<p>A word of warning, this plugin can become kind of an addiction!</p>
+</blockquote>
+<p><a href="https://marketplace.visualstudio.com/items?itemName=RamonViladomat.CompileScore">Compile Score</a> is a really neat plugin that hook into your build without any extra code or setup, works just as well with your custom buildsystem as with ordinary msbuild, and show you in a great way where you spend time compiling and what includes cost you the most etc.</p>
+<p>Try it out but don&rsquo;t blame me when your hooked :)</p>
+<h2 id="on-the-radar">On the &ldquo;radar&rdquo;</h2>
+<p>These are tools that I haven&rsquo;t tried yet, isn&rsquo;t released yet etc but that I has some hope for.</p>
+<h3 id="rad-debugger">RAD Debugger</h3>
+<p><a href="/images/software-i-like/rad_debugger.png"><img src="/images/software-i-like/rad_debugger.png" alt="" title="RAD Debugger - Image stolen from Twitter"></a></p>
+<p><a href="https://github.com/EpicGamesExt/raddebugger">RAD Debugger on GitHub</a></p>
+<p>The world need some competition in the debugger-space and as a Linux user I definitively know!!! Professionally I use Visual Studio but it has been getting slower and slower and more bloated over time. So when Epic/RAD anounced that they are working on their own debugger and released a preview build that really made me want to try it out. Unfortunatly I haven&rsquo;t had the time yet, but it is there to keep an eye on!</p>
+<h2 id="disk-voyager">Disk Voyager</h2>
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe src="https://www.youtube.com/embed/oSS_mXJJugo" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
+</div>
+
+<p><a href="https://diskvoyager.com/">Disc Voyager</a> is an in development replacement for windows explorer that looks really neat! Seems fast an well thought out. I would live to give it a spin and test it out some day.</p>
+
+
+
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://mastodon.gamedev.place/@wcduck" name="mastodon">
+        <em class="fab fa-mastodon"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="index.xml" name="rss">
+        <em class="fas fa-rss"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2024
+      
+        &nbsp;/&nbsp;
+        <a href="https://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>
