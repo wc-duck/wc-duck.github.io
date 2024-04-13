@@ -2,34 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://kihlander.net/post/</loc>
-    <lastmod>2024-03-10T00:00:00+00:00</lastmod>
+    <loc>https://kihlander.net/tags/c&#43;&#43;/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/software-i-like/</loc>
-    <lastmod>2024-03-10T00:00:00+00:00</lastmod>
+    <loc>https://kihlander.net/tags/code/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/post/compile-time-hashes-in-c-revisied/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/tags/optimization/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/post/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/tags/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/</loc>
+    <lastmod>2024-04-13T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/post/software-i-like/</loc>
     <lastmod>2024-03-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/tags/api-design/</loc>
     <lastmod>2024-01-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/c&#43;&#43;/</loc>
-    <lastmod>2024-01-07T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kihlander.net/tags/code/</loc>
-    <lastmod>2024-01-07T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</loc>
     <lastmod>2024-01-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/tags/</loc>
-    <lastmod>2024-01-07T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kihlander.net/tags/memcpy_util/</loc>
-    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kihlander.net/tags/optimization/</loc>
     <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</loc>

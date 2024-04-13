@@ -12,6 +12,15 @@
 		<atom:link href="/categories/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Compile Time Hashes in C - Revisied</title>
+			<link>https://kihlander.net/post/compile-time-hashes-in-c-revisied/</link>
+			<pubDate>Sat, 13 Apr 2024 00:00:00 +0000</pubDate>
+			<guid>https://kihlander.net/post/compile-time-hashes-in-c-revisied/</guid>
+			<description>Hashing strings in c++ at compile time has been possible since c++11 but is it worth doing? Me and a few colleagues was discussed this over a few beers and it reminded me that I have already written about it here (8 years ago&amp;hellip; ARGH I&amp;rsquo;m getting old!).
+But a lot of time has passed since I wrote that&amp;hellip; and I didn&amp;rsquo;t make any measurements in that article! shame! SHAME I SAY!</description>
+		</item>
+      	
+		<item>
 			<title>Software I Like</title>
 			<link>https://kihlander.net/post/software-i-like/</link>
 			<pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
@@ -94,16 +103,6 @@ void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {
 			<guid>https://kihlander.net/post/printf-based-tostr-on-the-stack/</guid>
 			<description>As I might have written before I like printf-style string-formating. It&amp;rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &amp;ldquo;composite&amp;rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
 printf(&amp;#34;{ %.2f, %.2f, %.2f }&amp;#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</description>
-		</item>
-      	
-		<item>
-			<title>A story about an unexpected ABI break</title>
-			<link>https://kihlander.net/post/a-story-about-an-unexpected-abi-break/</link>
-			<pubDate>Wed, 15 Nov 2017 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/a-story-about-an-unexpected-abi-break/</guid>
-			<description>This is the story of an unexpected ABI break that I thought would be worth documenting.
-At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
-Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</description>
 		</item>
       	
 	</channel>
