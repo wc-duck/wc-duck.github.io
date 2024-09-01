@@ -14,6 +14,15 @@
 		<atom:link href="/tags/war-stories/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Extending an Enum in Zig</title>
+			<link>https://kihlander.net/post/extending-an-enum-in-zig/</link>
+			<pubDate>Sun, 01 Sep 2024 08:33:59 +0200</pubDate>
+			<guid>https://kihlander.net/post/extending-an-enum-in-zig/</guid>
+			<description>For a while now I have been dabbling with zig and as a small test writing a NES-emulator (everyone should have written an 8-bit emulator in their life right?). While doing this I stumbled upon a kind of neat trick that you can do in zig that I thought was worth sharing&amp;hellip; with kind of a &amp;ldquo;anti-climactic&amp;rdquo; end!
+Some background While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data.</description>
+		</item>
+      	
+		<item>
 			<title>Compile Time Hashes in C - Revisied</title>
 			<link>https://kihlander.net/post/compile-time-hashes-in-c-revisied/</link>
 			<pubDate>Sat, 13 Apr 2024 00:00:00 +0000</pubDate>
@@ -96,15 +105,6 @@ After an update all line-breaks in code-segments just got removed, did I configu
 			<guid>https://kihlander.net/post/protothreads-with-a-twist/</guid>
 			<description>For a long time I&amp;rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
 void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &amp;lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</description>
-		</item>
-      	
-		<item>
-			<title>printf-based TOSTR on the stack</title>
-			<link>https://kihlander.net/post/printf-based-tostr-on-the-stack/</link>
-			<pubDate>Tue, 15 May 2018 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/printf-based-tostr-on-the-stack/</guid>
-			<description>As I might have written before I like printf-style string-formating. It&amp;rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &amp;ldquo;composite&amp;rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
-printf(&amp;#34;{ %.2f, %.2f, %.2f }&amp;#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</description>
 		</item>
       	
 	</channel>

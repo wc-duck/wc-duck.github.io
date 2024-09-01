@@ -20,8 +20,10 @@
   href="https://kihlander.net/index.xml"
   title="What could possibly go wrong?"
 />
-<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Swapping memory and compiler optimizations"/>
-<meta name="twitter:description" content="During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &ldquo;family life&rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while. I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!"/>
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Swapping memory and compiler optimizations">
+  <meta name="twitter:description" content="During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with “family life” (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while. I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!">
 
 
 
@@ -66,7 +68,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.124.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
   </head>
   <body>
     
@@ -879,9 +881,12 @@ However if it would be a problem a simple fix would be to just not inline the co
 I&rsquo;m not alone in seeing this. In the last year we have seen other more &ldquo;c++-leaning&rdquo; developers also raising this issue. For example <a href="https://twitter.com/supahvee1234">Vittorio Romeo</a> has been raising that <code>std::move</code>, <code>std::forward</code> and other &ldquo;small&rdquo; function generate expensive calls in debug that really isn&rsquo;t needed and has been pushing for changes to both clang and gcc + it now seems that msvc is also coming along for the ride with <code>[[msvc::intrinsic]]</code></p>
 <p>See:
 
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-  <iframe src="https://www.youtube.com/embed/ffFT-gIPCRE" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
-</div>
+
+    
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/ffFT-gIPCRE?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
+      ></iframe>
+    </div>
 </p>
 <p>and:</p>
 <ul>

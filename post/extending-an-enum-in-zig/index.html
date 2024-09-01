@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Extending an Enum in Zig</title>
+<meta name="description" 
+      content=""
+>
+
+  
+
+
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  href="https://kihlander.net/index.xml"
+  title="What could possibly go wrong?"
+/>
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Extending an Enum in Zig">
+  <meta name="twitter:description" content="For a while now I have been dabbling with zig and as a small test writing a NES-emulator (everyone should have written an 8-bit emulator in their life right?). While doing this I stumbled upon a kind of neat trick that you can do in zig that I thought was worth sharing… with kind of a “anti-climactic” end!
+Some background While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data.">
+
+
+
+<link rel="stylesheet" href="https://kihlander.net/fontawesome/css/all.min.css" />
+
+
+
+
+<link
+  crossorigin="anonymous"
+  href="/css/styles.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+
+
+<link
+  id="dark-mode-theme"
+  crossorigin="anonymous"
+  href="/css/dark.min.css"
+  integrity=""
+  rel="preload stylesheet"
+  as="style"
+/>
+
+
+<script>
+  var darkTheme = document.getElementById('dark-mode-theme')
+  var storedTheme = localStorage.getItem('dark-mode-storage')
+
+  if (storedTheme === 'dark') {
+    darkTheme.disabled = false
+  } else if (storedTheme === 'light') {
+    darkTheme.disabled = true
+  }
+</script>
+
+
+<script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
+
+
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="https://kihlander.net/" class="nav-logo">
+        <img
+          src="https://kihlander.net/images/logo.png"
+          width="50"
+          height="50"
+          alt="Logo"
+        />
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li>
+            <a href="/about/" id="About"
+              ><em class="fas fa-user fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/tags" id="Tags"
+              ><em class="fas fa-tag fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/search" id="Search"
+              ><em class="fas fa-search fa-lg"></em
+            ></a>
+          </li>
+          
+      
+        
+          <li>
+            <a href="/archives" id="Archives"
+              ><em class="fas fa-archive fa-lg"></em
+            ></a>
+          </li>
+          
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>
+              Extending an Enum in Zig
+            </h1>
+          
+          
+            <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Sep 1, 2024
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      
+  <p>For a while now I have been dabbling with <a href="https://ziglang.org/">zig</a> and as a small test writing a NES-emulator (everyone should have written an 8-bit emulator in their life right?).
+While doing this I stumbled upon a kind of neat trick that you can do in zig that I thought was worth sharing&hellip; with kind of a &ldquo;anti-climactic&rdquo; end!</p>
+<h1 id="some-background">Some background</h1>
+<p>While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data. At this time the available palettes were all described with an enum.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">const</span> Palette <span style="color:#f92672">=</span> <span style="color:#66d9ef">enum</span> {
+</span></span><span style="display:flex;"><span>    bg0, <span style="color:#75715e">// background palette 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    bg1, <span style="color:#75715e">// background palette 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    bg2, <span style="color:#75715e">// background palette 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    bg3, <span style="color:#75715e">// background palette 3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    sp0, <span style="color:#75715e">// sprite palette 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    sp1, <span style="color:#75715e">// sprite palette 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    sp2, <span style="color:#75715e">// sprite palette 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    sp3, <span style="color:#75715e">// sprite palette 3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
+</span></span></code></pre></div><p>As I use <a href="https://github.com/zig-gamedev/zig-gamedev">zig-gamedev</a> for window-management, rendering and ImGui the first thing to reach for is just an imgui-combo-box. Zig:s builtin compile-time reflection and some smart decisions in the zig-gamedev imgui-bindings make that a real treat:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> zgui <span style="color:#f92672">=</span> @import(<span style="color:#e6db74">&#34;zgui&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> Palette <span style="color:#f92672">=</span> .bg0;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> drawUi()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    zgui.comboFromEnum(<span style="color:#e6db74">&#34;palette&#34;</span>, <span style="color:#f92672">&amp;</span><span style="color:#66d9ef">var</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This will create a combo-box with all possible values in the enum and select the names from the enum-item names.</p>
+<p><a href="/images/extending-an-enum-in-zig/combo_1.png"><img src="/images/extending-an-enum-in-zig/combo_1.png" alt="" title="initial combo"></a></p>
+<h1 id="the-problem">The problem</h1>
+<p>However, I wanted to have a &ldquo;custom&rdquo; selection as well? Zig has some really powerful meta-programming facilities, maybe we should try these out? I usually get a tingle of &ldquo;bad things coming up&rdquo; when I hear meta-programming as it brings back memories of slow compiles, hard to maintain code and c++-template-errors :D</p>
+<p>But I&rsquo;m here to learn, test and experiment, so here we go!</p>
+<p>Lets see if we can extend <code>Palette</code> with a first option called <code>custom</code>, it is actually not that hard!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> addCustomChoice(<span style="color:#66d9ef">comptime</span> T<span style="color:#f92672">:</span> anytype) <span style="color:#66d9ef">type</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// we should probably add some error-checks here that T is an enum etc!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// use reflection to get the information of the comptime parameter T
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> enum_type <span style="color:#f92672">=</span> @typeInfo(T).Enum;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// define an array, in compile time, with the fields of our new enum
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// that has room for &#34;custom&#34;.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">comptime</span> <span style="color:#66d9ef">var</span> fields<span style="color:#f92672">:</span> [enum_type.fields.len <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]std.builtin.Type.EnumField <span style="color:#f92672">=</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// define our first field to be &#34;custom&#34; and have the value &#34;1 more than
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// the number of fields&#34;.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fields[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> .{ .name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;custom&#34;</span>, .value <span style="color:#f92672">=</span> enum_type.fields.len };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// copy the field from the &#34;base&#34; enum
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">for</span> (<span style="color:#ae81ff">1</span>.., enum_type.fields) <span style="color:#f92672">|</span>idx, f<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>        fields[idx] <span style="color:#f92672">=</span> f;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// and declare and return our new type!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> enumInfo <span style="color:#f92672">=</span> std.builtin.Type.Enum{
+</span></span><span style="display:flex;"><span>        .tag_type <span style="color:#f92672">=</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>        .fields <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>fields,
+</span></span><span style="display:flex;"><span>        .decls <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>[<span style="color:#ae81ff">0</span>]std.builtin.Type.Declaration{},
+</span></span><span style="display:flex;"><span>        .is_exhaustive <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> @Type(std.builtin.Type{ .Enum <span style="color:#f92672">=</span> enumInfo });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// define a new value of the new type and set it to our new value.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">var</span> var_with_custom <span style="color:#f92672">=</span> addCustomChoice(Palette) <span style="color:#f92672">=</span> .custom;
+</span></span></code></pre></div><p>That is actually quite readable, it is just &ldquo;ordinary code&rdquo; that you can read as any other.</p>
+<p><a href="/images/extending-an-enum-in-zig/combo_2.png"><img src="/images/extending-an-enum-in-zig/combo_2.png" alt="" title="combo with custom option"></a></p>
+<p>But there are some problems that I have to mention.</p>
+<h2 id="custom-is-hardcoded-and-values-are-hardcoded">&ldquo;custom&rdquo; is hardcoded and values are hardcoded.</h2>
+<p>With this &ldquo;custom&rdquo; and the values of the new items are hardcoded but that could be solved by just taking that as a parameter or an array etc, nothing big!</p>
+<h2 id="getting-the-base-enum-back">getting the &ldquo;base&rdquo; enum back</h2>
+<p>This is a bigger issue, that could probably be solved by someone better at zig than I am. The problem arises when I want to use my new enum as the &ldquo;base&rdquo; one, i.e. I want to pass what I selected in my combo-box to some other api. You can&rsquo;t just pass your new enum to the other api as the types are not the same. My first thought was to just add a function to the enum like <code>fn toBase(self: NewType) BaseType</code> but I couldn&rsquo;t find a good way through comptime type definitions to add a function to the declared type (probably missing something?).</p>
+<p>So I just ended up with my own <code>enumCast()</code> declared like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> isEnum(<span style="color:#66d9ef">comptime</span> T<span style="color:#f92672">:</span> anytype) <span style="color:#66d9ef">bool</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">switch</span> (@typeInfo(T)) {
+</span></span><span style="display:flex;"><span>        .Enum <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> enumCast(in<span style="color:#f92672">:</span> anytype, <span style="color:#66d9ef">comptime</span> T<span style="color:#f92672">:</span> anytype) T {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">comptime</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> in_T <span style="color:#f92672">=</span> @TypeOf(in);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>isEnum(in_T))
+</span></span><span style="display:flex;"><span>            @compileError(std.fmt.comptimePrint(<span style="color:#e6db74">&#34;&#39;in&#39; should be an enum, &#39;{s}&#39; is not&#34;</span>, .{@typeName(in_T)}));
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>isEnum(T))
+</span></span><span style="display:flex;"><span>            @compileError(std.fmt.comptimePrint(<span style="color:#e6db74">&#34;&#39;T&#39; should be an enum, &#39;{s}&#39; is not&#34;</span>, .{@typeName(T)}));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> i <span style="color:#f92672">=</span> @intFromEnum(in);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> @enumFromInt(i);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> castMe() <span style="color:#66d9ef">void</span>{
+</span></span><span style="display:flex;"><span>    callWithBase(enumCast(var_with_custom, Palette));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>I couldn&rsquo;t find a &ldquo;neater&rdquo; way of casting between 2 enums in zig, should there be one? Maybe? Also having to pass in the type to &ldquo;cast&rdquo; to feels &ldquo;old style zig&rdquo; but there seems to not be a better way at the moment.</p>
+<blockquote>
+<p>there is a proposal for <code>@Return</code> <a href="https://github.com/ziglang/zig/issues/447">https://github.com/ziglang/zig/issues/447</a> that could be used here.</p>
+</blockquote>
+<p>This is the point where I realized that I once again had been tricked by the temptress that is &ldquo;meta programming&rdquo;, what was I doing? Why all this code? And I went back to just doing this.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> var_with_custom <span style="color:#f92672">:</span> <span style="color:#66d9ef">enum</span>(<span style="color:#66d9ef">u8</span>) {
+</span></span><span style="display:flex;"><span>    custom <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    bg0 <span style="color:#f92672">=</span> @intFromEnum(Palette.bg0),
+</span></span><span style="display:flex;"><span>    bg1 <span style="color:#f92672">=</span> @intFromEnum(Palette.bg1),
+</span></span><span style="display:flex;"><span>    bg2 <span style="color:#f92672">=</span> @intFromEnum(Palette.bg2),
+</span></span><span style="display:flex;"><span>    bg3 <span style="color:#f92672">=</span> @intFromEnum(Palette.bg3),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    sp0 <span style="color:#f92672">=</span> @intFromEnum(Palette.sp0),
+</span></span><span style="display:flex;"><span>    sp1 <span style="color:#f92672">=</span> @intFromEnum(Palette.sp1),
+</span></span><span style="display:flex;"><span>    sp2 <span style="color:#f92672">=</span> @intFromEnum(Palette.sp2),
+</span></span><span style="display:flex;"><span>    sp3 <span style="color:#f92672">=</span> @intFromEnum(Palette.sp3),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> asBase(self<span style="color:#f92672">:</span> @This()) Palette {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(self <span style="color:#f92672">==</span> .custom)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">unreachable</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> b <span style="color:#f92672">=</span> @intFromEnum(self);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> @enumFromInt(b);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>} <span style="color:#f92672">=</span> .custom;
+</span></span></code></pre></div><p>Less code, easier to understand&hellip; sure, someone might argue that this is not that reusable but honestly, the above wasn&rsquo;t either. Some one else might argue &ldquo;what if the &lsquo;Palette&rsquo; is extended?&rdquo;&hellip; I&rsquo;ll take my chances that Nintendo will not redesign the NES any time soon!</p>
+<h1 id="so-what-have-we-learned-by-this">So what have we learned by this?</h1>
+<p>Number one is probably just because you can its not sure that you should! But also that zig:s meta-programming facilities are really powerful and easy to read/write. I really like the fact that &ldquo;it is just plain zig&rdquo; and that I don&rsquo;t have to learn that much new stuff. I&rsquo;m still afraid of the day when I have to debug this kind of stuff but I&rsquo;ll take this over c++ templates any day of the week!</p>
+<p>It is also obvious that zig has a long way to go&hellip; documentation is &ldquo;sparse&rdquo; to say the least. The above code was all figured out with googling and reading the zig std-lib. On the other hand it is quite impressive that I could do this in a really short amount of time despite the lack of docs!</p>
+<p>In the end it was an experiment that turned out to be a dead end&hellip; but these are also worth writing about from time to time!</p>
+
+
+
+
+      
+        <div class="blog-tags">
+          
+            <a
+              href="https://kihlander.net/tags/code/"
+              >code</a
+            >&nbsp;
+          
+            <a
+              href="https://kihlander.net/tags/zig/"
+              >zig</a
+            >&nbsp;
+          
+        </div>
+      
+
+      
+    </article>
+    
+    
+      
+
+    
+  </div>
+
+    <footer>
+  
+
+<div class="social-icons">
+  
+    
+    
+      
+      <a href="https://twitter.com/wc_duck" name="twitter">
+        <em class="fab fa-twitter"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://mastodon.gamedev.place/@wcduck" name="mastodon">
+        <em class="fab fa-mastodon"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="https://github.com/wc-duck" name="github">
+        <em class="fab fa-github"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="mailto:fredrik.kihlander@gmail.com" name="mail">
+        <em class="fa fa-envelope"></em>
+      </a>
+    
+       &nbsp;&ndash;&nbsp;
+      <a href="index.xml" name="rss">
+        <em class="fas fa-rss"></em>
+      </a>
+    
+  
+
+  
+</div>
+
+
+  
+  <div class="container">
+    <p class="credits copyright">
+      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      &nbsp;&copy;
+      2024
+      
+        &nbsp;/&nbsp;
+        <a href="https://kihlander.net/">What could possibly go wrong?</a>
+      
+      &nbsp;&ndash;&nbsp;
+      <em class="fas fa-moon" id="dark-mode-toggle"></em>
+    </p>
+
+    <p class="credits theme-by">
+      Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;
+      Theme
+      <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>
