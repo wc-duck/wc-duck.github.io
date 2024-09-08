@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -157,9 +157,12 @@
   </a>
   <div class="post-entry">
     
-      <p>This is the story of an unexpected ABI break that I thought would be worth documenting.
-At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
-Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</p>
+      <p><p>This is the story of an unexpected ABI break that I thought would be worth documenting.</p>
+<p>At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
+uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.</p>
+<p>Why would you want a class like this you might ask, well we use it for adding a <code>const char* c_str()</code>-function that can be
+used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString
+and have a lookup of the hash-value performed.</p></p>
       <a href="https://kihlander.net/post/a-story-about-an-unexpected-abi-break/" class="post-read-more"
         >Read More</a
       >
@@ -183,7 +186,9 @@ Why would you want a class like this you might ask, well we use it for adding a 
   </a>
   <div class="post-entry">
     
-      <p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &ldquo;in passing&rdquo; but will dig down a bit deeper into one &ldquo;feature&rdquo; in it that I find kind of neat. I&rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&rsquo;ll be writing about how I handle builtin resources in the engine.</p>
+      <p><p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &ldquo;in passing&rdquo;
+but will dig down a bit deeper into one &ldquo;feature&rdquo; in it that I find kind of neat. I&rsquo;m sure it has been done before but I have not seen it myself somewhere else.
+I&rsquo;ll be writing about how I handle builtin resources in the engine.</p></p>
       <a href="https://kihlander.net/post/builtin-resources-and-the-resource-system/" class="post-read-more"
         >Read More</a
       >
@@ -207,8 +212,10 @@ Why would you want a class like this you might ask, well we use it for adding a 
   </a>
   <div class="post-entry">
     
-      <p>I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)
-Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up.</p>
+      <p><p>I saw this blog post a while ago <a href="http://reedbeta.com/blog/programmers-intro-to-unicode/">A Programmer’s Introduction to Unicode</a>, a really great write up that is a worth a
+read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)</p>
+<p>Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about <a href="http://github.com/wc-duck/utf8_lookup/">utf8_lookup</a>,
+a small lib to translate utf8 chars into offsets into a table.</p></p>
       <a href="https://kihlander.net/post/utf8_lookup-writeup/" class="post-read-more"
         >Read More</a
       >

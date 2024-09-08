@@ -23,7 +23,7 @@
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Looking at c for better closures in c&#43;&#43;">
-  <meta name="twitter:description" content="Note: before we begin, finding a name for this post was really hard!
+  <meta name="twitter:description" content=" Note: before we begin, finding a name for this post was really hard!
 In this post I’m going to touch on a c&#43;&#43;-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn’t seen before either. Probably it’s not something new and some of you will probably just say “yeah yeah, nothing new under the sun” but it’s probably worth a few words!">
 
 
@@ -69,7 +69,7 @@ In this post I’m going to touch on a c&#43;&#43;-technique to handle callbacks
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -407,34 +407,34 @@ We can start with noticing that the time is basically the same across all the op
 </span></span></code></pre></div><p>It is worth noting that I decided to strip out empty lines as the preprocessor seem to produce a lot of it. My really uneducated guess is that it is just faster for the preprocessor to strip out &ldquo;ifdef&rdquo;:ed code by switching the lines with new-lines instead of removing them from the data properly? But that is just a guess. However I think it is much fairer to count the lines without the empty lines as a compiler probably handle these lines quickly.</p>
 <p>However, here are the line counts for a few different c++ versions.</p>
 <table>
-<thead>
-<tr>
-<th></th>
-<th>std=c++98</th>
-<th>std=c++11</th>
-<th>std=c++14</th>
-<th>std=c++17</th>
-<th>std=c++20</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>clang</td>
-<td>505</td>
-<td>8477</td>
-<td>9252</td>
-<td>23622</td>
-<td>27211</td>
-</tr>
-<tr>
-<td>gcc</td>
-<td>505</td>
-<td>8477</td>
-<td>9248</td>
-<td>23589</td>
-<td>27180</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left">std=c++98</th>
+          <th style="text-align: left">std=c++11</th>
+          <th style="text-align: left">std=c++14</th>
+          <th style="text-align: left">std=c++17</th>
+          <th style="text-align: left">std=c++20</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">clang</td>
+          <td style="text-align: left">505</td>
+          <td style="text-align: left">8477</td>
+          <td style="text-align: left">9252</td>
+          <td style="text-align: left">23622</td>
+          <td style="text-align: left">27211</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">gcc</td>
+          <td style="text-align: left">505</td>
+          <td style="text-align: left">8477</td>
+          <td style="text-align: left">9248</td>
+          <td style="text-align: left">23589</td>
+          <td style="text-align: left">27180</td>
+      </tr>
+  </tbody>
 </table>
 <p>That is a lot of lines compared to 14 that was the non std-one! Regardless of how you put it, that will take time to process. And this is BEFORE we have actually started to turn all these lines into instructions for the CPU to execute!</p>
 <h2 id="performance">Performance</h2>
@@ -451,87 +451,87 @@ To test this out we&rsquo;ll write a benchmark app using the excellent <a href="
 </ul>
 <p>Let&rsquo;s see how they perform, these are the times captured by the benchmark.</p>
 <table>
-<thead>
-<tr>
-<th></th>
-<th>gcc -O0</th>
-<th>gcc -O2</th>
-<th>clang -O0</th>
-<th>clang -O2</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>std::function small</td>
-<td>32.5us</td>
-<td>1.3us</td>
-<td>24.2us</td>
-<td>1.5us</td>
-</tr>
-<tr>
-<td>std::function big</td>
-<td>29.2us</td>
-<td>1.3us</td>
-<td>23.2us</td>
-<td>1.5us</td>
-</tr>
-<tr>
-<td>inlined std::function small</td>
-<td>32.9us</td>
-<td>1.5us</td>
-<td>24.2us</td>
-<td>1.5us</td>
-</tr>
-<tr>
-<td>inlined std::function big</td>
-<td>27.6us</td>
-<td>1.5us</td>
-<td>23.2us</td>
-<td>1.8us</td>
-</tr>
-<tr>
-<td>inlined closure small</td>
-<td>3.2us</td>
-<td>0.02us</td>
-<td>2.9us</td>
-<td>0.02us</td>
-</tr>
-<tr>
-<td>inlined closure big</td>
-<td>3.2us</td>
-<td>0.02us</td>
-<td>2.9us</td>
-<td>0.02us</td>
-</tr>
-<tr>
-<td>c-style small</td>
-<td>5.9us</td>
-<td>1.3us</td>
-<td>4.6us</td>
-<td>1.4us</td>
-</tr>
-<tr>
-<td>c-style big</td>
-<td>5.9us</td>
-<td>1.3us</td>
-<td>4.4us</td>
-<td>1.4us</td>
-</tr>
-<tr>
-<td>Kihlanders reverse small</td>
-<td>8.3us</td>
-<td>1.3us</td>
-<td>5.3us</td>
-<td>1.4us</td>
-</tr>
-<tr>
-<td>Kihlanders reverse big</td>
-<td>8.3us</td>
-<td>1.3us</td>
-<td>5.4us</td>
-<td>1.4us</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left">gcc -O0</th>
+          <th style="text-align: left">gcc -O2</th>
+          <th style="text-align: left">clang -O0</th>
+          <th style="text-align: left">clang -O2</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">std::function small</td>
+          <td style="text-align: left">32.5us</td>
+          <td style="text-align: left">1.3us</td>
+          <td style="text-align: left">24.2us</td>
+          <td style="text-align: left">1.5us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">std::function big</td>
+          <td style="text-align: left">29.2us</td>
+          <td style="text-align: left">1.3us</td>
+          <td style="text-align: left">23.2us</td>
+          <td style="text-align: left">1.5us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">inlined std::function small</td>
+          <td style="text-align: left">32.9us</td>
+          <td style="text-align: left">1.5us</td>
+          <td style="text-align: left">24.2us</td>
+          <td style="text-align: left">1.5us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">inlined std::function big</td>
+          <td style="text-align: left">27.6us</td>
+          <td style="text-align: left">1.5us</td>
+          <td style="text-align: left">23.2us</td>
+          <td style="text-align: left">1.8us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">inlined closure small</td>
+          <td style="text-align: left">3.2us</td>
+          <td style="text-align: left">0.02us</td>
+          <td style="text-align: left">2.9us</td>
+          <td style="text-align: left">0.02us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">inlined closure big</td>
+          <td style="text-align: left">3.2us</td>
+          <td style="text-align: left">0.02us</td>
+          <td style="text-align: left">2.9us</td>
+          <td style="text-align: left">0.02us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">c-style small</td>
+          <td style="text-align: left">5.9us</td>
+          <td style="text-align: left">1.3us</td>
+          <td style="text-align: left">4.6us</td>
+          <td style="text-align: left">1.4us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">c-style big</td>
+          <td style="text-align: left">5.9us</td>
+          <td style="text-align: left">1.3us</td>
+          <td style="text-align: left">4.4us</td>
+          <td style="text-align: left">1.4us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Kihlanders reverse small</td>
+          <td style="text-align: left">8.3us</td>
+          <td style="text-align: left">1.3us</td>
+          <td style="text-align: left">5.3us</td>
+          <td style="text-align: left">1.4us</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Kihlanders reverse big</td>
+          <td style="text-align: left">8.3us</td>
+          <td style="text-align: left">1.3us</td>
+          <td style="text-align: left">5.4us</td>
+          <td style="text-align: left">1.4us</td>
+      </tr>
+  </tbody>
 </table>
 <blockquote>
 <p>these are mean values of the above tests. To note is also that the results are not super stable but &lsquo;within reason&rsquo; determined by me.</p>

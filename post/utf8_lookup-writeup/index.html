@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="utf8_lookup, a write up.">
   <meta name="twitter:description" content="I saw this blog post a while ago A Programmer’s Introduction to Unicode, a really great write up that is a worth a read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)
-Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up.">
+Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about utf8_lookup, a small lib to translate utf8 chars into offsets into a table.">
 
 
 
@@ -69,7 +69,7 @@ Reading this reminded me of an old project of mine that I think is a bit novel a
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -193,26 +193,26 @@ tree is based on each byte of an utf8-char.</p>
 <p>item_cnt[uint64_t], availability-bits[uint64_t[item_cnt]], offsets[uint16_t[item_cnt]]</p>
 </blockquote>
 <table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>item_cnt</td>
-<td>the amount of items in the following lists, kept as uint64_t for alignment reasons.</td>
-</tr>
-<tr>
-<td>availability-bits</td>
-<td>collection of bit-fields of what codepoints that are available in the lookup per &ldquo;octet-byte&rdquo;.</td>
-</tr>
-<tr>
-<td>offsets</td>
-<td>depending on the octet of the current char to translate and step in the translation-process the next offset in availability-bits or start of result-offset.</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left"></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">item_cnt</td>
+          <td style="text-align: left">the amount of items in the following lists, kept as uint64_t for alignment reasons.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">availability-bits</td>
+          <td style="text-align: left">collection of bit-fields of what codepoints that are available in the lookup per &ldquo;octet-byte&rdquo;.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">offsets</td>
+          <td style="text-align: left">depending on the octet of the current char to translate and step in the translation-process the next offset in availability-bits or start of result-offset.</td>
+      </tr>
+  </tbody>
 </table>
 <blockquote>
 <p>By octet I refer to how many bytes the current utf8-char is consisting of.</p>
@@ -332,114 +332,114 @@ different kind of texts using different combinations of code-pages etc.</p>
 <p>Finally its time for some numbers and charts!</p>
 <p>Texts used and results:</p>
 <table>
-<thead>
-<tr>
-<th>file</th>
-<th>codepoint count</th>
-<th>bpcp utf8_lookup</th>
-<th>bpcp bitarray</th>
-<th>bpcp std::map</th>
-<th>bpcp std::unordered_map</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ancient_greek.txt</td>
-<td>222</td>
-<td>0.891892</td>
-<td>5.810811</td>
-<td>40.0</td>
-<td>30.342342</td>
-</tr>
-<tr>
-<td>stb_image.h</td>
-<td>95</td>
-<td>0.505263</td>
-<td>0.019531</td>
-<td>40.0</td>
-<td>23.242105</td>
-</tr>
-<tr>
-<td>chinese1.txt</td>
-<td>3529</td>
-<td>0.971380</td>
-<td>2.893171</td>
-<td>40.0</td>
-<td>24.451118</td>
-</tr>
-<tr>
-<td>chinese2.txt</td>
-<td>3540</td>
-<td>0.959887</td>
-<td>2.884181</td>
-<td>40.0</td>
-<td>24.424858</td>
-</tr>
-<tr>
-<td>chinese3.txt</td>
-<td>4226</td>
-<td>0.818268</td>
-<td>2.415996</td>
-<td>40.0</td>
-<td>30.209181</td>
-</tr>
-<tr>
-<td>danish.txt</td>
-<td>111</td>
-<td>1.333333</td>
-<td>11.351352</td>
-<td>40.0</td>
-<td>29.549549</td>
-</tr>
-<tr>
-<td>germain.txt</td>
-<td>133</td>
-<td>1.413534</td>
-<td>10.526316</td>
-<td>40.0</td>
-<td>27.308271</td>
-</tr>
-<tr>
-<td>esperanto.txt</td>
-<td>96</td>
-<td>1.229167</td>
-<td>13.437500</td>
-<td>40.0</td>
-<td>23.166666</td>
-</tr>
-<tr>
-<td>japanese.txt</td>
-<td>2176</td>
-<td>1.506434</td>
-<td>4.191961</td>
-<td>40.0</td>
-<td>28.232977</td>
-</tr>
-<tr>
-<td>japanese2.txt</td>
-<td>2438</td>
-<td>1.506434</td>
-<td>4.696691</td>
-<td>40.0</td>
-<td>29.705883</td>
-</tr>
-<tr>
-<td>russian.txt</td>
-<td>145</td>
-<td>0.882759</td>
-<td>8.896552</td>
-<td>40.0</td>
-<td>26.372414</td>
-</tr>
-<tr>
-<td>big.txt</td>
-<td>6069</td>
-<td>0.607678</td>
-<td>1.683968</td>
-<td>40.0</td>
-<td>25.894217</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">file</th>
+          <th style="text-align: left">codepoint count</th>
+          <th style="text-align: left">bpcp utf8_lookup</th>
+          <th style="text-align: left">bpcp bitarray</th>
+          <th style="text-align: left">bpcp std::map</th>
+          <th style="text-align: left">bpcp std::unordered_map</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">ancient_greek.txt</td>
+          <td style="text-align: left">222</td>
+          <td style="text-align: left">0.891892</td>
+          <td style="text-align: left">5.810811</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">30.342342</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">stb_image.h</td>
+          <td style="text-align: left">95</td>
+          <td style="text-align: left">0.505263</td>
+          <td style="text-align: left">0.019531</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">23.242105</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">chinese1.txt</td>
+          <td style="text-align: left">3529</td>
+          <td style="text-align: left">0.971380</td>
+          <td style="text-align: left">2.893171</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">24.451118</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">chinese2.txt</td>
+          <td style="text-align: left">3540</td>
+          <td style="text-align: left">0.959887</td>
+          <td style="text-align: left">2.884181</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">24.424858</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">chinese3.txt</td>
+          <td style="text-align: left">4226</td>
+          <td style="text-align: left">0.818268</td>
+          <td style="text-align: left">2.415996</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">30.209181</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">danish.txt</td>
+          <td style="text-align: left">111</td>
+          <td style="text-align: left">1.333333</td>
+          <td style="text-align: left">11.351352</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">29.549549</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">germain.txt</td>
+          <td style="text-align: left">133</td>
+          <td style="text-align: left">1.413534</td>
+          <td style="text-align: left">10.526316</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">27.308271</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">esperanto.txt</td>
+          <td style="text-align: left">96</td>
+          <td style="text-align: left">1.229167</td>
+          <td style="text-align: left">13.437500</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">23.166666</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">japanese.txt</td>
+          <td style="text-align: left">2176</td>
+          <td style="text-align: left">1.506434</td>
+          <td style="text-align: left">4.191961</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">28.232977</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">japanese2.txt</td>
+          <td style="text-align: left">2438</td>
+          <td style="text-align: left">1.506434</td>
+          <td style="text-align: left">4.696691</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">29.705883</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">russian.txt</td>
+          <td style="text-align: left">145</td>
+          <td style="text-align: left">0.882759</td>
+          <td style="text-align: left">8.896552</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">26.372414</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">big.txt</td>
+          <td style="text-align: left">6069</td>
+          <td style="text-align: left">0.607678</td>
+          <td style="text-align: left">1.683968</td>
+          <td style="text-align: left">40.0</td>
+          <td style="text-align: left">25.894217</td>
+      </tr>
+  </tbody>
 </table>
 <blockquote>
 <p>bpcp = bytes per codepoint</p>

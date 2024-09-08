@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -164,8 +164,33 @@
   </a>
   <div class="post-entry">
     
-      <p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</p>
+      <p><p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines.
+Something like the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">some_game_object_behavior</span>( entity ent, ... )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    pnt3 points[] <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">3</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">4</span>}
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> pos <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span>(entity_alive(ent))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// move the entity to a position and yield coroutine while movement is ongoing.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        move_to(ent, points[pos <span style="color:#f92672">%</span> ARRAY_LENGTH(points)]);
+</span></span><span style="display:flex;"><span>        pos<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            shoot_bullet(ent);
+</span></span><span style="display:flex;"><span>            wait_sec(ent, <span style="color:#ae81ff">2</span>); <span style="color:#75715e">// do nothing for 2 seconds and yield the coroutine for that duration.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pr</p>
       <a href="https://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
         >Read More</a
       >
@@ -189,8 +214,10 @@ void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {
   </a>
   <div class="post-entry">
     
-      <p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
-printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</p>
+      <p><p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
+</span></span></code></pr</p>
       <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
         >Read More</a
       >
@@ -214,9 +241,12 @@ printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for mult
   </a>
   <div class="post-entry">
     
-      <p>This is the story of an unexpected ABI break that I thought would be worth documenting.
-At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
-Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</p>
+      <p><p>This is the story of an unexpected ABI break that I thought would be worth documenting.</p>
+<p>At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
+uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.</p>
+<p>Why would you want a class like this you might ask, well we use it for adding a <code>const char* c_str()</code>-function that can be
+used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString
+and have a lookup of the hash-value performed.</p></p>
       <a href="https://kihlander.net/post/a-story-about-an-unexpected-abi-break/" class="post-read-more"
         >Read More</a
       >

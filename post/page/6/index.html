@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -164,9 +164,22 @@
   </a>
   <div class="post-entry">
     
-      <p>I recently read a blogpost about compile-time string-hashes and constexpr and I&rsquo;m still not convinced and see no real reason to leave my old and true friend the script :)
-So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).
-void my_func( uint32_t val ) { switch( val ) { case HashOfString(&#34;some_string&#34;): do_some_stuff(); break; case HashOfString(&#34;some_other_string&#34;): do_some_other_stuff(); break; } } Simple enough.</p>
+      <p><p>I recently read a blogpost about <a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/">compile-time string-hashes and constexpr</a> and I&rsquo;m still not convinced and
+see no real reason to leave my old and true friend the script :)</p>
+<p>So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func</span>( <span style="color:#66d9ef">uint32_t</span> val )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span>( val )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HashOfString(<span style="color:#e6db74">&#34;some_string&#34;</span>)<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            do_some_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HashOfString(<span style="color:#e6db74">&#34;some_other_string&#34;</span>)<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            do_some_other_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pr</p>
       <a href="https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/" class="post-read-more"
         >Read More</a
       >
@@ -190,8 +203,13 @@ void my_func( uint32_t val ) { switch( val ) { case HashOfString(&#34;some_strin
   </a>
   <div class="post-entry">
     
-      <p>I like command-line arguments as mentioned in an earlier post about them. In this post I&rsquo;ll discuss a method to use them as simple config-files.
-Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.</p>
+      <p><p>I like command-line arguments as mentioned in an earlier <a href="%7Bfilename%7D./registering-command-line-args.md">post</a> about them. In this
+post I&rsquo;ll discuss a method to use them as simple config-files.</p>
+<p>Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
+and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
+loading ( particles have a material to be rendered with etc ), i.e. resources from &ldquo;some game&rdquo; need to be found by the particle-viewer.
+Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make
+sure that &ldquo;some game&rdquo;:s resources is mounted in the particle-viewer!</p></p>
       <a href="https://kihlander.net/post/command-line-args-as-config/" class="post-read-more"
         >Read More</a
       >
@@ -215,7 +233,10 @@ Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/
   </a>
   <div class="post-entry">
     
-      <p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the &ldquo;resource&rdquo;-domain to verbose or --memory-enable-stacktrace=render to enable save of stacktraces for all allocations done in the &ldquo;render&rdquo;-allocator than to edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p>
+      <p><p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+It is for example easier to just add a <code>--log-verbose=resource</code> to set all logging in the &ldquo;resource&rdquo;-domain to verbose or
+<code>--memory-enable-stacktrace=render</code> to enable save of stacktraces for all allocations done in the &ldquo;render&rdquo;-allocator than to
+edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p></p>
       <a href="https://kihlander.net/post/registering-command-line-args/" class="post-read-more"
         >Read More</a
       >

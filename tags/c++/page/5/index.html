@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -157,8 +157,13 @@
   </a>
   <div class="post-entry">
     
-      <p>I like command-line arguments as mentioned in an earlier post about them. In this post I&rsquo;ll discuss a method to use them as simple config-files.
-Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.</p>
+      <p><p>I like command-line arguments as mentioned in an earlier <a href="%7Bfilename%7D./registering-command-line-args.md">post</a> about them. In this
+post I&rsquo;ll discuss a method to use them as simple config-files.</p>
+<p>Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
+and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
+loading ( particles have a material to be rendered with etc ), i.e. resources from &ldquo;some game&rdquo; need to be found by the particle-viewer.
+Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make
+sure that &ldquo;some game&rdquo;:s resources is mounted in the particle-viewer!</p></p>
       <a href="https://kihlander.net/post/command-line-args-as-config/" class="post-read-more"
         >Read More</a
       >
@@ -182,7 +187,10 @@ Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/
   </a>
   <div class="post-entry">
     
-      <p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine. It is for example easier to just add a --log-verbose=resource to set all logging in the &ldquo;resource&rdquo;-domain to verbose or --memory-enable-stacktrace=render to enable save of stacktraces for all allocations done in the &ldquo;render&rdquo;-allocator than to edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p>
+      <p><p>I really like using command line arguments. I think that it is a flexible way to interact with and configure my games/engine.
+It is for example easier to just add a <code>--log-verbose=resource</code> to set all logging in the &ldquo;resource&rdquo;-domain to verbose or
+<code>--memory-enable-stacktrace=render</code> to enable save of stacktraces for all allocations done in the &ldquo;render&rdquo;-allocator than to
+edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p></p>
       <a href="https://kihlander.net/post/registering-command-line-args/" class="post-read-more"
         >Read More</a
       >

@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="The command-line as a poor mans config files">
   <meta name="twitter:description" content="I like command-line arguments as mentioned in an earlier post about them. In this post I’ll discuss a method to use them as simple config-files.
-Let’s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.">
+Let’s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while loading ( particles have a material to be rendered with etc ), i.e. resources from “some game” need to be found by the particle-viewer. Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make sure that “some game”:s resources is mounted in the particle-viewer!">
 
 
 
@@ -69,7 +69,7 @@ Let’s start of with a usage example from my own code. I have a meshviewer/part
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     

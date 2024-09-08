@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -157,9 +157,12 @@
   </a>
   <div class="post-entry">
     
-      <p>This is the story of an unexpected ABI break that I thought would be worth documenting.
-At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
-Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</p>
+      <p><p>This is the story of an unexpected ABI break that I thought would be worth documenting.</p>
+<p>At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
+uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.</p>
+<p>Why would you want a class like this you might ask, well we use it for adding a <code>const char* c_str()</code>-function that can be
+used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString
+and have a lookup of the hash-value performed.</p></p>
       <a href="https://kihlander.net/post/a-story-about-an-unexpected-abi-break/" class="post-read-more"
         >Read More</a
       >

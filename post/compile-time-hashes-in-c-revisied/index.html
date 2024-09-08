@@ -69,7 +69,7 @@ But a lot of time has passed since I wrote that… and I didn’t make any measu
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -211,82 +211,82 @@ I just picked MurmurHash3 as that is what I use at home and at work mostly&helli
 <p><code>clang++ --version</code> -&gt; Ubuntu clang version 14.0.0-1ubuntu1.1</p>
 </blockquote>
 <table>
-<thead>
-<tr>
-<th></th>
-<th>16</th>
-<th>128</th>
-<th>1024</th>
-<th>2048</th>
-<th>4096</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>g++ -O0</code> constant</td>
-<td>0.015s</td>
-<td>0.021s</td>
-<td>0.078s</td>
-<td>0.175s</td>
-<td>0.475s</td>
-</tr>
-<tr>
-<td><code>g++ -O0</code> constexpr</td>
-<td>0.015s</td>
-<td>0.027s</td>
-<td>0.140s</td>
-<td>0.302s</td>
-<td>0.750s</td>
-</tr>
-<tr>
-<td><code>clang++ -O0</code> constant</td>
-<td>0.023s</td>
-<td>0.028s</td>
-<td>0.056s</td>
-<td>0.084s</td>
-<td>0.153s</td>
-</tr>
-<tr>
-<td><code>clang++ -O0</code> constexpr</td>
-<td>0.026s</td>
-<td>0.047s</td>
-<td>0.203s</td>
-<td>0.386s</td>
-<td>0.750s</td>
-</tr>
-<tr>
-<td><code>g++ -O2</code> constant</td>
-<td>0.017s</td>
-<td>0.036s</td>
-<td>0.304s</td>
-<td>0.920s</td>
-<td>4.041s</td>
-</tr>
-<tr>
-<td><code>g++ -O2</code> constexpr</td>
-<td>0.018s</td>
-<td>0.045s</td>
-<td>0.371s</td>
-<td>1.068s</td>
-<td>4.370s</td>
-</tr>
-<tr>
-<td><code>clang++ -O2</code> constant</td>
-<td>0.025s</td>
-<td>0.039s</td>
-<td>0.224s</td>
-<td>0.612s</td>
-<td>2.097s</td>
-</tr>
-<tr>
-<td><code>clang++ -O2</code> constexpr</td>
-<td>0.030s</td>
-<td>0.063s</td>
-<td>0.392s</td>
-<td>0.917s</td>
-<td>2.716s</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left">16</th>
+          <th style="text-align: left">128</th>
+          <th style="text-align: left">1024</th>
+          <th style="text-align: left">2048</th>
+          <th style="text-align: left">4096</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>g++ -O0</code> constant</td>
+          <td style="text-align: left">0.015s</td>
+          <td style="text-align: left">0.021s</td>
+          <td style="text-align: left">0.078s</td>
+          <td style="text-align: left">0.175s</td>
+          <td style="text-align: left">0.475s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>g++ -O0</code> constexpr</td>
+          <td style="text-align: left">0.015s</td>
+          <td style="text-align: left">0.027s</td>
+          <td style="text-align: left">0.140s</td>
+          <td style="text-align: left">0.302s</td>
+          <td style="text-align: left">0.750s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O0</code> constant</td>
+          <td style="text-align: left">0.023s</td>
+          <td style="text-align: left">0.028s</td>
+          <td style="text-align: left">0.056s</td>
+          <td style="text-align: left">0.084s</td>
+          <td style="text-align: left">0.153s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O0</code> constexpr</td>
+          <td style="text-align: left">0.026s</td>
+          <td style="text-align: left">0.047s</td>
+          <td style="text-align: left">0.203s</td>
+          <td style="text-align: left">0.386s</td>
+          <td style="text-align: left">0.750s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>g++ -O2</code> constant</td>
+          <td style="text-align: left">0.017s</td>
+          <td style="text-align: left">0.036s</td>
+          <td style="text-align: left">0.304s</td>
+          <td style="text-align: left">0.920s</td>
+          <td style="text-align: left">4.041s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>g++ -O2</code> constexpr</td>
+          <td style="text-align: left">0.018s</td>
+          <td style="text-align: left">0.045s</td>
+          <td style="text-align: left">0.371s</td>
+          <td style="text-align: left">1.068s</td>
+          <td style="text-align: left">4.370s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O2</code> constant</td>
+          <td style="text-align: left">0.025s</td>
+          <td style="text-align: left">0.039s</td>
+          <td style="text-align: left">0.224s</td>
+          <td style="text-align: left">0.612s</td>
+          <td style="text-align: left">2.097s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O2</code> constexpr</td>
+          <td style="text-align: left">0.030s</td>
+          <td style="text-align: left">0.063s</td>
+          <td style="text-align: left">0.392s</td>
+          <td style="text-align: left">0.917s</td>
+          <td style="text-align: left">2.716s</td>
+      </tr>
+  </tbody>
 </table>
 <p>If we look at the table we can clearly see that we pay something for using the constexpr hashes, it would be unexpected if we didn&rsquo;t&hellip; but it also do not seem to be that much. We can see that in the bigger numbers that the times is quite high regardless if just generating the hashes or using the constexpr hash. We clearly see that it take quite a bit of time to compile with both approaches.</p>
 <p>What is it that the compilers are spending their time on then? Optimizing the huge switch of course! Lets try again but this time we&rsquo;ll just generate the constants!</p>
@@ -314,82 +314,82 @@ I just picked MurmurHash3 as that is what I use at home and at work mostly&helli
 </span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
 </span></span></span></code></pre></div><p>Compiling these in the same way gives us this:</p>
 <table>
-<thead>
-<tr>
-<th></th>
-<th>16</th>
-<th>128</th>
-<th>1024</th>
-<th>2048</th>
-<th>4096</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>g++ -O0</code> constant</td>
-<td>0.011s</td>
-<td>0.016s</td>
-<td>0.024s</td>
-<td>0.033s</td>
-<td>0.053s</td>
-</tr>
-<tr>
-<td><code>g++ -O0</code> constexpr</td>
-<td>0.012s</td>
-<td>0.021s</td>
-<td>0.093s</td>
-<td>0.172s</td>
-<td>0.313s</td>
-</tr>
-<tr>
-<td><code>clang++ -O0</code> constant</td>
-<td>0.026s</td>
-<td>0.025s</td>
-<td>0.035s</td>
-<td>0.048s</td>
-<td>0.072s</td>
-</tr>
-<tr>
-<td><code>clang++ -O0</code> constexpr</td>
-<td>0.037s</td>
-<td>0.043s</td>
-<td>0.129s</td>
-<td>0.293s</td>
-<td>0.533s</td>
-</tr>
-<tr>
-<td><code>g++ -O2</code> constant</td>
-<td>0.011s</td>
-<td>0.017s</td>
-<td>0.021s</td>
-<td>0.026s</td>
-<td>0.038s</td>
-</tr>
-<tr>
-<td><code>g++ -O2</code> constexpr</td>
-<td>0.012s</td>
-<td>0.023s</td>
-<td>0.089s</td>
-<td>0.157s</td>
-<td>0.305s</td>
-</tr>
-<tr>
-<td><code>clang++ -O2</code> constant</td>
-<td>0.023s</td>
-<td>0.025s</td>
-<td>0.039s</td>
-<td>0.050s</td>
-<td>0.073s</td>
-</tr>
-<tr>
-<td><code>clang++ -O2</code> constexpr</td>
-<td>0.029s</td>
-<td>0.044s</td>
-<td>0.142s</td>
-<td>0.272s</td>
-<td>0.517s</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left">16</th>
+          <th style="text-align: left">128</th>
+          <th style="text-align: left">1024</th>
+          <th style="text-align: left">2048</th>
+          <th style="text-align: left">4096</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>g++ -O0</code> constant</td>
+          <td style="text-align: left">0.011s</td>
+          <td style="text-align: left">0.016s</td>
+          <td style="text-align: left">0.024s</td>
+          <td style="text-align: left">0.033s</td>
+          <td style="text-align: left">0.053s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>g++ -O0</code> constexpr</td>
+          <td style="text-align: left">0.012s</td>
+          <td style="text-align: left">0.021s</td>
+          <td style="text-align: left">0.093s</td>
+          <td style="text-align: left">0.172s</td>
+          <td style="text-align: left">0.313s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O0</code> constant</td>
+          <td style="text-align: left">0.026s</td>
+          <td style="text-align: left">0.025s</td>
+          <td style="text-align: left">0.035s</td>
+          <td style="text-align: left">0.048s</td>
+          <td style="text-align: left">0.072s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O0</code> constexpr</td>
+          <td style="text-align: left">0.037s</td>
+          <td style="text-align: left">0.043s</td>
+          <td style="text-align: left">0.129s</td>
+          <td style="text-align: left">0.293s</td>
+          <td style="text-align: left">0.533s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>g++ -O2</code> constant</td>
+          <td style="text-align: left">0.011s</td>
+          <td style="text-align: left">0.017s</td>
+          <td style="text-align: left">0.021s</td>
+          <td style="text-align: left">0.026s</td>
+          <td style="text-align: left">0.038s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>g++ -O2</code> constexpr</td>
+          <td style="text-align: left">0.012s</td>
+          <td style="text-align: left">0.023s</td>
+          <td style="text-align: left">0.089s</td>
+          <td style="text-align: left">0.157s</td>
+          <td style="text-align: left">0.305s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O2</code> constant</td>
+          <td style="text-align: left">0.023s</td>
+          <td style="text-align: left">0.025s</td>
+          <td style="text-align: left">0.039s</td>
+          <td style="text-align: left">0.050s</td>
+          <td style="text-align: left">0.073s</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>clang++ -O2</code> constexpr</td>
+          <td style="text-align: left">0.029s</td>
+          <td style="text-align: left">0.044s</td>
+          <td style="text-align: left">0.142s</td>
+          <td style="text-align: left">0.272s</td>
+          <td style="text-align: left">0.517s</td>
+      </tr>
+  </tbody>
 </table>
 <p>Way faster!</p>
 <p>Most overhead seems to be in &ldquo;optimizing the switch()&rdquo;. Doing some quick math just dividing the diff between constant and constexpr we see that when the amount of hashes rise the time-per-hash flattens out to a constant, 0.06ms for gcc and 0.1ms on my machine. On the lower numbers I guess that the overhead on &ldquo;everything except hashes&rdquo; skews the numbers to make them unreliable.</p>

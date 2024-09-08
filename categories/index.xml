@@ -16,8 +16,10 @@
 			<link>https://kihlander.net/post/extending-an-enum-in-zig/</link>
 			<pubDate>Sun, 01 Sep 2024 08:33:59 +0200</pubDate>
 			<guid>https://kihlander.net/post/extending-an-enum-in-zig/</guid>
-			<description>For a while now I have been dabbling with zig and as a small test writing a NES-emulator (everyone should have written an 8-bit emulator in their life right?). While doing this I stumbled upon a kind of neat trick that you can do in zig that I thought was worth sharing&amp;hellip; with kind of a &amp;ldquo;anti-climactic&amp;rdquo; end!
-Some background While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data.</description>
+			<description>&lt;p&gt;For a while now I have been dabbling with &lt;a href=&#34;https://ziglang.org/&#34;&gt;zig&lt;/a&gt; and as a small test writing a NES-emulator (everyone should have written an 8-bit emulator in their life right?).
+While doing this I stumbled upon a kind of neat trick that you can do in zig that I thought was worth sharing&amp;hellip; with kind of a &amp;ldquo;anti-climactic&amp;rdquo; end!&lt;/p&gt;
+&lt;h1 id=&#34;some-background&#34;&gt;Some background&lt;/h1&gt;
+&lt;p&gt;While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data. At this time the available palettes were all described with an enum.&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -25,8 +27,8 @@ Some background While writing some debug-tools I decided that I wanted to switch
 			<link>https://kihlander.net/post/compile-time-hashes-in-c-revisied/</link>
 			<pubDate>Sat, 13 Apr 2024 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/compile-time-hashes-in-c-revisied/</guid>
-			<description>Hashing strings in c++ at compile time has been possible since c++11 but is it worth doing? Me and a few colleagues was discussed this over a few beers and it reminded me that I have already written about it here (8 years ago&amp;hellip; ARGH I&amp;rsquo;m getting old!).
-But a lot of time has passed since I wrote that&amp;hellip; and I didn&amp;rsquo;t make any measurements in that article! shame! SHAME I SAY!</description>
+			<description>&lt;p&gt;Hashing strings in c++ at compile time has been possible since c++11 but is it worth doing? Me and a few colleagues was discussed this over a few beers and it reminded me that I have already written about it &lt;a href=&#34;../compile-time-hashes-in-c-im-not-convinced&#34;&gt;here&lt;/a&gt; (8 years ago&amp;hellip; ARGH I&amp;rsquo;m getting old!).&lt;/p&gt;
+&lt;p&gt;But a lot of time has passed since I wrote that&amp;hellip; and I didn&amp;rsquo;t make any measurements in that article! &lt;em&gt;shame!&lt;/em&gt; &lt;em&gt;SHAME I SAY!&lt;/em&gt;&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -34,9 +36,9 @@ But a lot of time has passed since I wrote that&amp;hellip; and I didn&amp;rsquo
 			<link>https://kihlander.net/post/software-i-like/</link>
 			<pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/software-i-like/</guid>
-			<description>I&amp;rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day. And since I like to read about what others use I might as well share some tips on tools that you might also like.
-My day-to-day OS of choice at home is xubuntu and at work Windows.
-I hope to make this post a living document so it might be updated from time to time.</description>
+			<description>&lt;p&gt;I&amp;rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day.
+And since I like to read about what others use I might as well share some tips on tools that you might also like.&lt;/p&gt;
+&lt;p&gt;My day-to-day OS of choice at home is &lt;a href=&#34;https://xubuntu.org/&#34;&gt;xubuntu&lt;/a&gt; and at work Windows.&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -44,8 +46,10 @@ I hope to make this post a living document so it might be updated from time to t
 			<link>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</link>
 			<pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</guid>
-			<description>Note: before we begin, finding a name for this post was really hard!
-In this post I&amp;rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&amp;rsquo;t seen before either. Probably it&amp;rsquo;s not something new and some of you will probably just say &amp;ldquo;yeah yeah, nothing new under the sun&amp;rdquo; but it&amp;rsquo;s probably worth a few words!</description>
+			<description>&lt;blockquote&gt;
+&lt;p&gt;Note: before we begin, finding a name for this post was really hard!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In this post I&amp;rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&amp;rsquo;t seen before either. Probably it&amp;rsquo;s not something new and some of you will probably just say &amp;ldquo;yeah yeah, nothing new under the sun&amp;rdquo; but it&amp;rsquo;s probably worth a few words!&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -53,7 +57,8 @@ In this post I&amp;rsquo;m going to touch on a c++-technique to handle callbacks
 			<link>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</link>
 			<pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/swapping-memory-and-compiler-optimizations/</guid>
-			<description>During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &amp;ldquo;family life&amp;rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while. I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!</description>
+			<description>&lt;p&gt;During my vacation for the holidays I thought that maybe I wanted some smaller project that you could fit in together with &amp;ldquo;family life&amp;rdquo; (not the easiest of endeavour!) and I got to think about some old code that I had laying about in my own little game-engine that I have thought about making public for a while.
+I thought it might be useful for someone else and maybe just doing some optimization work on it might be a fun little distraction!&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -61,9 +66,12 @@ In this post I&amp;rsquo;m going to touch on a c++-technique to handle callbacks
 			<link>https://kihlander.net/post/a-zig-diary/</link>
 			<pubDate>Sun, 08 Jan 2023 19:34:19 +0100</pubDate>
 			<guid>https://kihlander.net/post/a-zig-diary/</guid>
-			<description>As it turned out I happened to help out with fixing a space to host a zig meetup here in Stockholm at the place where I work. However I haven&amp;rsquo;t written a single line of zig in my life&amp;hellip; I felt that it might be worth doing something about that :D
-If you don&amp;rsquo;t know, zig is a new systems programming language!
-I have found zig quite intriguing for a while now but I haven&amp;rsquo;t had the time to look into it so this sounded like an as good excuse as any!</description>
+			<description>&lt;p&gt;As it turned out I happened to help out with fixing a space to host a &lt;a href=&#34;https://www.meetup.com/zig-stockholm/&#34;&gt;zig meetup&lt;/a&gt; here in Stockholm at the place where I work. However I haven&amp;rsquo;t written a single line of zig in my life&amp;hellip; I felt that it might be worth doing something about that :D&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;If you don&amp;rsquo;t know, &lt;a href=&#34;https://ziglang.org/&#34;&gt;zig&lt;/a&gt; is a new systems programming language!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I have found zig quite intriguing for a while now but I haven&amp;rsquo;t had the time to look into it so this sounded like an as good excuse as any!
+I&amp;rsquo;ll try something new with this post and just write as I go and document my success/failure/reflections, this might make it a bit &amp;ldquo;rambly&amp;rdquo; :)&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -71,9 +79,11 @@ I have found zig quite intriguing for a while now but I haven&amp;rsquo;t had th
 			<link>https://kihlander.net/post/when-memcpy-change/</link>
 			<pubDate>Sun, 23 Oct 2022 09:38:33 +0200</pubDate>
 			<guid>https://kihlander.net/post/when-memcpy-change/</guid>
-			<description>To start of, yes, I know that this article touch undefined behavior and that all bets are off!
-I am currently working on a bigger post on swapping memory that is THIS close to being done&amp;hellip; any day now (he has been saying the last year!).
-However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it.</description>
+			<description>&lt;blockquote&gt;
+&lt;p&gt;To start of, yes, I know that this article touch undefined behavior and that all bets are off!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I am currently working on a bigger post on swapping memory that is THIS close to being done&amp;hellip; any day now (he has been saying the last year!).&lt;/p&gt;
+&lt;p&gt;However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it. As the other post is already quite big I opted for a shorter one here.&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -81,10 +91,13 @@ However this topic popped up and I was wondering if it was worth making the othe
 			<link>https://kihlander.net/post/macros-and-lambdas/</link>
 			<pubDate>Sun, 16 Oct 2022 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/macros-and-lambdas/</guid>
-			<description>Time for a short post on using lambdas to construct macros&amp;hellip; that was a sentence that will be able to trigger 2 camps in one go :D
-Defer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don&amp;rsquo;t have to!
-A Defer Statement For C++11
-Call once So from my end I&amp;rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it IS_FIRST_CALL().</description>
+			<description>&lt;p&gt;Time for a short post on using lambdas to construct macros&amp;hellip; that was a sentence that will be able to trigger 2 camps in one go :D&lt;/p&gt;
+&lt;h2 id=&#34;defer&#34;&gt;Defer&lt;/h2&gt;
+&lt;p&gt;First of, using lambdas to implement a &lt;code&gt;defer()&lt;/code&gt; is really neat, however others has already written about that so that I don&amp;rsquo;t have to!&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.gingerbill.org/article/2015/08/19/defer-in-cpp/&#34;&gt;A Defer Statement For C++11&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;call-once&#34;&gt;Call once&lt;/h2&gt;
+&lt;p&gt;So from my end I&amp;rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it &lt;code&gt;IS_FIRST_CALL()&lt;/code&gt;.
+This can be used for things such as only logging something once or just asserting once. I&amp;rsquo;ll leave it to the reader to decide if this is a &amp;ldquo;good&amp;rdquo; thing but it is absolutely things I have seen &amp;ldquo;in the wild&amp;rdquo;.&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -92,8 +105,8 @@ Call once So from my end I&amp;rsquo;ll start of with a quick one for constructi
 			<link>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</link>
 			<pubDate>Sat, 23 Jul 2022 09:36:55 +0200</pubDate>
 			<guid>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</guid>
-			<description>I have been using pellican to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.
-After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it?</description>
+			<description>&lt;p&gt;I have been using &lt;a href=&#34;https://blog.getpelican.com/&#34;&gt;pellican&lt;/a&gt; to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.&lt;/p&gt;
+&lt;p&gt;After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it? Don&amp;rsquo;t know and Im not really keen on finding out.&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -101,8 +114,33 @@ After an update all line-breaks in code-segments just got removed, did I configu
 			<link>https://kihlander.net/post/protothreads-with-a-twist/</link>
 			<pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/protothreads-with-a-twist/</guid>
-			<description>For a long time I&amp;rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &amp;lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</description>
+			<description>&lt;p&gt;For a long time I&amp;rsquo;v been interested in running game-specific/entity-specific code in coroutines.
+Something like the following.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;some_game_object_behavior&lt;/span&gt;( entity ent, ... )
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    pnt3 points[] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    };
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; pos &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;while&lt;/span&gt;(entity_alive(ent))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#75715e&#34;&gt;// move the entity to a position and yield coroutine while movement is ongoing.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        move_to(ent, points[pos &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; ARRAY_LENGTH(points)]);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        pos&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;; &lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;i)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            shoot_bullet(ent);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            wait_sec(ent, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;); &lt;span style=&#34;color:#75715e&#34;&gt;// do nothing for 2 seconds and yield the coroutine for that duration.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pr</description>
 		</item>
       	
 	</channel>

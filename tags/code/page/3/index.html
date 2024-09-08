@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -157,10 +157,13 @@
   </a>
   <div class="post-entry">
     
-      <p>Time for a short post on using lambdas to construct macros&hellip; that was a sentence that will be able to trigger 2 camps in one go :D
-Defer First of, using lambdas to implement a defer() is really neat, however others has already written about that so that I don&rsquo;t have to!
-A Defer Statement For C++11
-Call once So from my end I&rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it IS_FIRST_CALL().</p>
+      <p><p>Time for a short post on using lambdas to construct macros&hellip; that was a sentence that will be able to trigger 2 camps in one go :D</p>
+<h2 id="defer">Defer</h2>
+<p>First of, using lambdas to implement a <code>defer()</code> is really neat, however others has already written about that so that I don&rsquo;t have to!</p>
+<p><a href="https://www.gingerbill.org/article/2015/08/19/defer-in-cpp/">A Defer Statement For C++11</a></p>
+<h2 id="call-once">Call once</h2>
+<p>So from my end I&rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it <code>IS_FIRST_CALL()</code>.
+This can be used for things such as only logging something once or just asserting once. I&rsquo;ll leave it to the reader to decide if this is a &ldquo;good&rdquo; thing but it is absolutely things I have seen &ldquo;in the wild&rdquo;.</p></p>
       <a href="https://kihlander.net/post/macros-and-lambdas/" class="post-read-more"
         >Read More</a
       >
@@ -184,8 +187,33 @@ Call once So from my end I&rsquo;ll start of with a quick one for constructing a
   </a>
   <div class="post-entry">
     
-      <p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos++; for(int i = 0; i &lt; 4; ++i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration.</p>
+      <p><p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines.
+Something like the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">some_game_object_behavior</span>( entity ent, ... )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    pnt3 points[] <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">3</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">4</span>}
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> pos <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span>(entity_alive(ent))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// move the entity to a position and yield coroutine while movement is ongoing.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        move_to(ent, points[pos <span style="color:#f92672">%</span> ARRAY_LENGTH(points)]);
+</span></span><span style="display:flex;"><span>        pos<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            shoot_bullet(ent);
+</span></span><span style="display:flex;"><span>            wait_sec(ent, <span style="color:#ae81ff">2</span>); <span style="color:#75715e">// do nothing for 2 seconds and yield the coroutine for that duration.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pr</p>
       <a href="https://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
         >Read More</a
       >
@@ -209,8 +237,10 @@ void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {
   </a>
   <div class="post-entry">
     
-      <p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
-printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</p>
+      <p><p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
+</span></span></code></pr</p>
       <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
         >Read More</a
       >

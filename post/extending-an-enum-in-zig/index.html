@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Extending an Enum in Zig">
   <meta name="twitter:description" content="For a while now I have been dabbling with zig and as a small test writing a NES-emulator (everyone should have written an 8-bit emulator in their life right?). While doing this I stumbled upon a kind of neat trick that you can do in zig that I thought was worth sharing… with kind of a “anti-climactic” end!
-Some background While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data.">
+Some background While writing some debug-tools I decided that I wanted to switch between ppu-palettes when displaying some data. At this time the available palettes were all described with an enum.">
 
 
 
@@ -69,7 +69,7 @@ Some background While writing some debug-tools I decided that I wanted to switch
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -279,6 +279,18 @@ While doing this I stumbled upon a kind of neat trick that you can do in zig tha
 <p>Number one is probably just because you can its not sure that you should! But also that zig:s meta-programming facilities are really powerful and easy to read/write. I really like the fact that &ldquo;it is just plain zig&rdquo; and that I don&rsquo;t have to learn that much new stuff. I&rsquo;m still afraid of the day when I have to debug this kind of stuff but I&rsquo;ll take this over c++ templates any day of the week!</p>
 <p>It is also obvious that zig has a long way to go&hellip; documentation is &ldquo;sparse&rdquo; to say the least. The above code was all figured out with googling and reading the zig std-lib. On the other hand it is quite impressive that I could do this in a really short amount of time despite the lack of docs!</p>
 <p>In the end it was an experiment that turned out to be a dead end&hellip; but these are also worth writing about from time to time!</p>
+<blockquote>
+<p><em>Addendum - 08 Sept, 2024</em></p>
+<p>After writing this I watched this from &lsquo;zig showtime&rsquo; where the same idea is shown of, but much better!
+
+
+    
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/l_qY2p0OH9A?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
+      ></iframe>
+    </div>
+</p>
+</blockquote>
 
 
 

@@ -68,7 +68,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -451,34 +451,34 @@ Well, loop-unrolling :)</p>
 <p>Now this is better! Both for clang ang gcc we are outperforming the &lsquo;generic&rsquo; implementation by a huge margin in debug and we see clang being close to the same perf as <code>-O2</code>/<code>-O3</code> in debug!:</p>
 <p><strong>Debug perf</strong></p>
 <table>
-<thead>
-<tr>
-<th></th>
-<th>generic</th>
-<th>GB/sec</th>
-<th>memcpy</th>
-<th>GB/sec</th>
-<th>perf</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>clang</td>
-<td>9600 us</td>
-<td>0.4</td>
-<td>370 us</td>
-<td>10.6</td>
-<td>26x</td>
-</tr>
-<tr>
-<td>gcc</td>
-<td>9600 us</td>
-<td>0.4</td>
-<td>525 us</td>
-<td>7.4</td>
-<td>18x</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left">generic</th>
+          <th style="text-align: left">GB/sec</th>
+          <th style="text-align: left">memcpy</th>
+          <th style="text-align: left">GB/sec</th>
+          <th style="text-align: left">perf</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">clang</td>
+          <td style="text-align: left">9600 us</td>
+          <td style="text-align: left">0.4</td>
+          <td style="text-align: left">370 us</td>
+          <td style="text-align: left">10.6</td>
+          <td style="text-align: left">26x</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">gcc</td>
+          <td style="text-align: left">9600 us</td>
+          <td style="text-align: left">0.4</td>
+          <td style="text-align: left">525 us</td>
+          <td style="text-align: left">7.4</td>
+          <td style="text-align: left">18x</td>
+      </tr>
+  </tbody>
 </table>
 <p>There are a few things that we might want to dig into here!</p>
 <h3 id="why-is-clang-this-much-faster-than-gcc">Why is clang this much faster than gcc?</h3>
@@ -548,91 +548,91 @@ Unfortunately for GCC it&rsquo;s generated memcpy-replacement is both slower and
 <a href="/images/swapping-memory-and-compiler-optimizations/memswap_sse2_time.png"><img src="/images/swapping-memory-and-compiler-optimizations/memswap_sse2_time.png" alt="memswap_sse2,time" title="memswap_sse2, time for 4MB"></a></p>
 <p><strong>Data in table form</strong></p>
 <table>
-<thead>
-<tr>
-<th></th>
-<th>generic</th>
-<th>GB/sec</th>
-<th>memcpy</th>
-<th>GB/sec</th>
-<th>sse2</th>
-<th>GB/sec</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>clang -O0</td>
-<td>9600 us</td>
-<td>0.4</td>
-<td>370 us</td>
-<td>10.56</td>
-<td>1540 us</td>
-<td>2.54</td>
-</tr>
-<tr>
-<td>clang -Os</td>
-<td>2900 us</td>
-<td>1.35</td>
-<td>270 us</td>
-<td>14.47</td>
-<td>280 us</td>
-<td>13.95</td>
-</tr>
-<tr>
-<td>clang -O2</td>
-<td>310 us</td>
-<td>12.6</td>
-<td>318 us</td>
-<td>12.28</td>
-<td>310 us</td>
-<td>12.60</td>
-</tr>
-<tr>
-<td>clang -O3</td>
-<td>307 us</td>
-<td>12.6</td>
-<td>318 us</td>
-<td>12.28</td>
-<td>310 us</td>
-<td>12.60</td>
-</tr>
-<tr>
-<td>gcc   -O0</td>
-<td>9600 us</td>
-<td>0.4</td>
-<td>525 us</td>
-<td>7.44</td>
-<td>1550 us</td>
-<td>2.54</td>
-</tr>
-<tr>
-<td>gcc   -Os</td>
-<td>2900 us</td>
-<td>1.35</td>
-<td>570 us</td>
-<td>6.85</td>
-<td>285 us</td>
-<td>13.71</td>
-</tr>
-<tr>
-<td>gcc   -O2</td>
-<td>2450 us</td>
-<td>1.59</td>
-<td>355 us</td>
-<td>11.0</td>
-<td>320 us</td>
-<td>12.21</td>
-</tr>
-<tr>
-<td>gcc   -O3</td>
-<td>325 us</td>
-<td>12.0</td>
-<td>355 us</td>
-<td>11.0</td>
-<td>320 us</td>
-<td>12.21</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: left">generic</th>
+          <th style="text-align: left">GB/sec</th>
+          <th style="text-align: left">memcpy</th>
+          <th style="text-align: left">GB/sec</th>
+          <th style="text-align: left">sse2</th>
+          <th style="text-align: left">GB/sec</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">clang -O0</td>
+          <td style="text-align: left">9600 us</td>
+          <td style="text-align: left">0.4</td>
+          <td style="text-align: left">370 us</td>
+          <td style="text-align: left">10.56</td>
+          <td style="text-align: left">1540 us</td>
+          <td style="text-align: left">2.54</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">clang -Os</td>
+          <td style="text-align: left">2900 us</td>
+          <td style="text-align: left">1.35</td>
+          <td style="text-align: left">270 us</td>
+          <td style="text-align: left">14.47</td>
+          <td style="text-align: left">280 us</td>
+          <td style="text-align: left">13.95</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">clang -O2</td>
+          <td style="text-align: left">310 us</td>
+          <td style="text-align: left">12.6</td>
+          <td style="text-align: left">318 us</td>
+          <td style="text-align: left">12.28</td>
+          <td style="text-align: left">310 us</td>
+          <td style="text-align: left">12.60</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">clang -O3</td>
+          <td style="text-align: left">307 us</td>
+          <td style="text-align: left">12.6</td>
+          <td style="text-align: left">318 us</td>
+          <td style="text-align: left">12.28</td>
+          <td style="text-align: left">310 us</td>
+          <td style="text-align: left">12.60</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">gcc   -O0</td>
+          <td style="text-align: left">9600 us</td>
+          <td style="text-align: left">0.4</td>
+          <td style="text-align: left">525 us</td>
+          <td style="text-align: left">7.44</td>
+          <td style="text-align: left">1550 us</td>
+          <td style="text-align: left">2.54</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">gcc   -Os</td>
+          <td style="text-align: left">2900 us</td>
+          <td style="text-align: left">1.35</td>
+          <td style="text-align: left">570 us</td>
+          <td style="text-align: left">6.85</td>
+          <td style="text-align: left">285 us</td>
+          <td style="text-align: left">13.71</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">gcc   -O2</td>
+          <td style="text-align: left">2450 us</td>
+          <td style="text-align: left">1.59</td>
+          <td style="text-align: left">355 us</td>
+          <td style="text-align: left">11.0</td>
+          <td style="text-align: left">320 us</td>
+          <td style="text-align: left">12.21</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">gcc   -O3</td>
+          <td style="text-align: left">325 us</td>
+          <td style="text-align: left">12.0</td>
+          <td style="text-align: left">355 us</td>
+          <td style="text-align: left">11.0</td>
+          <td style="text-align: left">320 us</td>
+          <td style="text-align: left">12.21</td>
+      </tr>
+  </tbody>
 </table>
 <p>Now we&rsquo;r talking. By sacrificing support on all platforms and only focusing on x86 we can get both compilers to generate code that can compete with the calls to <code>memcpy()</code> in all but the <code>-O0</code> builds. IMHO that is not surprising as we are comparing an optimized <code>memcpy()</code> against unoptimized code, however 1.5ms compared to the generic implementations 9.6ms is nothing to scoff at!</p>
 <blockquote>

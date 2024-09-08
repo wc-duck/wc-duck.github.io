@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.133.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
   </head>
   <body>
     
@@ -157,8 +157,10 @@
   </a>
   <div class="post-entry">
     
-      <p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed. However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.
-printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above!</p>
+      <p><p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
+</span></span></code></pr</p>
       <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
         >Read More</a
       >
@@ -182,9 +184,12 @@ printf(&#34;{ %.2f, %.2f, %.2f }&#34;, vec.x, vec.x, vec.z); Doing this for mult
   </a>
   <div class="post-entry">
     
-      <p>This is the story of an unexpected ABI break that I thought would be worth documenting.
-At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.
-Why would you want a class like this you might ask, well we use it for adding a const char* c_str()-function that can be used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString and have a lookup of the hash-value performed.</p>
+      <p><p>This is the story of an unexpected ABI break that I thought would be worth documenting.</p>
+<p>At Avalanche we use a small class wrapping 32bit hashes called CHashString, it is basically just a wrapper around
+uint32_t and one should be able to treat it as a uint32_t in code except for operations that do not make sense on a hash-value.</p>
+<p>Why would you want a class like this you might ask, well we use it for adding a <code>const char* c_str()</code>-function that can be
+used in logging and also we use it to add custom natvis-support in visual studio so that you can just hover a CHashString
+and have a lookup of the hash-value performed.</p></p>
       <a href="https://kihlander.net/post/a-story-about-an-unexpected-abi-break/" class="post-read-more"
         >Read More</a
       >
@@ -208,7 +213,9 @@ Why would you want a class like this you might ask, well we use it for adding a 
   </a>
   <div class="post-entry">
     
-      <p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &ldquo;in passing&rdquo; but will dig down a bit deeper into one &ldquo;feature&rdquo; in it that I find kind of neat. I&rsquo;m sure it has been done before but I have not seen it myself somewhere else. I&rsquo;ll be writing about how I handle builtin resources in the engine.</p>
+      <p><p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &ldquo;in passing&rdquo;
+but will dig down a bit deeper into one &ldquo;feature&rdquo; in it that I find kind of neat. I&rsquo;m sure it has been done before but I have not seen it myself somewhere else.
+I&rsquo;ll be writing about how I handle builtin resources in the engine.</p></p>
       <a href="https://kihlander.net/post/builtin-resources-and-the-resource-system/" class="post-read-more"
         >Read More</a
       >
