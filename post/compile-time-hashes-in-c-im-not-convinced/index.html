@@ -25,7 +25,7 @@
   <meta name="twitter:title" content="Compile-time hashes in c&#43;&#43;, im not convinced!">
   <meta name="twitter:description" content="I recently read a blogpost about compile-time string-hashes and constexpr and I’m still not convinced and see no real reason to leave my old and true friend the script :)
 So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).
-void my_func( uint32_t val ) { switch( val ) { case HashOfString(&#34;some_string&#34;): do_some_stuff(); break; case HashOfString(&#34;some_other_string&#34;): do_some_other_stuff(); break; } } ">
+void my_func( uint32_t val ) { switch( val ) { case HashOfString(&#34;some_string&#34;): do_some_stuff(); break; case HashOfString(&#34;some_other_string&#34;): do_some_other_stuff(); break; } } Simple enough. What seems to come up over and over again is ways of doing this with the compiler compile-time and now recently just marking HashOfString as constexpr and “trust the compiler”. The solution I usually fall back to is to just have a text-file where each line is hashed with a custom script and written to a .h file with values such as:">
 
 
 
@@ -70,7 +70,7 @@ void my_func( uint32_t val ) { switch( val ) { case HashOfString(&#34;some_strin
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.139.4">
   </head>
   <body>
     
@@ -285,7 +285,7 @@ cost time each time I compile that file. When generating a header I pay for it o
   
   <div class="container">
     <p class="credits copyright">
-      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      <a href="https://kihlander.net/about"></a>
       &nbsp;&copy;
       2024
       

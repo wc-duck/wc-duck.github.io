@@ -7,7 +7,7 @@
 		
   		<language>en</language>
 		
-		<managingEditor>Page(/tags/code) (Fredrik Kihlander)</managingEditor>
+		<managingEditor>/tags/code</managingEditor>
     	
   		<lastBuildDate>Sun, 01 Sep 2024 08:33:59 +0200</lastBuildDate>
 		
@@ -40,7 +40,9 @@ While doing this I stumbled upon a kind of neat trick that you can do in zig tha
 			<guid>https://kihlander.net/post/software-i-like/</guid>
 			<description>&lt;p&gt;I&amp;rsquo;m not the one that tinkers a lot with my dev-environment but there are some tools and software that I need and find that they help a lot day to day.
 And since I like to read about what others use I might as well share some tips on tools that you might also like.&lt;/p&gt;
-&lt;p&gt;My day-to-day OS of choice at home is &lt;a href=&#34;https://xubuntu.org/&#34;&gt;xubuntu&lt;/a&gt; and at work Windows.&lt;/p&gt;</description>
+&lt;p&gt;My day-to-day OS of choice at home is &lt;a href=&#34;https://xubuntu.org/&#34;&gt;xubuntu&lt;/a&gt; and at work Windows.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;I hope to make this post a living document so it might be updated from time to time.&lt;/p&gt;</description>
 		</item>
       	
 		<item>
@@ -142,7 +144,10 @@ Something like the following.&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pr</description>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The above example is slightly simplified but I hope that it get the point across, that I want to be able
+to suspend code-execution at specific points and wait for certain actions to complete. Writing  one-off
+game-code in this fashion might be a good way to work, especially when adding wait_for_any() and  wait_for_all()
+etc.&lt;/p&gt;</description>
 		</item>
       	
 	</channel>
