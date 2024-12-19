@@ -5,6 +5,16 @@
         
             {
                 "id": 0,
+                "href": "https://kihlander.net/post/its-healthy-to-look-outside-your-own-tribe/",
+                "title": "It's Healthy to Look Outside Your Own Tribe!",
+                "section": "post",
+                "date" : "2024.12.19",
+                "body": "It\u0026rsquo;s time for me to interrupt the ordinary programming on this little part of the interwebs that I call my blog and not do the usual schtick with numbers, code and c++-bashing and be a bit more philosophical instead.\nOne of my favorite philosophers!\nI think most of us working in tech, especially if we have been doing it for a while, know quite well what we like, what we think is \u0026ldquo;good engineering\u0026rdquo; or dare I say it \u0026ldquo;clean code\u0026rdquo;! We have found our bunch of people, our \u0026ldquo;tribe\u0026rdquo;, where we tackle similar problems, like the same kind of solutions and feel at home! Unfortunatly we also tend like to fling poop over the fences towards the other \u0026ldquo;tribes\u0026rdquo; and not really care where or on who it may land. Im unfortunatly not free of sin here, and you are probably not either!\nSidenote, I really dislike that expression \u0026ldquo;clean code\u0026rdquo; with passion! It has no other definition than \u0026ldquo;code that I like!\u0026rdquo; so it gives as much information as saying that \u0026ldquo;red is red\u0026rdquo; or \u0026ldquo;up is not down!\u0026rdquo;.\nWhat I want to say is that I do believe that it is healthy and important to, instead of flinging poop over the fence, maybe having a curious look over said fence! You might not always like what you see, you are in no shape of form required to agree with what you see, but I\u0026rsquo;m convinced that there are things to learn \u0026ldquo;over there\u0026rdquo;.\nEven if you don\u0026rsquo;t agree with a big part of something, there might be smaller nuggets of wisdom that you can apply to what you are doing and that can be applied to how you like to do things. You might see something that put you on a path to rethink or reframe how you think about attacking these kind of problems. It might be so simple as you just got to re-evaluate your own arguments for or against something and that they just came out stronger on the other side?\nI\u0026rsquo;m convinced that most articles and presentations that reach the tech-sphere is written or presented by people that believe in what they are presenting! There sure are some snake-oil-salesmen out there, but not the majority. This thing solved their problem, that solution didn\u0026rsquo;t work out at all, they found that this way of writing a specific type of code saved them from other problems. Again, you might not agree or it might not apply to your own mental image of what good engineering is but just calling all these people \u0026ldquo;stupid\u0026rdquo; and throwing it all out the window is the actual stupid thing to do!\nI\u0026rsquo;m not expecting anything I read today to \u0026ldquo;completely change how I see engineering\u0026rdquo;, I think that ship has sailed or it might never have even been possible to begin with (maybe in the beginning of my career), but I\u0026rsquo;m sure that all the cppcon presentation that I have watched (even if I have sigh:ed loudly and moaned) has given me something. The posts on python dependency management give me insights in these problems and proposed solutions in that space (and a feeling of recognition in where I work!). Getting into zig has been really inspiring, articles on the problems of \u0026ldquo;personal names\u0026rdquo; and how different they can be around the world might actually come in handy someday, not understanding anything when reading about Haskell\u0026hellip; is a thing? ;)\nSo go out there, read about what the current problems and proposed solutions are in the world of web dev, what are the cool new problems solved by people working on database-engines, maybe there is something to what the c gray-beards are actually saying\u0026hellip; or maybe, and this is actually hard to write, there might be some small nuggets of value in the \u0026ldquo;modern c++\u0026quot;-space as well!\nAll of them has given me something and I do think it made me a better programmer with a stronger belief in what I find works for me and why I think it works! There are thing I do not like, don\u0026rsquo;t see the benefit of etc, but I hope that I have come to these conclusions not by just rejecting everything from outside my own \u0026ldquo;tribe\u0026rdquo; but by trying to consume knowledge from a lot of different sources, testing out things in my spare time, write about it here!\nNot really sure why I wrote this as it is kind of out of character for me, but as a closing thing, stop the poop-throwing and go out there and try to understand others, have a healthy debate (with an emphasis on healthy!) and remember \u0026ldquo;you can\u0026rsquo;t win them all!\u0026rdquo;\u0026hellip; and please tell them I sent you!\nNext time, maybe it is time for a \u0026ldquo;link dump\u0026rdquo; of things I just found interesting, good or things that just got me thinking in one direction or the other?\n"
+            }
+    
+        ,
+            {
+                "id": 1,
                 "href": "https://kihlander.net/post/extending-an-enum-in-zig/",
                 "title": "Extending an Enum in Zig",
                 "section": "post",
@@ -14,7 +24,7 @@
     
         ,
             {
-                "id": 1,
+                "id": 2,
                 "href": "https://kihlander.net/post/compile-time-hashes-in-c-revisied/",
                 "title": "Compile Time Hashes in C - Revisied",
                 "section": "post",
@@ -24,7 +34,7 @@
     
         ,
             {
-                "id": 2,
+                "id": 3,
                 "href": "https://kihlander.net/post/software-i-like/",
                 "title": "Software I Like",
                 "section": "post",
@@ -34,7 +44,7 @@
     
         ,
             {
-                "id": 3,
+                "id": 4,
                 "href": "https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/",
                 "title": "Looking at c for better closures in c++",
                 "section": "post",
@@ -44,7 +54,7 @@
     
         ,
             {
-                "id": 4,
+                "id": 5,
                 "href": "https://kihlander.net/post/swapping-memory-and-compiler-optimizations/",
                 "title": "Swapping memory and compiler optimizations",
                 "section": "post",
@@ -54,7 +64,7 @@
     
         ,
             {
-                "id": 5,
+                "id": 6,
                 "href": "https://kihlander.net/post/a-zig-diary/",
                 "title": "A Zig Diary",
                 "section": "post",
@@ -64,7 +74,7 @@
     
         ,
             {
-                "id": 6,
+                "id": 7,
                 "href": "https://kihlander.net/post/when-memcpy-change/",
                 "title": "When memcpy() change!",
                 "section": "post",
@@ -74,7 +84,7 @@
     
         ,
             {
-                "id": 7,
+                "id": 8,
                 "href": "https://kihlander.net/post/macros-and-lambdas/",
                 "title": "Macros and Lambdas",
                 "section": "post",
@@ -84,7 +94,7 @@
     
         ,
             {
-                "id": 8,
+                "id": 9,
                 "href": "https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
@@ -94,7 +104,7 @@
     
         ,
             {
-                "id": 9,
+                "id": 10,
                 "href": "https://kihlander.net/about/",
                 "title": "About",
                 "section": "",
@@ -104,7 +114,7 @@
     
         ,
             {
-                "id": 10,
+                "id": 11,
                 "href": "https://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
@@ -114,7 +124,7 @@
     
         ,
             {
-                "id": 11,
+                "id": 12,
                 "href": "https://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
@@ -124,7 +134,7 @@
     
         ,
             {
-                "id": 12,
+                "id": 13,
                 "href": "https://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
@@ -134,7 +144,7 @@
     
         ,
             {
-                "id": 13,
+                "id": 14,
                 "href": "https://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
@@ -144,7 +154,7 @@
     
         ,
             {
-                "id": 14,
+                "id": 15,
                 "href": "https://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
@@ -154,7 +164,7 @@
     
         ,
             {
-                "id": 15,
+                "id": 16,
                 "href": "https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
@@ -164,7 +174,7 @@
     
         ,
             {
-                "id": 16,
+                "id": 17,
                 "href": "https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
@@ -174,7 +184,7 @@
     
         ,
             {
-                "id": 17,
+                "id": 18,
                 "href": "https://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
@@ -184,7 +194,7 @@
     
         ,
             {
-                "id": 18,
+                "id": 19,
                 "href": "https://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",

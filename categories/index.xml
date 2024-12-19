@@ -12,6 +12,19 @@
 		<atom:link href="/categories/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>It&#39;s Healthy to Look Outside Your Own Tribe!</title>
+			<link>https://kihlander.net/post/its-healthy-to-look-outside-your-own-tribe/</link>
+			<pubDate>Thu, 19 Dec 2024 18:35:57 +0100</pubDate>
+			<guid>https://kihlander.net/post/its-healthy-to-look-outside-your-own-tribe/</guid>
+			<description>&lt;p&gt;It&amp;rsquo;s time for me to interrupt the ordinary programming on this little part of the interwebs that I call my blog and not do the usual schtick with numbers, code and c++-bashing and be a bit more philosophical instead.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;&#34;&gt;&lt;img src=&#34;https://kihlander.net/images/its-healthy-to-look-outside-your-own-tribe/great-philosopher.webp&#34; alt=&#34;&#34; title=&#34;combo with custom option&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;One of my favorite philosophers!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I think most of us working in tech, especially if we have been doing it for a while, know quite well what we like, what we think is &amp;ldquo;good engineering&amp;rdquo; or dare I say it &amp;ldquo;clean code&amp;rdquo;! We have found our bunch of people, our &amp;ldquo;tribe&amp;rdquo;, where we tackle similar problems, like the same kind of solutions and feel at home! Unfortunatly we also tend like to fling poop over the fences towards the other &amp;ldquo;tribes&amp;rdquo; and not really care where or on who it may land. Im unfortunatly not free of sin here, and you are probably not either!&lt;/p&gt;</description>
+		</item>
+      	
+		<item>
 			<title>Extending an Enum in Zig</title>
 			<link>https://kihlander.net/post/extending-an-enum-in-zig/</link>
 			<pubDate>Sun, 01 Sep 2024 08:33:59 +0200</pubDate>
@@ -109,43 +122,6 @@ This can be used for things such as only logging something once or just assertin
 			<guid>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</guid>
 			<description>&lt;p&gt;I have been using &lt;a href=&#34;https://blog.getpelican.com/&#34;&gt;pellican&lt;/a&gt; to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.&lt;/p&gt;
 &lt;p&gt;After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it? Don&amp;rsquo;t know and Im not really keen on finding out.&lt;/p&gt;</description>
-		</item>
-      	
-		<item>
-			<title>&#34;ProtoThreads&#34; with a twist.</title>
-			<link>https://kihlander.net/post/protothreads-with-a-twist/</link>
-			<pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/protothreads-with-a-twist/</guid>
-			<description>&lt;p&gt;For a long time I&amp;rsquo;v been interested in running game-specific/entity-specific code in coroutines.
-Something like the following.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;some_game_object_behavior&lt;/span&gt;( entity ent, ... )
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    pnt3 points[] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;},
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;},
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;},
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    };
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; pos &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;while&lt;/span&gt;(entity_alive(ent))
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#75715e&#34;&gt;// move the entity to a position and yield coroutine while movement is ongoing.
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        move_to(ent, points[pos &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; ARRAY_LENGTH(points)]);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        pos&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;; &lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;i)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            shoot_bullet(ent);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            wait_sec(ent, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;); &lt;span style=&#34;color:#75715e&#34;&gt;// do nothing for 2 seconds and yield the coroutine for that duration.
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        }
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The above example is slightly simplified but I hope that it get the point across, that I want to be able
-to suspend code-execution at specific points and wait for certain actions to complete. Writing  one-off
-game-code in this fashion might be a good way to work, especially when adding wait_for_any() and  wait_for_all()
-etc.&lt;/p&gt;</description>
 		</item>
       	
 	</channel>
