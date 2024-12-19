@@ -68,7 +68,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.139.4">
   </head>
   <body>
     
@@ -453,30 +453,30 @@ Well, loop-unrolling :)</p>
 <table>
   <thead>
       <tr>
-          <th style="text-align: left"></th>
-          <th style="text-align: left">generic</th>
-          <th style="text-align: left">GB/sec</th>
-          <th style="text-align: left">memcpy</th>
-          <th style="text-align: left">GB/sec</th>
-          <th style="text-align: left">perf</th>
+          <th></th>
+          <th>generic</th>
+          <th>GB/sec</th>
+          <th>memcpy</th>
+          <th>GB/sec</th>
+          <th>perf</th>
       </tr>
   </thead>
   <tbody>
       <tr>
-          <td style="text-align: left">clang</td>
-          <td style="text-align: left">9600 us</td>
-          <td style="text-align: left">0.4</td>
-          <td style="text-align: left">370 us</td>
-          <td style="text-align: left">10.6</td>
-          <td style="text-align: left">26x</td>
+          <td>clang</td>
+          <td>9600 us</td>
+          <td>0.4</td>
+          <td>370 us</td>
+          <td>10.6</td>
+          <td>26x</td>
       </tr>
       <tr>
-          <td style="text-align: left">gcc</td>
-          <td style="text-align: left">9600 us</td>
-          <td style="text-align: left">0.4</td>
-          <td style="text-align: left">525 us</td>
-          <td style="text-align: left">7.4</td>
-          <td style="text-align: left">18x</td>
+          <td>gcc</td>
+          <td>9600 us</td>
+          <td>0.4</td>
+          <td>525 us</td>
+          <td>7.4</td>
+          <td>18x</td>
       </tr>
   </tbody>
 </table>
@@ -550,87 +550,87 @@ Unfortunately for GCC it&rsquo;s generated memcpy-replacement is both slower and
 <table>
   <thead>
       <tr>
-          <th style="text-align: left"></th>
-          <th style="text-align: left">generic</th>
-          <th style="text-align: left">GB/sec</th>
-          <th style="text-align: left">memcpy</th>
-          <th style="text-align: left">GB/sec</th>
-          <th style="text-align: left">sse2</th>
-          <th style="text-align: left">GB/sec</th>
+          <th></th>
+          <th>generic</th>
+          <th>GB/sec</th>
+          <th>memcpy</th>
+          <th>GB/sec</th>
+          <th>sse2</th>
+          <th>GB/sec</th>
       </tr>
   </thead>
   <tbody>
       <tr>
-          <td style="text-align: left">clang -O0</td>
-          <td style="text-align: left">9600 us</td>
-          <td style="text-align: left">0.4</td>
-          <td style="text-align: left">370 us</td>
-          <td style="text-align: left">10.56</td>
-          <td style="text-align: left">1540 us</td>
-          <td style="text-align: left">2.54</td>
+          <td>clang -O0</td>
+          <td>9600 us</td>
+          <td>0.4</td>
+          <td>370 us</td>
+          <td>10.56</td>
+          <td>1540 us</td>
+          <td>2.54</td>
       </tr>
       <tr>
-          <td style="text-align: left">clang -Os</td>
-          <td style="text-align: left">2900 us</td>
-          <td style="text-align: left">1.35</td>
-          <td style="text-align: left">270 us</td>
-          <td style="text-align: left">14.47</td>
-          <td style="text-align: left">280 us</td>
-          <td style="text-align: left">13.95</td>
+          <td>clang -Os</td>
+          <td>2900 us</td>
+          <td>1.35</td>
+          <td>270 us</td>
+          <td>14.47</td>
+          <td>280 us</td>
+          <td>13.95</td>
       </tr>
       <tr>
-          <td style="text-align: left">clang -O2</td>
-          <td style="text-align: left">310 us</td>
-          <td style="text-align: left">12.6</td>
-          <td style="text-align: left">318 us</td>
-          <td style="text-align: left">12.28</td>
-          <td style="text-align: left">310 us</td>
-          <td style="text-align: left">12.60</td>
+          <td>clang -O2</td>
+          <td>310 us</td>
+          <td>12.6</td>
+          <td>318 us</td>
+          <td>12.28</td>
+          <td>310 us</td>
+          <td>12.60</td>
       </tr>
       <tr>
-          <td style="text-align: left">clang -O3</td>
-          <td style="text-align: left">307 us</td>
-          <td style="text-align: left">12.6</td>
-          <td style="text-align: left">318 us</td>
-          <td style="text-align: left">12.28</td>
-          <td style="text-align: left">310 us</td>
-          <td style="text-align: left">12.60</td>
+          <td>clang -O3</td>
+          <td>307 us</td>
+          <td>12.6</td>
+          <td>318 us</td>
+          <td>12.28</td>
+          <td>310 us</td>
+          <td>12.60</td>
       </tr>
       <tr>
-          <td style="text-align: left">gcc   -O0</td>
-          <td style="text-align: left">9600 us</td>
-          <td style="text-align: left">0.4</td>
-          <td style="text-align: left">525 us</td>
-          <td style="text-align: left">7.44</td>
-          <td style="text-align: left">1550 us</td>
-          <td style="text-align: left">2.54</td>
+          <td>gcc   -O0</td>
+          <td>9600 us</td>
+          <td>0.4</td>
+          <td>525 us</td>
+          <td>7.44</td>
+          <td>1550 us</td>
+          <td>2.54</td>
       </tr>
       <tr>
-          <td style="text-align: left">gcc   -Os</td>
-          <td style="text-align: left">2900 us</td>
-          <td style="text-align: left">1.35</td>
-          <td style="text-align: left">570 us</td>
-          <td style="text-align: left">6.85</td>
-          <td style="text-align: left">285 us</td>
-          <td style="text-align: left">13.71</td>
+          <td>gcc   -Os</td>
+          <td>2900 us</td>
+          <td>1.35</td>
+          <td>570 us</td>
+          <td>6.85</td>
+          <td>285 us</td>
+          <td>13.71</td>
       </tr>
       <tr>
-          <td style="text-align: left">gcc   -O2</td>
-          <td style="text-align: left">2450 us</td>
-          <td style="text-align: left">1.59</td>
-          <td style="text-align: left">355 us</td>
-          <td style="text-align: left">11.0</td>
-          <td style="text-align: left">320 us</td>
-          <td style="text-align: left">12.21</td>
+          <td>gcc   -O2</td>
+          <td>2450 us</td>
+          <td>1.59</td>
+          <td>355 us</td>
+          <td>11.0</td>
+          <td>320 us</td>
+          <td>12.21</td>
       </tr>
       <tr>
-          <td style="text-align: left">gcc   -O3</td>
-          <td style="text-align: left">325 us</td>
-          <td style="text-align: left">12.0</td>
-          <td style="text-align: left">355 us</td>
-          <td style="text-align: left">11.0</td>
-          <td style="text-align: left">320 us</td>
-          <td style="text-align: left">12.21</td>
+          <td>gcc   -O3</td>
+          <td>325 us</td>
+          <td>12.0</td>
+          <td>355 us</td>
+          <td>11.0</td>
+          <td>320 us</td>
+          <td>12.21</td>
       </tr>
   </tbody>
 </table>
@@ -881,11 +881,8 @@ However if it would be a problem a simple fix would be to just not inline the co
 I&rsquo;m not alone in seeing this. In the last year we have seen other more &ldquo;c++-leaning&rdquo; developers also raising this issue. For example <a href="https://twitter.com/supahvee1234">Vittorio Romeo</a> has been raising that <code>std::move</code>, <code>std::forward</code> and other &ldquo;small&rdquo; function generate expensive calls in debug that really isn&rsquo;t needed and has been pushing for changes to both clang and gcc + it now seems that msvc is also coming along for the ride with <code>[[msvc::intrinsic]]</code></p>
 <p>See:
 
-
-    
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/ffFT-gIPCRE?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
-      ></iframe>
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/ffFT-gIPCRE?autoplay=0&amp;controls=1&amp;end=0&amp;loop=0&amp;mute=0&amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"></iframe>
     </div>
 </p>
 <p>and:</p>
@@ -987,7 +984,7 @@ If something interesting pops out I might do a followup :)</p>
   
   <div class="container">
     <p class="credits copyright">
-      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      <a href="https://kihlander.net/about"></a>
       &nbsp;&copy;
       2024
       

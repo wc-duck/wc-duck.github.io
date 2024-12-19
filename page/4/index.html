@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.139.4">
   </head>
   <body>
     
@@ -185,7 +185,10 @@ Something like the following.</p>
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pr</p>
+</span></span></code></pre></div><p>The above example is slightly simplified but I hope that it get the point across, that I want to be able
+to suspend code-execution at specific points and wait for certain actions to complete. Writing  one-off
+game-code in this fashion might be a good way to work, especially when adding wait_for_any() and  wait_for_all()
+etc.</p></p>
       <a href="https://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
         >Read More</a
       >
@@ -212,7 +215,7 @@ Something like the following.</p>
       <p><p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
 However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
-</span></span></code></pr</p>
+</span></span></code></pre></div><p>Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above! ).</p></p>
       <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
         >Read More</a
       >
@@ -325,7 +328,7 @@ and have a lookup of the hash-value performed.</p></p>
   
   <div class="container">
     <p class="credits copyright">
-      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      <a href="https://kihlander.net/about"></a>
       &nbsp;&copy;
       2024
       

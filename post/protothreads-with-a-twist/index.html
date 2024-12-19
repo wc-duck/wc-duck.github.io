@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="&#34;ProtoThreads&#34; with a twist.">
   <meta name="twitter:description" content="For a long time I’v been interested in running game-specific/entity-specific code in coroutines. Something like the following.
-void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos&#43;&#43;; for(int i = 0; i &lt; 4; &#43;&#43;i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration. } } } ">
+void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {2,2,2}, {3,3,3}, {4,4,4} }; int pos = 0; while(entity_alive(ent)) { // move the entity to a position and yield coroutine while movement is ongoing. move_to(ent, points[pos % ARRAY_LENGTH(points)]); pos&#43;&#43;; for(int i = 0; i &lt; 4; &#43;&#43;i) { shoot_bullet(ent); wait_sec(ent, 2); // do nothing for 2 seconds and yield the coroutine for that duration. } } } The above example is slightly simplified but I hope that it get the point across, that I want to be able to suspend code-execution at specific points and wait for certain actions to complete. Writing one-off game-code in this fashion might be a good way to work, especially when adding wait_for_any() and wait_for_all() etc.">
 
 
 
@@ -69,7 +69,7 @@ void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.134.1">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.139.4">
   </head>
   <body>
     
@@ -624,7 +624,7 @@ Please hit me up on twitter or post in the coro issue-tracker! And remember, the
   
   <div class="container">
     <p class="credits copyright">
-      <a href="https://kihlander.net/about">Fredrik Kihlander</a>
+      <a href="https://kihlander.net/about"></a>
       &nbsp;&copy;
       2024
       
