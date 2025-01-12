@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.0">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
   </head>
   <body>
     
@@ -151,6 +151,36 @@
       
         
         
+
+      
+        <article class="post-preview">
+  <a href="https://kihlander.net/post/command-line-args-as-config/">
+    <h2 class="post-title">The command-line as a poor mans config files</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p><p>I like command-line arguments as mentioned in an earlier <a href="%7Bfilename%7D./registering-command-line-args.md">post</a> about them. In this
+post I&rsquo;ll discuss a method to use them as simple config-files.</p>
+<p>Let&rsquo;s start of with a usage example from my own code. I have a meshviewer/particleviewer that is used for, you guessed it, viewing meshes
+and particle-effects. These kind of resources, at least the particle-effects, have internal paths to resources that need to be read while
+loading ( particles have a material to be rendered with etc ), i.e. resources from &ldquo;some game&rdquo; need to be found by the particle-viewer.
+Since reading resources is done via a VFS ( Virtual File System ) and paths is always specified via this VFS in resources we must just make
+sure that &ldquo;some game&rdquo;:s resources is mounted in the particle-viewer!</p></p>
+      <a href="https://kihlander.net/post/command-line-args-as-config/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Mar 1, 2016
+  
+</span>
+
+  </div>
+</article>
 
       
         <article class="post-preview">
@@ -240,7 +270,7 @@ edit some config-file somewhere. At least for things such as the ones mentioned 
     <p class="credits copyright">
       <a href="https://kihlander.net/about"></a>
       &nbsp;&copy;
-      2024
+      2025
       
         &nbsp;/&nbsp;
         <a href="https://kihlander.net/">What could possibly go wrong?</a>

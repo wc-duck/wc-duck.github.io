@@ -1,17 +1,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ramblings on What could possibly go wrong?</title>
-		<link>https://kihlander.net/tags/ramblings/</link>
-		<description>Recent content in Ramblings </description>
+		<title>Link Dump on What could possibly go wrong?</title>
+		<link>https://kihlander.net/tags/link-dump/</link>
+		<description>Recent content in Link Dump </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
   		<language>en</language>
 		
-		<managingEditor>/tags/ramblings</managingEditor>
+		<managingEditor>/tags/link-dump</managingEditor>
     	
-  		<lastBuildDate>Thu, 19 Dec 2024 18:35:57 +0100</lastBuildDate>
+  		<lastBuildDate>Mon, 06 Jan 2025 15:34:54 +0100</lastBuildDate>
 		
-		<atom:link href="/tags/ramblings/" rel="self" type="application/rss+xml" />
+		<atom:link href="/tags/link-dump/" rel="self" type="application/rss+xml" />
 		
 		<item>
 			<title>Link Dump Vol1</title>

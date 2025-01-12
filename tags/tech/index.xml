@@ -14,6 +14,15 @@
 		<atom:link href="/tags/tech/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>Link Dump Vol1</title>
+			<link>https://kihlander.net/post/link-dump-vol1/</link>
+			<pubDate>Mon, 06 Jan 2025 15:34:54 +0100</pubDate>
+			<guid>https://kihlander.net/post/link-dump-vol1/</guid>
+			<description>&lt;p&gt;During my time of work this christmas I had lots of plans to work on some of my hobby-projects or maybe just check out some new stuff&amp;hellip; none of that happened :D But I can at least write something, something low effort that is!&lt;/p&gt;
+&lt;p&gt;I have had this document (and an ever growing youtube &amp;ldquo;watch later&amp;rdquo;-list!) where I have just dumped links to blog-posts, presentations and videos that I have found in one way or another interesting.&lt;/p&gt;</description>
+		</item>
+      	
+		<item>
 			<title>It&#39;s Healthy to Look Outside Your Own Tribe!</title>
 			<link>https://kihlander.net/post/its-healthy-to-look-outside-your-own-tribe/</link>
 			<pubDate>Thu, 19 Dec 2024 18:35:57 +0100</pubDate>
@@ -115,15 +124,6 @@ I&amp;rsquo;ll try something new with this post and just write as I go and docum
 &lt;h2 id=&#34;call-once&#34;&gt;Call once&lt;/h2&gt;
 &lt;p&gt;So from my end I&amp;rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it &lt;code&gt;IS_FIRST_CALL()&lt;/code&gt;.
 This can be used for things such as only logging something once or just asserting once. I&amp;rsquo;ll leave it to the reader to decide if this is a &amp;ldquo;good&amp;rdquo; thing but it is absolutely things I have seen &amp;ldquo;in the wild&amp;rdquo;.&lt;/p&gt;</description>
-		</item>
-      	
-		<item>
-			<title>When selecting a theme is your biggest problem!</title>
-			<link>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</link>
-			<pubDate>Sat, 23 Jul 2022 09:36:55 +0200</pubDate>
-			<guid>https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/</guid>
-			<description>&lt;p&gt;I have been using &lt;a href=&#34;https://blog.getpelican.com/&#34;&gt;pellican&lt;/a&gt; to generate and maintain my blog sinces its inception and it has been mainly fine. However after getting a new machine and starting to fiddle with a new post I started noticing things such as installation being far from optimal and it no longer generating a functioning site after updating pellican.&lt;/p&gt;
-&lt;p&gt;After an update all line-breaks in code-segments just got removed, did I configure something wrong, what to do to fix it? Don&amp;rsquo;t know and Im not really keen on finding out.&lt;/p&gt;</description>
 		</item>
       	
 	</channel>
