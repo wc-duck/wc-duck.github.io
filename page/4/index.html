@@ -154,6 +154,36 @@
 
       
         <article class="post-preview">
+  <a href="https://kihlander.net/post/macros-and-lambdas/">
+    <h2 class="post-title">Macros and Lambdas</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p><p>Time for a short post on using lambdas to construct macros&hellip; that was a sentence that will be able to trigger 2 camps in one go :D</p>
+<h2 id="defer">Defer</h2>
+<p>First of, using lambdas to implement a <code>defer()</code> is really neat, however others has already written about that so that I don&rsquo;t have to!</p>
+<p><a href="https://www.gingerbill.org/article/2015/08/19/defer-in-cpp/">A Defer Statement For C++11</a></p>
+<h2 id="call-once">Call once</h2>
+<p>So from my end I&rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it <code>IS_FIRST_CALL()</code>.
+This can be used for things such as only logging something once or just asserting once. I&rsquo;ll leave it to the reader to decide if this is a &ldquo;good&rdquo; thing but it is absolutely things I have seen &ldquo;in the wild&rdquo;.</p></p>
+      <a href="https://kihlander.net/post/macros-and-lambdas/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Oct 16, 2022
+  
+</span>
+
+  </div>
+</article>
+
+      
+        <article class="post-preview">
   <a href="https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/">
     <h2 class="post-title">When selecting a theme is your biggest problem!</h2>
   </a>
@@ -224,33 +254,6 @@ etc.</p></p>
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
   >&nbsp;Nov 20, 2018
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/">
-    <h2 class="post-title">printf-based TOSTR on the stack</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p><p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
-However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
-</span></span></code></pre></div><p>Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above! ).</p></p>
-      <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;May 15, 2018
   
 </span>
 

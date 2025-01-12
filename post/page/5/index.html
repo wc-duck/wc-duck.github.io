@@ -139,7 +139,11 @@
           
             <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
+<<<<<<< HEAD
   >&nbsp;Jan 12, 2025
+=======
+  >&nbsp;Jan 6, 2025
+>>>>>>> 663d9b4da5b9a66da3b40cde538e80f941e31f6a
   
 </span>
 
@@ -156,6 +160,33 @@
       
         
       
+
+      
+        <article class="post-preview">
+  <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/">
+    <h2 class="post-title">printf-based TOSTR on the stack</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p><p>As I might have written before I like printf-style string-formating. It&rsquo;s imho the most convenient way to format strings and it can be really powerful if needed.
+However something that can be a bit tedious is output:ing &ldquo;composite&rdquo; values such as a vec3 or quaternion as there will be quite a bunch of repetition.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>printf(<span style="color:#e6db74">&#34;{ %.2f, %.2f, %.2f }&#34;</span>, vec.x, vec.x, vec.z);
+</span></span></code></pre></div><p>Doing this for multiple values really get verbose and its easy to make simple copy-paste-errors ( see above! ).</p></p>
+      <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;May 15, 2018
+  
+</span>
+
+  </div>
+</article>
 
       
         <article class="post-preview">
@@ -206,33 +237,6 @@ I&rsquo;ll be writing about how I handle builtin resources in the engine.</p></p
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
   >&nbsp;Aug 7, 2017
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="https://kihlander.net/post/utf8_lookup-writeup/">
-    <h2 class="post-title">utf8_lookup, a write up.</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p><p>I saw this blog post a while ago <a href="http://reedbeta.com/blog/programmers-intro-to-unicode/">A Programmer’s Introduction to Unicode</a>, a really great write up that is a worth a
-read for anyone interested in the subject! So go ahead and read that now even as it might not be super important for what I am about to write about here :)</p>
-<p>Reading this reminded me of an old project of mine that I think is a bit novel and deserves, at least, a write up. I am talking about <a href="http://github.com/wc-duck/utf8_lookup/">utf8_lookup</a>,
-a small lib to translate utf8 chars into offsets into a table.</p></p>
-      <a href="https://kihlander.net/post/utf8_lookup-writeup/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Jun 26, 2017
   
 </span>
 
