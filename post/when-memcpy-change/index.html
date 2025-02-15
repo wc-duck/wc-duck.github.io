@@ -70,7 +70,7 @@ However this topic popped up and I was wondering if it was worth making the othe
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -158,8 +158,7 @@ However this topic popped up and I was wondering if it was worth making the othe
     <article class="article" class="blog-post">
       
   <blockquote>
-<p>To start of, yes, I know that this article touch undefined behavior and that all bets are off!</p>
-</blockquote>
+<p>To start of, yes, I know that this article touch undefined behavior and that all bets are off!</p></blockquote>
 <p>I am currently working on a bigger post on swapping memory that is THIS close to being done&hellip; any day now (he has been saying the last year!).</p>
 <p>However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it. As the other post is already quite big I opted for a shorter one here.</p>
 <p>So what am I on about you might ask, weird title and all? <code>memcpy()</code> don&rsquo;t just change right, it is well defined what it should do! It should copy memory from buffer <code>a</code> to buffer <code>b</code>&hellip; as long as they don&rsquo;t overlap, then your in <em>undefined behavior territory</em> (spooky sounds go here!).</p>
@@ -169,8 +168,7 @@ However this topic popped up and I was wondering if it was worth making the othe
 <p>IMHO it is the right decision on a system-level to implement <code>memcpy()</code> as <code>memmove()</code> for the above mentioned reason, that reason being you and me as developers are stupid :) Many systems however don&rsquo;t do this so we still need to think about it.</p>
 <p>And now to the interesting part&hellip; lets try this out on my linux-machine. Let us add a simple program like this:</p>
 <blockquote>
-<p>In this post I will define &ldquo;the right&rdquo; behavior to be memmove() all the time&hellip; if this is right can absolutely be debated and I would not be on the side that it is ALWAYS the right choice, but for the sake of this article we define that as &ldquo;right&rdquo;.</p>
-</blockquote>
+<p>In this post I will define &ldquo;the right&rdquo; behavior to be memmove() all the time&hellip; if this is right can absolutely be debated and I would not be on the side that it is ALWAYS the right choice, but for the sake of this article we define that as &ldquo;right&rdquo;.</p></blockquote>
 <h1 id="trying-it-out">Trying it out</h1>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">

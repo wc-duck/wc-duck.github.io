@@ -14,6 +14,18 @@
 		<atom:link href="/tags/ramblings/" rel="self" type="application/rss+xml" />
 		
 		<item>
+			<title>c&#43;&#43; errors... a rant</title>
+			<link>https://kihlander.net/post/cpp-errors-a-rant/</link>
+			<pubDate>Sat, 15 Feb 2025 15:10:55 +0100</pubDate>
+			<guid>https://kihlander.net/post/cpp-errors-a-rant/</guid>
+			<description>&lt;p&gt;Today a small rant&amp;hellip; with a bit of an unexpected conclusion!&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In the beginning someone decided to use &lt;code&gt;std::variant&lt;/code&gt;. This has made a lot of people very angry and been widely regarded as a bad move.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;So at work this week I had to look at code written with &lt;code&gt;std::variant&lt;/code&gt;&amp;hellip; a lot can be said about &lt;code&gt;std::variant&lt;/code&gt; but this time it is about compile errors!&lt;/p&gt;
+&lt;p&gt;Someone had decided to use an &lt;code&gt;std::variant&amp;lt;x, y, z&amp;gt;&lt;/code&gt;, probably got a really bad error-message when they tried to extract a value out of it with the type &lt;code&gt;w&lt;/code&gt;, i.e. a type that is not part of the variant. Something like this, but simplified.&lt;/p&gt;</description>
+		</item>
+      	
+		<item>
 			<title>Link Dump Vol1</title>
 			<link>https://kihlander.net/post/link-dump-vol1/</link>
 			<pubDate>Sun, 12 Jan 2025 18:44:54 +0100</pubDate>
@@ -30,8 +42,7 @@
 			<description>&lt;p&gt;It&amp;rsquo;s time for me to interrupt the ordinary programming on this little part of the interwebs that I call my blog and not do the usual schtick with numbers, code and c++-bashing and be a bit more philosophical instead.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;&#34;&gt;&lt;img src=&#34;https://kihlander.net/images/its-healthy-to-look-outside-your-own-tribe/great-philosopher.webp&#34; alt=&#34;&#34; title=&#34;combo with custom option&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;One of my favorite philosophers!&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;One of my favorite philosophers!&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;I think most of us working in tech, especially if we have been doing it for a while, know quite well what we like, what we think is &amp;ldquo;good engineering&amp;rdquo; or dare I say it &amp;ldquo;clean code&amp;rdquo;! We have found our bunch of people, our &amp;ldquo;tribe&amp;rdquo;, where we tackle similar problems, like the same kind of solutions and feel at home! Unfortunatly we also tend like to fling poop over the fences towards the other &amp;ldquo;tribes&amp;rdquo; and not really care where or on who it may land. Im unfortunatly not free of sin here, and you are probably not either!&lt;/p&gt;</description>
 		</item>
       	
@@ -73,8 +84,7 @@ And since I like to read about what others use I might as well share some tips o
 			<pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
 			<guid>https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/</guid>
 			<description>&lt;blockquote&gt;
-&lt;p&gt;Note: before we begin, finding a name for this post was really hard!&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;Note: before we begin, finding a name for this post was really hard!&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;In this post I&amp;rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&amp;rsquo;t seen before either. Probably it&amp;rsquo;s not something new and some of you will probably just say &amp;ldquo;yeah yeah, nothing new under the sun&amp;rdquo; but it&amp;rsquo;s probably worth a few words!&lt;/p&gt;</description>
 		</item>
       	
@@ -94,8 +104,7 @@ I thought it might be useful for someone else and maybe just doing some optimiza
 			<guid>https://kihlander.net/post/a-zig-diary/</guid>
 			<description>&lt;p&gt;As it turned out I happened to help out with fixing a space to host a &lt;a href=&#34;https://www.meetup.com/zig-stockholm/&#34;&gt;zig meetup&lt;/a&gt; here in Stockholm at the place where I work. However I haven&amp;rsquo;t written a single line of zig in my life&amp;hellip; I felt that it might be worth doing something about that :D&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;If you don&amp;rsquo;t know, &lt;a href=&#34;https://ziglang.org/&#34;&gt;zig&lt;/a&gt; is a new systems programming language!&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;If you don&amp;rsquo;t know, &lt;a href=&#34;https://ziglang.org/&#34;&gt;zig&lt;/a&gt; is a new systems programming language!&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;I have found zig quite intriguing for a while now but I haven&amp;rsquo;t had the time to look into it so this sounded like an as good excuse as any!
 I&amp;rsquo;ll try something new with this post and just write as I go and document my success/failure/reflections, this might make it a bit &amp;ldquo;rambly&amp;rdquo; :)&lt;/p&gt;</description>
 		</item>
@@ -106,24 +115,9 @@ I&amp;rsquo;ll try something new with this post and just write as I go and docum
 			<pubDate>Sun, 23 Oct 2022 09:38:33 +0200</pubDate>
 			<guid>https://kihlander.net/post/when-memcpy-change/</guid>
 			<description>&lt;blockquote&gt;
-&lt;p&gt;To start of, yes, I know that this article touch undefined behavior and that all bets are off!&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;To start of, yes, I know that this article touch undefined behavior and that all bets are off!&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;I am currently working on a bigger post on swapping memory that is THIS close to being done&amp;hellip; any day now (he has been saying the last year!).&lt;/p&gt;
 &lt;p&gt;However this topic popped up and I was wondering if it was worth making the other post longer or just make a small one about it. As the other post is already quite big I opted for a shorter one here.&lt;/p&gt;</description>
-		</item>
-      	
-		<item>
-			<title>Macros and Lambdas</title>
-			<link>https://kihlander.net/post/macros-and-lambdas/</link>
-			<pubDate>Sun, 16 Oct 2022 00:00:00 +0000</pubDate>
-			<guid>https://kihlander.net/post/macros-and-lambdas/</guid>
-			<description>&lt;p&gt;Time for a short post on using lambdas to construct macros&amp;hellip; that was a sentence that will be able to trigger 2 camps in one go :D&lt;/p&gt;
-&lt;h2 id=&#34;defer&#34;&gt;Defer&lt;/h2&gt;
-&lt;p&gt;First of, using lambdas to implement a &lt;code&gt;defer()&lt;/code&gt; is really neat, however others has already written about that so that I don&amp;rsquo;t have to!&lt;/p&gt;
-&lt;p&gt;&lt;a href=&#34;https://www.gingerbill.org/article/2015/08/19/defer-in-cpp/&#34;&gt;A Defer Statement For C++11&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&#34;call-once&#34;&gt;Call once&lt;/h2&gt;
-&lt;p&gt;So from my end I&amp;rsquo;ll start of with a quick one for constructing a macro that only does something once, lets call it &lt;code&gt;IS_FIRST_CALL()&lt;/code&gt;.
-This can be used for things such as only logging something once or just asserting once. I&amp;rsquo;ll leave it to the reader to decide if this is a &amp;ldquo;good&amp;rdquo; thing but it is absolutely things I have seen &amp;ldquo;in the wild&amp;rdquo;.&lt;/p&gt;</description>
 		</item>
       	
 	</channel>

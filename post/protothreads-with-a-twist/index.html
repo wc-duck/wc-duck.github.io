@@ -69,7 +69,7 @@ void some_game_object_behavior( entity ent, ... ) { pnt3 points[] = { {1,1,1}, {
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -236,8 +236,7 @@ does!</p>
 in coro MAY have a stack associated with it where the system itself can push data and reset when a coroutine completes.</p>
 <blockquote>
 <p>Warning for you C-all-the-way people, there be some usage of C++ in this piece of code! But I guess it wouldn&rsquo;t
-be that hard to C:ify the lib if there is demand for it!</p>
-</blockquote>
+be that hard to C:ify the lib if there is demand for it!</p></blockquote>
 <p>The library does nothing particularly fancy at its core, the simplest coroutine would be implemented and updated
 like this.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_coro</span>( coro<span style="color:#f92672">*</span> co, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> )
@@ -293,14 +292,12 @@ the problem isn&rsquo;t really to store the data, it is how to make it nice to u
 <blockquote>
 <p>whoo 1</p>
 <p>whoo 2</p>
-<p>whoo 3</p>
-</blockquote>
+<p>whoo 3</p></blockquote>
 <p>But it will print</p>
 <blockquote>
 <p>whoo 1</p>
 <p>whoo 1</p>
-<p>whoo 1</p>
-</blockquote>
+<p>whoo 1</p></blockquote>
 <p>Why? If you read the article <a href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html">coroutines in c</a> ( you
 did read it right? ) then you see the problem. The coroutines build on calling the function over and over until it
 exits at the end. On each call it will initialize a local variable to 0, jump to the last position in the
@@ -361,8 +358,7 @@ can put all of this in one declare call + we get size/alignment of the entire bl
 just write out or variables, set initial values and use <code>placement new</code> to initialize the values.</p>
 <blockquote>
 <p>Note to the C++:ers out there, currently no destructor is run on the locals but I guess that could be implemented in co_end()
-if needed.</p>
-</blockquote>
+if needed.</p></blockquote>
 <h2 id="sub-calls">sub-calls</h2>
 <p>With local variables out of the way, how about calling another coroutine function from the first one? Well, just to state the
 obvious calling an ordinary function is just doing the call if someone was wondering. However say that you want to call a
@@ -447,8 +443,7 @@ An alert reader might have noticed that the argument is copied onto the stack an
 keep the arguments simple. I guess you could add lots of c++ magic to move types and <em>yada yada</em> but I haven&rsquo;t needed that. IHMO
 keeping types <code>memcpy</code>-able usually keeps code simpler and easier to work with!</p>
 <blockquote>
-<p>Note: there is also a version of co_call() and co_init() that deduce sizeof() and alignof() from arg.</p>
-</blockquote>
+<p>Note: there is also a version of co_call() and co_init() that deduce sizeof() and alignof() from arg.</p></blockquote>
 <p>Again, no destructor will be run for the argument!
 Lastly note the cast to (co_func)! I guess that this is not everyones cup of tea but personally I&rsquo;d rather take the cast there
 than in the function itself but I guess that is a matter of taste.</p>
@@ -534,8 +529,7 @@ test/test_coro.cpp:43:16: error: jump to case label [-fpermissive]
 co_yield(co);
 ^
 test/test_coro.cpp:40:9: note:   crosses initialization of ‘int path_to_take’
-int path_to_take = rand() % 5;</p>
-</blockquote>
+int path_to_take = rand() % 5;</p></blockquote>
 <p>Also stepping through the co_***-macros while debugging is far from pleasant, hopefully that is my problem and not
 my users :)</p>
 <h2 id="con-no-type-safety-for-arguments">Con: no type-safety for arguments</h2>

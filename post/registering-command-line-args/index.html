@@ -68,7 +68,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -160,8 +160,7 @@ It is for example easier to just add a <code>--log-verbose=resource</code> to se
 <code>--memory-enable-stacktrace=render</code> to enable save of stacktraces for all allocations done in the &ldquo;render&rdquo;-allocator than to
 edit some config-file somewhere. At least for things such as the ones mentioned above, that is only set once in a while.</p>
 <blockquote>
-<p>Note: It&rsquo;s also a simple replacement for config-files, but that is something for a later blog-post ;)</p>
-</blockquote>
+<p>Note: It&rsquo;s also a simple replacement for config-files, but that is something for a later blog-post ;)</p></blockquote>
 <p>However it seems like there&rsquo;s always one problem, how to register supported command-line arguments to show &ndash;help and
 check that arguments are correctly specified?
 In this blog-post I&rsquo;ll outline a solution that I have found works really well for me. It has its drawbacks but that is usually

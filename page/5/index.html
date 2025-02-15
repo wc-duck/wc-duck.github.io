@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -154,6 +154,59 @@
 
       
         <article class="post-preview">
+  <a href="https://kihlander.net/post/protothreads-with-a-twist/">
+    <h2 class="post-title">&#34;ProtoThreads&#34; with a twist.</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p><p>For a long time I&rsquo;v been interested in running game-specific/entity-specific code in coroutines.
+Something like the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">some_game_object_behavior</span>( entity ent, ... )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    pnt3 points[] <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">3</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">4</span>}
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> pos <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span>(entity_alive(ent))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// move the entity to a position and yield coroutine while movement is ongoing.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        move_to(ent, points[pos <span style="color:#f92672">%</span> ARRAY_LENGTH(points)]);
+</span></span><span style="display:flex;"><span>        pos<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            shoot_bullet(ent);
+</span></span><span style="display:flex;"><span>            wait_sec(ent, <span style="color:#ae81ff">2</span>); <span style="color:#75715e">// do nothing for 2 seconds and yield the coroutine for that duration.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The above example is slightly simplified but I hope that it get the point across, that I want to be able
+to suspend code-execution at specific points and wait for certain actions to complete. Writing  one-off
+game-code in this fashion might be a good way to work, especially when adding wait_for_any() and  wait_for_all()
+etc.</p></p>
+      <a href="https://kihlander.net/post/protothreads-with-a-twist/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Nov 20, 2018
+  
+</span>
+
+  </div>
+</article>
+
+      
+        <article class="post-preview">
   <a href="https://kihlander.net/post/printf-based-tostr-on-the-stack/">
     <h2 class="post-title">printf-based TOSTR on the stack</h2>
   </a>
@@ -202,32 +255,6 @@ and have a lookup of the hash-value performed.</p></p>
     <span class="meta-post">
   <em class="fa fa-calendar-alt"></em
   >&nbsp;Nov 15, 2017
-  
-</span>
-
-  </div>
-</article>
-
-      
-        <article class="post-preview">
-  <a href="https://kihlander.net/post/builtin-resources-and-the-resource-system/">
-    <h2 class="post-title">Builtin resources and the resource-system</h2>
-  </a>
-  <div class="post-entry">
-    
-      <p><p>I have written, in passing, about the resource-system and VFS ( Virtual File System ) I use in my own game-engine. This time it will however not be &ldquo;in passing&rdquo;
-but will dig down a bit deeper into one &ldquo;feature&rdquo; in it that I find kind of neat. I&rsquo;m sure it has been done before but I have not seen it myself somewhere else.
-I&rsquo;ll be writing about how I handle builtin resources in the engine.</p></p>
-      <a href="https://kihlander.net/post/builtin-resources-and-the-resource-system/" class="post-read-more"
-        >Read More</a
-      >
-    
-  </div>
-
-  <div class="postmeta">
-    <span class="meta-post">
-  <em class="fa fa-calendar-alt"></em
-  >&nbsp;Aug 7, 2017
   
 </span>
 

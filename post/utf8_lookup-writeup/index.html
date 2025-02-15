@@ -69,7 +69,7 @@ Reading this reminded me of an old project of mine that I think is a bit novel a
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -190,8 +190,7 @@ That is what I have been using it for but I guess there might be other uses for 
 tree is based on each byte of an utf8-char.</p>
 <p>As stated earlier the entire lookup structure is stored as one buffer, a buffer with the following layout.</p>
 <blockquote>
-<p>item_cnt[uint64_t], availability-bits[uint64_t[item_cnt]], offsets[uint16_t[item_cnt]]</p>
-</blockquote>
+<p>item_cnt[uint64_t], availability-bits[uint64_t[item_cnt]], offsets[uint16_t[item_cnt]]</p></blockquote>
 <table>
   <thead>
       <tr>
@@ -215,8 +214,7 @@ tree is based on each byte of an utf8-char.</p>
   </tbody>
 </table>
 <blockquote>
-<p>By octet I refer to how many bytes the current utf8-char is consisting of.</p>
-</blockquote>
+<p>By octet I refer to how many bytes the current utf8-char is consisting of.</p></blockquote>
 <p>The first section of our availability-bits is the &ldquo;root&rdquo; of our lookup-table where a small table is used to find where to start the lookup.
 As octet one ( i.e. ASCII ) can have 128 possible values in utf8 ( first bit is 0 ) we need two slots in the availability bits where all other octets first byte fit in one 64-bit slots.</p>
 <p>So what is stored is something like this:
@@ -232,8 +230,7 @@ in the tree after each other as such:</p>
 <p>avail_bits[some_index] = [00010110]
 offset[some_index] = 16</p>
 <p>avail_bits[16-18] = is the next level in the tree
-offsets[16-18] = offsets to the next level in the tree or final result-offsets.</p>
-</blockquote>
+offsets[16-18] = offsets to the next level in the tree or final result-offsets.</p></blockquote>
 <p>As we only store one offset per level we need a way to find what item we need, but we do not want empty elements for the 0-bit. What we can do then is use base_offset + bits_set_before_checked_bit(),
 an operation that can be performed really fast by modern hardware via the popcnt-instruction and fairly quick with some smart code if popcnt is not available.</p>
 <p>So the inner loop of the algorithm will look as follows.</p>
@@ -326,8 +323,7 @@ different kind of texts using different combinations of code-pages etc.</p>
 </ul>
 <p>The bitarray-approach is just having a big array of uint64_t, set the bit if the codepoint exists, store an offset per uint64_t, and get the result-offset as:</p>
 <blockquote>
-<p>res = offsets[codepoint / 64] + bits_set_before(lookup[codepoint / 64])</p>
-</blockquote>
+<p>res = offsets[codepoint / 64] + bits_set_before(lookup[codepoint / 64])</p></blockquote>
 <p>basically utf8_lookup without compression.</p>
 <p>Finally its time for some numbers and charts!</p>
 <p>Texts used and results:</p>
@@ -442,18 +438,15 @@ different kind of texts using different combinations of code-pages etc.</p>
   </tbody>
 </table>
 <blockquote>
-<p>bpcp = bytes per codepoint</p>
-</blockquote>
+<p>bpcp = bytes per codepoint</p></blockquote>
 <p>All tests has been run on my private machine, an Intel(R) Core(TM) i7-4770K CPU @ 3.50GHz with 16GB DDR3 RAM running Ubuntu 14.04.5 LTS.</p>
 <p>All builds has been done with g++ (Ubuntu 4.8.4-2ubuntu1~14.04.3) 4.8.4.</p>
 <p>Optimized builds has been compiled with</p>
 <blockquote>
-<p>g++ -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -O2 -std=gnu++0x -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -O2</p>
-</blockquote>
+<p>g++ -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -O2 -std=gnu++0x -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -O2</p></blockquote>
 <p>And debug builds with</p>
 <blockquote>
-<p>g++ -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -std=gnu++0x -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2</p>
-</blockquote>
+<p>g++ -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2 -std=gnu++0x -Wconversion -Wextra -Wall -Werror -Wstrict-aliasing=2</p></blockquote>
 <p>First lets get this out of the room, the std::map/unordered_map versions are really bad compared to the others in all measurements. That was expected but I added them to
 the tests as it is something that is the &ldquo;first thing that comes to mind&rdquo; and something I wouldn&rsquo;t be surprised to see in a codebase.</p>
 <p><img src="/images/utf8_lookup-writeup/memuse_all.png" alt="Memory use" title="Memory use">

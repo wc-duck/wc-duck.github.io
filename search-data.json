@@ -5,6 +5,16 @@
         
             {
                 "id": 0,
+                "href": "https://kihlander.net/post/cpp-errors-a-rant/",
+                "title": "c++ errors... a rant",
+                "section": "post",
+                "date" : "2025.02.15",
+                "body": "Today a small rant\u0026hellip; with a bit of an unexpected conclusion!\nIn the beginning someone decided to use std::variant. This has made a lot of people very angry and been widely regarded as a bad move.\nSo at work this week I had to look at code written with std::variant\u0026hellip; a lot can be said about std::variant but this time it is about compile errors!\nSomeone had decided to use an std::variant\u0026lt;x, y, z\u0026gt;, probably got a really bad error-message when they tried to extract a value out of it with the type w, i.e. a type that is not part of the variant. Something like this, but simplified.\n#include \u0026lt;variant\u0026gt; using test = std::variant\u0026lt;int, float\u0026gt;; template\u0026lt;typename T\u0026gt; void get_it(test\u0026amp; t) { // ... yes, highly unsafe, but only here to show the error ... int i = *std::get_if\u0026lt;T\u0026gt;(\u0026amp;t); (void)i; }; void use_it() { test t = 0; get_it\u0026lt;double\u0026gt;(t); } Observe that the type being requested is not present in the variant, hence the code is invalid. So what do clang and gcc spit out (don\u0026rsquo;t have msvc at home but we\u0026rsquo;ll get to that later).\nclang 14.0.0-1ubuntu1.1\nwc-duck@WcLaptop:~/kod/varianttest$ clang++ -std=c++17 varianttest.cpp -o test In file included from varianttest.cpp:35: /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1185:7: error: static_assert failed due to requirement \u0026#39;__detail::__variant::__exactly_once\u0026lt;double, int, float\u0026gt;\u0026#39; \u0026#34;T must occur exactly once in alternatives\u0026#34; static_assert(__detail::__variant::__exactly_once\u0026lt;_Tp, _Types...\u0026gt;, ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ varianttest.cpp:43:19: note: in instantiation of function template specialization \u0026#39;std::get_if\u0026lt;double, int, float\u0026gt;\u0026#39; requested here int i = *std::get_if\u0026lt;T\u0026gt;(\u0026amp;t); ^ varianttest.cpp:50:5: note: in instantiation of function template specialization \u0026#39;get_it\u0026lt;double\u0026gt;\u0026#39; requested here get_it\u0026lt;double\u0026gt;(t); ^ In file included from varianttest.cpp:35: /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:104:7: error: implicit instantiation of undefined template \u0026#39;std::variant_alternative\u0026lt;0, std::variant\u0026lt;\u0026gt;\u0026gt;\u0026#39; : variant_alternative\u0026lt;_Np-1, variant\u0026lt;_Rest...\u0026gt;\u0026gt; {}; ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:104:7: note: in instantiation of template class \u0026#39;std::variant_alternative\u0026lt;1, std::variant\u0026lt;float\u0026gt;\u0026gt;\u0026#39; requested here /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:111:5: note: in instantiation of template class \u0026#39;std::variant_alternative\u0026lt;2, std::variant\u0026lt;int, float\u0026gt;\u0026gt;\u0026#39; requested here using variant_alternative_t = ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1155:29: note: in instantiation of template type alias \u0026#39;variant_alternative_t\u0026#39; requested here constexpr add_pointer_t\u0026lt;variant_alternative_t\u0026lt;_Np, variant\u0026lt;_Types...\u0026gt;\u0026gt;\u0026gt; ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1188:14: note: while substituting deduced template arguments into function template \u0026#39;get_if\u0026#39; [with _Np = 2, _Types = \u0026lt;int, float\u0026gt;] return std::get_if\u0026lt;__detail::__variant::__index_of_v\u0026lt;_Tp, _Types...\u0026gt;\u0026gt;( ^ varianttest.cpp:43:19: note: in instantiation of function template specialization \u0026#39;std::get_if\u0026lt;double, int, float\u0026gt;\u0026#39; requested here int i = *std::get_if\u0026lt;T\u0026gt;(\u0026amp;t); ^ varianttest.cpp:50:5: note: in instantiation of function template specialization \u0026#39;get_it\u0026lt;double\u0026gt;\u0026#39; requested here get_it\u0026lt;double\u0026gt;(t); ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:100:12: note: template is declared here struct variant_alternative; ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1188:14: error: no matching function for call to \u0026#39;get_if\u0026#39; return std::get_if\u0026lt;__detail::__variant::__index_of_v\u0026lt;_Tp, _Types...\u0026gt;\u0026gt;( ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ varianttest.cpp:43:19: note: in instantiation of function template specialization \u0026#39;std::get_if\u0026lt;double, int, float\u0026gt;\u0026#39; requested here int i = *std::get_if\u0026lt;T\u0026gt;(\u0026amp;t); ^ varianttest.cpp:50:5: note: in instantiation of function template specialization \u0026#39;get_it\u0026lt;double\u0026gt;\u0026#39; requested here get_it\u0026lt;double\u0026gt;(t); ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1156:5: note: candidate template ignored: substitution failure [with _Np = 2, _Types = \u0026lt;int, float\u0026gt;] get_if(variant\u0026lt;_Types...\u0026gt;* __ptr) noexcept ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1170:5: note: candidate template ignored: substitution failure [with _Np = 2, _Types = \u0026lt;int, float\u0026gt;]: no type named \u0026#39;type\u0026#39; in \u0026#39;std::variant_alternative\u0026lt;2, std::variant\u0026lt;int, float\u0026gt;\u0026gt;\u0026#39; get_if(const variant\u0026lt;_Types...\u0026gt;* __ptr) noexcept ^ /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/variant:1183:5: note: candidate template ignored: invalid explicitly-specified argument for template parameter \u0026#39;_Tp\u0026#39; get_if(variant\u0026lt;_Types...\u0026gt;* __ptr) noexcept ^ 3 errors generated. g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0\nwc-duck@WcLaptop:~/kod/varianttest$ g++ -std=c++17 varianttest.cpp -o test In file included from varianttest.cpp:35: /usr/include/c++/11/variant: In instantiation of ‘constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with _Tp = double; _Types = {int, float}; std::add_pointer_t\u0026lt;_Tp\u0026gt; = double*]’: varianttest.cpp:43:28: required from ‘void get_it(test\u0026amp;) [with T = double; test = std::variant\u0026lt;int, float\u0026gt;]’ varianttest.cpp:50:19: required from here /usr/include/c++/11/variant:1185:42: error: static assertion failed: T must occur exactly once in alternatives 1185 | static_assert(__detail::__variant::__exactly_once\u0026lt;_Tp, _Types...\u0026gt;, | ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /usr/include/c++/11/variant:1185:42: note: ‘std::__detail::__variant::__exactly_once\u0026lt;double, int, float\u0026gt;’ evaluates to false /usr/include/c++/11/variant: In instantiation of ‘struct std::variant_alternative\u0026lt;1, std::variant\u0026lt;float\u0026gt; \u0026gt;’: /usr/include/c++/11/variant:103:12: required from ‘struct std::variant_alternative\u0026lt;2, std::variant\u0026lt;int, float\u0026gt; \u0026gt;’ /usr/include/c++/11/variant:1170:5: required by substitution of ‘template\u0026lt;long unsigned int _Np, class ... _Types\u0026gt; constexpr std::add_pointer_t\u0026lt;const typename std::variant_alternative\u0026lt;_Np, std::variant\u0026lt;_Types ...\u0026gt; \u0026gt;::type\u0026gt; std::get_if(const std::variant\u0026lt;_Types ...\u0026gt;*) [with long unsigned int _Np = 2; _Types = {int, float}]’ /usr/include/c++/11/variant:1188:76: required from ‘constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with _Tp = double; _Types = {int, float}; std::add_pointer_t\u0026lt;_Tp\u0026gt; = double*]’ varianttest.cpp:43:28: required from ‘void get_it(test\u0026amp;) [with T = double; test = std::variant\u0026lt;int, float\u0026gt;]’ varianttest.cpp:50:19: required from here /usr/include/c++/11/variant:103:12: error: invalid use of incomplete type ‘struct std::variant_alternative\u0026lt;0, std::variant\u0026lt;\u0026gt; \u0026gt;’ 103 | struct variant_alternative\u0026lt;_Np, variant\u0026lt;_First, _Rest...\u0026gt;\u0026gt; | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /usr/include/c++/11/variant:100:12: note: declaration of ‘struct std::variant_alternative\u0026lt;0, std::variant\u0026lt;\u0026gt; \u0026gt;’ 100 | struct variant_alternative; | ^~~~~~~~~~~~~~~~~~~ /usr/include/c++/11/variant: In instantiation of ‘constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with _Tp = double; _Types = {int, float}; std::add_pointer_t\u0026lt;_Tp\u0026gt; = double*]’: varianttest.cpp:43:28: required from ‘void get_it(test\u0026amp;) [with T = double; test = std::variant\u0026lt;int, float\u0026gt;]’ varianttest.cpp:50:19: required from here /usr/include/c++/11/variant:1188:76: error: no matching function for call to ‘get_if\u0026lt;std::__detail::__variant::__index_of_v\u0026lt;double, int, float\u0026gt; \u0026gt;(std::variant\u0026lt;int, float\u0026gt;*\u0026amp;)’ 1188 | return std::get_if\u0026lt;__detail::__variant::__index_of_v\u0026lt;_Tp, _Types...\u0026gt;\u0026gt;( | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^ 1189 | __ptr); | ~~~~~~ /usr/include/c++/11/variant:1156:5: note: candidate: ‘template\u0026lt;long unsigned int _Np, class ... _Types\u0026gt; constexpr std::add_pointer_t\u0026lt;typename std::variant_alternative\u0026lt;_Np, std::variant\u0026lt;_Types ...\u0026gt; \u0026gt;::type\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*)’ 1156 | get_if(variant\u0026lt;_Types...\u0026gt;* __ptr) noexcept | ^~~~~~ /usr/include/c++/11/variant:1156:5: note: template argument deduction/substitution failed: /usr/include/c++/11/variant: In substitution of ‘template\u0026lt;long unsigned int _Np, class ... _Types\u0026gt; constexpr std::add_pointer_t\u0026lt;typename std::variant_alternative\u0026lt;_Np, std::variant\u0026lt;_Types ...\u0026gt; \u0026gt;::type\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with long unsigned int _Np = 2; _Types = {int, float}]’: /usr/include/c++/11/variant:1188:76: required from ‘constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with _Tp = double; _Types = {int, float}; std::add_pointer_t\u0026lt;_Tp\u0026gt; = double*]’ varianttest.cpp:43:28: required from ‘void get_it(test\u0026amp;) [with T = double; test = std::variant\u0026lt;int, float\u0026gt;]’ varianttest.cpp:50:19: required from here /usr/include/c++/11/variant:1156:5: error: no type named ‘type’ in ‘struct std::variant_alternative\u0026lt;2, std::variant\u0026lt;int, float\u0026gt; \u0026gt;’ /usr/include/c++/11/variant: In instantiation of ‘constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with _Tp = double; _Types = {int, float}; std::add_pointer_t\u0026lt;_Tp\u0026gt; = double*]’: varianttest.cpp:43:28: required from ‘void get_it(test\u0026amp;) [with T = double; test = std::variant\u0026lt;int, float\u0026gt;]’ varianttest.cpp:50:19: required from here /usr/include/c++/11/variant:1170:5: note: candidate: ‘template\u0026lt;long unsigned int _Np, class ... _Types\u0026gt; constexpr std::add_pointer_t\u0026lt;const typename std::variant_alternative\u0026lt;_Np, std::variant\u0026lt;_Types ...\u0026gt; \u0026gt;::type\u0026gt; std::get_if(const std::variant\u0026lt;_Types ...\u0026gt;*)’ 1170 | get_if(const variant\u0026lt;_Types...\u0026gt;* __ptr) noexcept | ^~~~~~ /usr/include/c++/11/variant:1170:5: note: substitution of deduced template arguments resulted in errors seen above /usr/include/c++/11/variant:1183:5: note: candidate: ‘template\u0026lt;class _Tp, class ... _Types\u0026gt; constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*)’ 1183 | get_if(variant\u0026lt;_Types...\u0026gt;* __ptr) noexcept | ^~~~~~ /usr/include/c++/11/variant:1183:5: note: template argument deduction/substitution failed: /usr/include/c++/11/variant:1188:76: error: type/value mismatch at argument 1 in template parameter list for ‘template\u0026lt;class _Tp, class ... _Types\u0026gt; constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; std::get_if(std::variant\u0026lt;_Types ...\u0026gt;*)’ 1188 | return std::get_if\u0026lt;__detail::__variant::__index_of_v\u0026lt;_Tp, _Types...\u0026gt;\u0026gt;( | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^ 1189 | __ptr); | ~~~~~~ /usr/include/c++/11/variant:1188:76: note: expected a type, got ‘std::__detail::__variant::__index_of_v\u0026lt;double, int, float\u0026gt;’ ARGH!!! Sure you can decipher it\u0026hellip; but that is a wall of text if there ever was one!\nSo the poor developer that initially got this wall of \u0026ldquo;characters\u0026rdquo; thrown in their face, after what I expect is more time understanding the error than could be expected of a fellow human being, decided to add a static_assert\u0026hellip; using boost (╯°□°)╯︵ ┻━┻ to make it simpler for the next user\u0026hellip; something like this:\n#include \u0026lt;variant\u0026gt; using test = std::variant\u0026lt;int, float\u0026gt;; template\u0026lt;typename T\u0026gt; void get_it(test\u0026amp; t) { static_assert(boost::mpl::contains\u0026lt;test, T\u0026gt;::type::value, \u0026#34;T isn\u0026#39;t a valid my_variant type.\u0026#34;); int i = *std::get_if\u0026lt;T\u0026gt;(\u0026amp;t); (void)i; }; void use_it() { test t = 0; get_it\u0026lt;double\u0026gt;(t); } Now they get the same as above but at least it start with a clear error! But is this good\u0026hellip; no! It is still a wall of text! So me and a coworker (that actually speak \u0026ldquo;modern c++\u0026rdquo;!?!) talked a bit about it\u0026hellip; and after a bit of google came up with something like this:\n#include \u0026lt;variant\u0026gt; using test = std::variant\u0026lt;int, float\u0026gt;; namespace woot { // https://stackoverflow.com/questions/2118541/check-if-parameter-pack-contains-a-type template\u0026lt;typename What, typename ... Args\u0026gt; struct is_present { static constexpr bool value {(std::is_same_v\u0026lt;What, Args\u0026gt; || ...)}; }; template\u0026lt; class T, class... Types \u0026gt; constexpr std::add_pointer_t\u0026lt;T\u0026gt; get_if( std::variant\u0026lt;Types...\u0026gt;* pv ) noexcept { constexpr bool is_valid_type = is_present\u0026lt;T, Types...\u0026gt;::value; static_assert(is_valid_type, \u0026#34;type is not part of the specified variant or specified twice!\u0026#34;); if constexpr (is_valid_type) return std::get_if\u0026lt;T\u0026gt;(pv); else return nullptr; } } template\u0026lt;typename T\u0026gt; void get_it(test\u0026amp; t) { // int i = *std::get_if\u0026lt;T\u0026gt;(\u0026amp;t); int i = *woot::get_if\u0026lt;T\u0026gt;(\u0026amp;t); (void)i; }; void use_it() { test t = 0; get_it\u0026lt;double\u0026gt;(t); } clang\nwc-duck@WcLaptop:~/kod/varianttest$ clang++ -std=c++17 varianttest.cpp -o test varianttest.cpp:18:9: error: static_assert failed due to requirement \u0026#39;is_valid_type\u0026#39; \u0026#34;type is not part of the specified variant or specified twice!\u0026#34; static_assert(is_valid_type, \u0026#34;type is not part of the specified variant or specified twice!\u0026#34;); ^ ~~~~~~~~~~~~~ varianttest.cpp:30:20: note: in instantiation of function template specialization \u0026#39;woot::get_if\u0026lt;double, int, float\u0026gt;\u0026#39; requested here int i = *woot::get_if\u0026lt;T\u0026gt;(\u0026amp;t); ^ varianttest.cpp:37:5: note: in instantiation of function template specialization \u0026#39;get_it\u0026lt;double\u0026gt;\u0026#39; requested here get_it\u0026lt;double\u0026gt;(t); ^ 1 error generated. g++\nwc-duck@WcLaptop:~/kod/varianttest$ g++ -std=c++17 varianttest.cpp -o test varianttest.cpp: In instantiation of ‘constexpr std::add_pointer_t\u0026lt;_Tp\u0026gt; woot::get_if(std::variant\u0026lt;_Types ...\u0026gt;*) [with T = double; Types = {int, float}; std::add_pointer_t\u0026lt;_Tp\u0026gt; = double*]’: varianttest.cpp:30:29: required from ‘void get_it(test\u0026amp;) [with T = double; test = std::variant\u0026lt;int, float\u0026gt;]’ varianttest.cpp:37:19: required from here varianttest.cpp:18:23: error: static assertion failed: type is not part of the specified variant or specified twice! 18 | static_assert(is_valid_type, \u0026#34;type is not part of the specified variant or specified twice!\u0026#34;); | ^~~~~~~~~~~~~ varianttest.cpp:18:23: note: ‘is_valid_type’ evaluates to false A little code\u0026hellip; a 1000% better error message! So what is the end of this story? I don\u0026rsquo;t want to cast shadow on the previous developer, and neither do I think that the above is a \u0026ldquo;neat\u0026rdquo; or \u0026ldquo;good\u0026rdquo; solution, the actual conclusion is WTF can\u0026rsquo;t I get this error-message from the standard libraries themself? Someone must, during development of the libs, have seen this wall of text but at no step of the way stopped and thought \u0026ldquo;well, this is kind of iffy? Me as an actual implementor of a standard library, i.e. an expert in the field, should be able to do better!\u0026rdquo;. If it is this \u0026ldquo;easy\u0026rdquo; to give us better error-messages WHY NOT DO IT\u0026hellip; from the beginning? How many more \u0026ldquo;walls of text\u0026rdquo; could we avoid with a few static_asserts?\nWould there be a downside? I don\u0026rsquo;t know, maybe there is, but this kind of stuff is one of the reasons c++ is really hard to work with from time to time and that people like me rather go with a \u0026ldquo;c style\u0026rdquo; codebase!\nHere is a godbolt link if you want to test it yourself.\nBTW\u0026hellip; in the beginning I told you that there was an unexpected twist to this. The latest MSVC actually give you this error (from godbolt!)\nexample.cpp Z:/compilers/msvc/14.41.33923-14.41.33923.0/include\\variant(1257): error C2338: static_assert failed: \u0026#39;get_if\u0026lt;T\u0026gt;(variant\u0026lt;Types...\u0026gt; *) requires T to occur exactly once in Types. (N4971 [variant.get]/12)\u0026#39; Z:/compilers/msvc/14.41.33923-14.41.33923.0/include\\variant(1257): note: the template instantiation context (the oldest one first) is \u0026lt;source\u0026gt;(37): note: see reference to function template instantiation \u0026#39;void get_it\u0026lt;double\u0026gt;(test \u0026amp;)\u0026#39; being compiled \u0026lt;source\u0026gt;(29): note: see reference to function template instantiation \u0026#39;double *std::get_if\u0026lt;T,int,float\u0026gt;(std::variant\u0026lt;int,float\u0026gt; *) noexcept\u0026#39; being compiled with [ T=double ] Compiler returned: 2 So for once msvc is actually the best one ;) (but just go back one version and we\u0026rsquo;r back to the text-wall again!)\n"
+            }
+    
+        ,
+            {
+                "id": 1,
                 "href": "https://kihlander.net/post/link-dump-vol1/",
                 "title": "Link Dump Vol1",
                 "section": "post",
@@ -14,7 +24,7 @@
     
         ,
             {
-                "id": 1,
+                "id": 2,
                 "href": "https://kihlander.net/post/its-healthy-to-look-outside-your-own-tribe/",
                 "title": "It's Healthy to Look Outside Your Own Tribe!",
                 "section": "post",
@@ -24,7 +34,7 @@
     
         ,
             {
-                "id": 2,
+                "id": 3,
                 "href": "https://kihlander.net/post/extending-an-enum-in-zig/",
                 "title": "Extending an Enum in Zig",
                 "section": "post",
@@ -34,7 +44,7 @@
     
         ,
             {
-                "id": 3,
+                "id": 4,
                 "href": "https://kihlander.net/post/compile-time-hashes-in-c-revisied/",
                 "title": "Compile Time Hashes in C - Revisied",
                 "section": "post",
@@ -44,7 +54,7 @@
     
         ,
             {
-                "id": 4,
+                "id": 5,
                 "href": "https://kihlander.net/post/software-i-like/",
                 "title": "Software I Like",
                 "section": "post",
@@ -54,7 +64,7 @@
     
         ,
             {
-                "id": 5,
+                "id": 6,
                 "href": "https://kihlander.net/post/looking-at-c-for-better-closures-in-cpp/",
                 "title": "Looking at c for better closures in c++",
                 "section": "post",
@@ -64,7 +74,7 @@
     
         ,
             {
-                "id": 6,
+                "id": 7,
                 "href": "https://kihlander.net/post/swapping-memory-and-compiler-optimizations/",
                 "title": "Swapping memory and compiler optimizations",
                 "section": "post",
@@ -74,7 +84,7 @@
     
         ,
             {
-                "id": 7,
+                "id": 8,
                 "href": "https://kihlander.net/post/a-zig-diary/",
                 "title": "A Zig Diary",
                 "section": "post",
@@ -84,7 +94,7 @@
     
         ,
             {
-                "id": 8,
+                "id": 9,
                 "href": "https://kihlander.net/post/when-memcpy-change/",
                 "title": "When memcpy() change!",
                 "section": "post",
@@ -94,7 +104,7 @@
     
         ,
             {
-                "id": 9,
+                "id": 10,
                 "href": "https://kihlander.net/post/macros-and-lambdas/",
                 "title": "Macros and Lambdas",
                 "section": "post",
@@ -104,7 +114,7 @@
     
         ,
             {
-                "id": 10,
+                "id": 11,
                 "href": "https://kihlander.net/post/when-selecting-a-theme-is-your-biggest-problem/",
                 "title": "When selecting a theme is your biggest problem!",
                 "section": "post",
@@ -114,7 +124,7 @@
     
         ,
             {
-                "id": 11,
+                "id": 12,
                 "href": "https://kihlander.net/about/",
                 "title": "About",
                 "section": "",
@@ -124,7 +134,7 @@
     
         ,
             {
-                "id": 12,
+                "id": 13,
                 "href": "https://kihlander.net/post/protothreads-with-a-twist/",
                 "title": "\"ProtoThreads\" with a twist.",
                 "section": "post",
@@ -134,7 +144,7 @@
     
         ,
             {
-                "id": 13,
+                "id": 14,
                 "href": "https://kihlander.net/post/printf-based-tostr-on-the-stack/",
                 "title": "printf-based TOSTR on the stack",
                 "section": "post",
@@ -144,7 +154,7 @@
     
         ,
             {
-                "id": 14,
+                "id": 15,
                 "href": "https://kihlander.net/post/a-story-about-an-unexpected-abi-break/",
                 "title": "A story about an unexpected ABI break",
                 "section": "post",
@@ -154,7 +164,7 @@
     
         ,
             {
-                "id": 15,
+                "id": 16,
                 "href": "https://kihlander.net/post/builtin-resources-and-the-resource-system/",
                 "title": "Builtin resources and the resource-system",
                 "section": "post",
@@ -164,7 +174,7 @@
     
         ,
             {
-                "id": 16,
+                "id": 17,
                 "href": "https://kihlander.net/post/utf8_lookup-writeup/",
                 "title": "utf8_lookup, a write up.",
                 "section": "post",
@@ -174,7 +184,7 @@
     
         ,
             {
-                "id": 17,
+                "id": 18,
                 "href": "https://kihlander.net/post/why-i-prefer-inline-forward-daclares-in-c/",
                 "title": "Why I prefer inline forward-declares in C++",
                 "section": "post",
@@ -184,7 +194,7 @@
     
         ,
             {
-                "id": 18,
+                "id": 19,
                 "href": "https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/",
                 "title": "Compile-time hashes in c++, im not convinced!",
                 "section": "post",
@@ -194,7 +204,7 @@
     
         ,
             {
-                "id": 19,
+                "id": 20,
                 "href": "https://kihlander.net/post/command-line-args-as-config/",
                 "title": "The command-line as a poor mans config files",
                 "section": "post",
@@ -204,7 +214,7 @@
     
         ,
             {
-                "id": 20,
+                "id": 21,
                 "href": "https://kihlander.net/post/registering-command-line-args/",
                 "title": "Registering command line arguments",
                 "section": "post",

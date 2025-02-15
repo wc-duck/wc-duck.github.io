@@ -69,7 +69,7 @@ In this post I’m going to touch on a c&#43;&#43;-technique to handle callbacks
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -157,8 +157,7 @@ In this post I’m going to touch on a c&#43;&#43;-technique to handle callbacks
     <article class="article" class="blog-post">
       
   <blockquote>
-<p>Note: before we begin, finding a name for this post was really hard!</p>
-</blockquote>
+<p>Note: before we begin, finding a name for this post was really hard!</p></blockquote>
 <p>In this post I&rsquo;m going to touch on a c++-technique to handle callbacks that I have not seen written about before and that many of my colleagues hadn&rsquo;t seen before either. Probably it&rsquo;s not something new and some of you will probably just say &ldquo;yeah yeah, nothing new under the sun&rdquo; but it&rsquo;s probably worth a few words!</p>
 <p>Most of us has been in situations where we need to pass a function + userdata to another function. It might be that we have some kind of &ldquo;for each&rdquo; over some collection of things or polling events from a system.</p>
 <p>I, for example, like to write systems that need polling that can also emit events/results that happened since the last poll for the user to react to. One convenient way to do this is to just pass a callback to your poll-function that is called per item.
@@ -219,8 +218,7 @@ This will not &ldquo;force&rdquo; any storage on the user such as returning an a
 <h3 id="debug-performance">Debug performance</h3>
 <p>Thirdly, debug-performance! Yes, we should care about performance in debug-builds as optimized builds can be way harder to use when tracking down issues.</p>
 <blockquote>
-<p>The fact that, at work, I can run a full debug-build of Apex (the Avalanche Engine) and still reach decent performance is worth a lot to your day to day productivity!</p>
-</blockquote>
+<p>The fact that, at work, I can run a full debug-build of Apex (the Avalanche Engine) and still reach decent performance is worth a lot to your day to day productivity!</p></blockquote>
 <p>As we can see in a previous post about <a href="../swapping-memory-and-compiler-optimizations">swapping memory</a> we can see that the c++ standard library can be far from great in a non optimized build (and honestly in an optimized one as well)!</p>
 <h2 id="just-pass-the-closure">Just pass the closure!</h2>
 <p>So, what can we do instead? &lsquo;Just pass the closure&rsquo; is the simplest solution! This is suggested by many, for example in this <a href="https://wolchok.org/posts/cxx-trap-2-std-function/">article</a>.</p>
@@ -237,8 +235,7 @@ Yet again we will come to numbers later!</p>
 <h2 id="c-style">c-style</h2>
 <p>So how do we handle this? As usual a good way to solve this is to look at a c-style interface. This is something I personally see as the solution to many problems and maybe a topic for its own post some day :)</p>
 <blockquote>
-<p>When I say c-style here doesn&rsquo;t necessarily mean full c, just functions + handles + structs. A reference here and a constexpr there is just fine.</p>
-</blockquote>
+<p>When I say c-style here doesn&rsquo;t necessarily mean full c, just functions + handles + structs. A reference here and a constexpr there is just fine.</p></blockquote>
 <p>But how would this look if you would do it in c? Probably something like this:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">the_system_poll</span>(the_system sys, <span style="color:#66d9ef">void</span>(<span style="color:#f92672">*</span>cb)(the_system_msg<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata), <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> userdata);
 </span></span></code></pre></div><p>I.e. we would pass a function pointer and userdata as a <code>void*</code> and on the implementation side cast that <code>void*</code> back to what we originally passed in. By doing this we can put the entire implementation of this function in a <code>.c</code>/<code>.cpp</code>-file and hide it for the user! This works but the ergonomics maybe leave a bit to be desired:</p>
@@ -292,8 +289,7 @@ Yet again we will come to numbers later!</p>
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    the_system_poll(sys, wrap, <span style="color:#f92672">&amp;</span>cb);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><blockquote>
-<p>If this hasn&rsquo;t been described before I would like to dub this <code>Kihlanders reverse</code>, it has a nice ring to it right?</p>
-</blockquote>
+<p>If this hasn&rsquo;t been described before I would like to dub this <code>Kihlanders reverse</code>, it has a nice ring to it right?</p></blockquote>
 <p>This will make it possible to write this:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">poll_me</span>(the_system sys)
 </span></span><span style="display:flex;"><span>{
@@ -309,18 +305,15 @@ Yet again we will come to numbers later!</p>
 </span></span></span></code></pre></div><h1 id="numbers">Numbers!</h1>
 <p>But enough talk about perf without numbers!</p>
 <blockquote>
-<p>Before we start, this is the standard disclaimer about micro benchmarks. They are hard and might be inaccurate compared to a real world scenario etc. You know the drill!</p>
-</blockquote>
+<p>Before we start, this is the standard disclaimer about micro benchmarks. They are hard and might be inaccurate compared to a real world scenario etc. You know the drill!</p></blockquote>
 <p>All this work has been done on my laptop with the following specs:</p>
 <blockquote>
 <p><strong>CPU</strong> Intel i7-10710U</p>
-<p><strong>RAM</strong> 16GB LPDDR3 at 2133 MT/s (around 17GB/sec peak bandwidth)</p>
-</blockquote>
+<p><strong>RAM</strong> 16GB LPDDR3 at 2133 MT/s (around 17GB/sec peak bandwidth)</p></blockquote>
 <p>And I&rsquo;ll use the compilers that I have installed, that being</p>
 <blockquote>
 <p><strong>Clang:</strong>  14.0.0-1ubuntu1.1</p>
-<p><strong>GCC:</strong> (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0</p>
-</blockquote>
+<p><strong>GCC:</strong> (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0</p></blockquote>
 <h2 id="compile-time">Compile time</h2>
 <p>First of, lets look at the compile-time claim. Let&rsquo;s create the smallest possible test-file that we can create:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#if defined(USE_STD_FUNC)
@@ -534,8 +527,7 @@ To test this out we&rsquo;ll write a benchmark app using the excellent <a href="
   </tbody>
 </table>
 <blockquote>
-<p>these are mean values of the above tests. To note is also that the results are not super stable but &lsquo;within reason&rsquo; determined by me.</p>
-</blockquote>
+<p>these are mean values of the above tests. To note is also that the results are not super stable but &lsquo;within reason&rsquo; determined by me.</p></blockquote>
 <p>So what can we take away from these numbers.</p>
 <p>One takeaway is, just as in <a href="../swapping-memory-and-compiler-optimizations">swapping memory</a>-article, debug-performance of <code>std::</code> is just horrible. You are paying a lot for that &ldquo;convenience&rdquo; in your non-optimized build. I find it really &ldquo;amusing&rdquo; that the small-object version is actually significantly slower than the bigger closure in debug on gcc!</p>
 <p>Secondly an inline function is, obviously, faster in all builds and in <code>-O2</code> it is taken as far as both gcc and clang just calculating the answer to my benchmark right away and just store an int directly. Interestingly they can&rsquo;t do the same thing with the <code>std::function</code> version even if you inline it. Throwing complexity at the compiler will force the compiler to spend time on the complexity instead of optimizing the actual code!</p>

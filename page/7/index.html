@@ -67,7 +67,7 @@
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -151,6 +151,46 @@
       
         
         
+
+      
+        <article class="post-preview">
+  <a href="https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/">
+    <h2 class="post-title">Compile-time hashes in c&#43;&#43;, im not convinced!</h2>
+  </a>
+  <div class="post-entry">
+    
+      <p><p>I recently read a blogpost about <a href="http://blog.demofox.org/2016/09/23/exploring-compile-time-hashing/">compile-time string-hashes and constexpr</a> and I&rsquo;m still not convinced and
+see no real reason to leave my old and true friend the script :)</p>
+<p>So first of lets look at the problem we want to solve. We want a way to do things like this and not pay the runtime cost ( and in this case just compile! ).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">my_func</span>( <span style="color:#66d9ef">uint32_t</span> val )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span>( val )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HashOfString(<span style="color:#e6db74">&#34;some_string&#34;</span>)<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            do_some_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> HashOfString(<span style="color:#e6db74">&#34;some_other_string&#34;</span>)<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            do_some_other_stuff();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Simple enough. What seems to come up over and over again is ways of doing this with the compiler compile-time and now recently just marking <code>HashOfString</code> as <code>constexpr</code> and &ldquo;trust the compiler&rdquo;.
+The solution I usually fall back to is to just have a text-file where each line is hashed with a custom script and written to a .h file with values such as:</p></p>
+      <a href="https://kihlander.net/post/compile-time-hashes-in-c-im-not-convinced/" class="post-read-more"
+        >Read More</a
+      >
+    
+  </div>
+
+  <div class="postmeta">
+    <span class="meta-post">
+  <em class="fa fa-calendar-alt"></em
+  >&nbsp;Sep 24, 2016
+  
+</span>
+
+  </div>
+</article>
 
       
         <article class="post-preview">

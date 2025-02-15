@@ -70,7 +70,7 @@ I have found zig quite intriguing for a while now but I haven’t had the time t
 <script defer crossorigin="anonymous" src="/js/theme.js" integrity=""></script>
 
 
-<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.140.2">
+<script defer crossorigin="anonymous" src="/js/instantpage.min.js" integrity=""></script><meta name="generator" content="Hugo 0.143.1">
   </head>
   <body>
     
@@ -159,8 +159,7 @@ I have found zig quite intriguing for a while now but I haven’t had the time t
       
   <p>As it turned out I happened to help out with fixing a space to host a <a href="https://www.meetup.com/zig-stockholm/">zig meetup</a> here in Stockholm at the place where I work. However I haven&rsquo;t written a single line of zig in my life&hellip; I felt that it might be worth doing something about that :D</p>
 <blockquote>
-<p>If you don&rsquo;t know, <a href="https://ziglang.org/">zig</a> is a new systems programming language!</p>
-</blockquote>
+<p>If you don&rsquo;t know, <a href="https://ziglang.org/">zig</a> is a new systems programming language!</p></blockquote>
 <p>I have found zig quite intriguing for a while now but I haven&rsquo;t had the time to look into it so this sounded like an as good excuse as any!
 I&rsquo;ll try something new with this post and just write as I go and document my success/failure/reflections, this might make it a bit &ldquo;rambly&rdquo; :)</p>
 <h1 id="what-to-build">What to build?</h1>
@@ -173,8 +172,7 @@ I&rsquo;ll try something new with this post and just write as I go and document 
 <p>A bit more info might be interesting to you readers! So my google search turned up <a href="https://ziglang.org/learn/getting-started/">https://ziglang.org/learn/getting-started/</a> as the first result, that in turns pointed me to the <a href="https://github.com/ziglang/zig/wiki/Install-Zig-from-a-Package-Manager">downloads page</a>.
 As I&rsquo;m on ubuntu I decided to do the &lsquo;snap&rsquo; install via:</p>
 <blockquote>
-<p>snap install zig &ndash;classic &ndash;edge</p>
-</blockquote>
+<p>snap install zig &ndash;classic &ndash;edge</p></blockquote>
 <p>After this the getting started page told me about <code>zig init-exe</code> and <code>zig build run</code> and I was off to the races!</p>
 <h1 id="step-2-syntax-highlighting">Step 2&hellip; syntax highlighting!</h1>
 <p>Can&rsquo;t write code without a decent editing environment, so let&rsquo;s see what we can do about that?</p>
@@ -315,8 +313,7 @@ ooxx%%%#@@@%oxx%%x;.....  .....,;x%%xxo#@@@#%%xxoo
 xoox%@@@@@@@@@##%xxox##%xxx%@#o;ox%######@@@@@%ooo
 </code></pre><p>Ugly ascii art yes&hellip; but still! And the code is as crapy as ever!</p>
 <blockquote>
-<p>It looks better in my terminal :D But I think it comes down to tweaking the &ldquo;alphabet&rdquo; used, deciding how many chars to use in width etc. Nothing really interesting for this post.</p>
-</blockquote>
+<p>It looks better in my terminal :D But I think it comes down to tweaking the &ldquo;alphabet&rdquo; used, deciding how many chars to use in width etc. Nothing really interesting for this post.</p></blockquote>
 <h1 id="conclusion">Conclusion</h1>
 <p>Time for a few reflections and conclusions.</p>
 <p>First off all, zig do not feel ready for &ldquo;primetime&rdquo; for me but I do feel that it has a promising future. It has many good ideas that sit right with me and seems well suited to the kind of work that I usually do. But would I suggest our team to go &ldquo;all out zig&rdquo; at this time&hellip; hell no!</p>
@@ -342,15 +339,13 @@ This would be such a powerful feature, to be able to use your day-to-day debugge
 <blockquote>
 <p>real 0m11,741s</p>
 <p>user 0m8,777s</p>
-<p>sys  0m5,789s</p>
-</blockquote>
+<p>sys  0m5,789s</p></blockquote>
 <p>YAUSA!!!</p>
 <p>time to build, small update to &lsquo;main.zig&rsquo; on my machine:</p>
 <blockquote>
 <p>real 0m1,074s</p>
 <p>user 0m0,953s</p>
-<p>sys  0m0,183s</p>
-</blockquote>
+<p>sys  0m0,183s</p></blockquote>
 <p>&hellip; for such a small change, not really &ldquo;stellar&rdquo; :(</p>
 <p>I know that this is being worked upon and with the new self-hosted compiler it has become (according to &ldquo;the interwebs&rdquo;) a lot better but im not sure how far you can take it?</p>
 <p>With all <code>comptime</code> etc it will be a problem to get it fast. The computations will have to be done regardless and the more calculations that has to be done compile-time the more expensive it will be! But I&rsquo;ll be happy to be proven wrong and it&rsquo;s definitively possible that it can get to a decent state!</p>

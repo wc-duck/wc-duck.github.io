@@ -2,19 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://kihlander.net/post/cpp-errors-a-rant/</loc>
+    <lastmod>2025-02-15T15:10:55+01:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/post/</loc>
+    <lastmod>2025-02-15T15:10:55+01:00</lastmod>
+  </url><url>
+    <loc>https://kihlander.net/</loc>
+    <lastmod>2025-02-15T15:10:55+01:00</lastmod>
+  </url><url>
     <loc>https://kihlander.net/tags/link-dump/</loc>
     <lastmod>2025-01-12T18:44:54+01:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/post/link-dump-vol1/</loc>
     <lastmod>2025-01-12T18:44:54+01:00</lastmod>
   </url><url>
-    <loc>https://kihlander.net/post/</loc>
-    <lastmod>2025-01-12T18:44:54+01:00</lastmod>
-  </url><url>
     <loc>https://kihlander.net/tags/</loc>
-    <lastmod>2025-01-12T18:44:54+01:00</lastmod>
-  </url><url>
-    <loc>https://kihlander.net/</loc>
     <lastmod>2025-01-12T18:44:54+01:00</lastmod>
   </url><url>
     <loc>https://kihlander.net/post/its-healthy-to-look-outside-your-own-tribe/</loc>
